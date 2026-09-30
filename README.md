@@ -8,7 +8,8 @@ The intended use case is hooking Chiplab into a CI pipeline, so the CLI is the s
 
 The primary supported development environment is the included nix devshell.
 
-[`nix-direnv`](https://github.com/nix-community/nix-direnv) is recommended for easy setup, it activates automatically when you `cd` into the repo, and will read `.env` for any local customization needed.
+[`nix-direnv`](https://github.com/nix-community/nix-direnv) is recommended for easy setup.
+After running `direnv allow` once, the devshell activates automatically when you `cd` into the repository, and `.env` is read for any local customization needed.
 Otherwise you can manually enter the devshell and source `.env` each time you enter the repo.
 
 ```sh
