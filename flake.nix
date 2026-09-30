@@ -32,7 +32,7 @@
           overlays = [rust-overlay.overlays.default];
         };
 
-        # The overlay is an input because nixpkgs' own `rustc` ignores `rust-toolchain.toml`.
+        # The overlay is an input because nixpkgs only packages one version of `rustc`, so cannot follow `rust-toolchain.toml`.
         rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
 
         rustPlatform = pkgs.makeRustPlatform {
