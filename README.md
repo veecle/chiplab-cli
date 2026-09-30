@@ -6,9 +6,15 @@ The intended use case is hooking Chiplab into a CI pipeline, so the CLI is the s
 
 ## Development
 
+The primary supported development environment is the included nix devshell.
+
+[`nix-direnv`](https://github.com/nix-community/nix-direnv) is recommended for easy setup, it activates automatically when you `cd` into the repo, and will read `.env` for any local customization needed.
+Otherwise you can manually enter the devshell and source `.env` each time you enter the repo.
+
 ```sh
 nix develop
-cargo run
+source .env
+cargo run -- --help
 ```
 
-`rust-toolchain.toml` pins the compiler, so `cargo` works the same with a plain `rustup` install and no Nix.
+The required dependencies should be minimal, and the toolchain itself is pinned via `rust-toolchain.toml`, so a standard dev environment with a plain `rustup` install should also be usable.
