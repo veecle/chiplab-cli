@@ -1,0 +1,47 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel jobs for previous commits in the same branch.
+# On main `head_ref` is not available and `run_id` is always unique.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  matrix-checks:
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on:
+          - ubuntu-latest
+          - macos-latest
+    timeout-minutes: 30
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - uses: cachix/install-nix-action@a49548c11d9846ad46ecc0115273879b045f001c  # v31.10.7
+
+      # `keep-going` reports every failing check in one run, rather than stopping at the first.
+      - name: Flake checks
+        run: nix flake check --print-build-logs --option keep-going true
+
+  # Single status for branch protection to gate on, so the matrix can change without
+  # the ruleset needing to know its shape.
+  checks:
+    runs-on: ubuntu-latest
+    needs:
+      - matrix-checks
+    if: always()
+    steps:
+      - run: exit 1
+        if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}

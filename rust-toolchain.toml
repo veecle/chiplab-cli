@@ -1,0 +1,5 @@
+# Single source of truth for the toolchain.
+# `rustup` reads this directly; the flake reads it through `rust-bin.fromRustupToolchainFile`.
+[toolchain]
+channel = "1.98.1"
+components = ["clippy", "rustfmt", "rust-analyzer", "rust-src"]
