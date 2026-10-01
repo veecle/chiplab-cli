@@ -3,7 +3,11 @@ exit status: 0
 --- stdout
 Command-line client for Chiplab
 
-Usage: chiplab-cli
+Usage: chiplab-cli <COMMAND>
+
+Commands:
+  run-test-suite  Run a TypeScript test suite against a firmware binary on a simulated board
+  help            Print this message or the help of the given subcommand(s)
 
 Options:
   -h, --help     Print help

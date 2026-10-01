@@ -1,0 +1,31 @@
+$ chiplab-cli run-test-suite --help
+exit status: 0
+--- stdout
+Run a TypeScript test suite against a firmware binary on a simulated board.
+
+The firmware and test suite are uploaded to the project, then run in a sandboxed simulation of the selected board.
+
+Exits with status 3 if the test suite failed to run to completion, or status 4 if it ran to completion but one or more test cases failed.
+
+Usage: chiplab-cli run-test-suite --project <PROJECT_ID> --firmware <FILE> --test-suite <FILE> --board <MODEL>
+
+Options:
+  -p, --project <PROJECT_ID>
+          The Chiplab project to upload the files to and run the test suite in
+
+  -f, --firmware <FILE>
+          The firmware ELF to run on the board
+
+  -t, --test-suite <FILE>
+          The TypeScript test suite to run against the firmware.
+
+          See <https://chiplab.veecle.ai/mcp/resources/docs/testing.md> for more info on writing a test suite.
+
+  -b, --board <MODEL>
+          The board model to simulate, e.g. `stm32f4_discovery`.
+
+          See <https://chiplab.veecle.ai/mcp/resources/docs/boards.md> for the available boards.
+
+  -h, --help
+          Print help (see a summary with '-h')
+--- stderr
