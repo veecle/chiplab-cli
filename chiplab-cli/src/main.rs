@@ -5,6 +5,7 @@ use clap::Parser;
 use crate::app::App;
 use crate::command::Command;
 
+mod api;
 mod app;
 mod command;
 
