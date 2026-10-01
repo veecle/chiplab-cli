@@ -44,9 +44,10 @@
 
         chiplab-cli = rustPlatform.buildRustPackage {
           pname = "chiplab-cli";
-          inherit (cargoToml.package) version;
+          inherit (cargoToml.workspace.package) version;
           src = ./.;
           cargoLock.lockFile = ./Cargo.lock;
+          cargoBuildFlags = ["--package" "chiplab-cli"];
         };
       in {
         _module.args.pkgs = pkgs;
@@ -60,12 +61,12 @@
         formatter = pkgs.alejandra;
 
         checks = {
-          # `buildRustPackage` runs the tests in its check phase, so this is also the test run.
+          # `buildRustPackage` runs the workspace tests in its check phase, so this is also the test run.
           package = chiplab-cli;
 
           clippy = chiplab-cli.overrideAttrs (previous: {
             pname = "${previous.pname}-clippy";
-            buildPhase = "cargo clippy --all-targets -- --deny warnings";
+            buildPhase = "cargo clippy --workspace --all-targets -- --deny warnings";
             installPhase = "touch $out";
             doCheck = false;
           });
