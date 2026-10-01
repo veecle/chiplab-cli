@@ -7,7 +7,15 @@ homepage.workspace = true
 repository.workspace = true
 publish.workspace = true
 
+[[test]]
+harness = false
+name = "cli"
+
 [dependencies]
 anyhow.workspace = true
 clap.workspace = true
 tokio.workspace = true
+
+[dev-dependencies]
+snapbox = { workspace = true, features = ["cmd", "color-auto", "diff"] }
+tryfn = { workspace = true, features = ["color-auto", "diff"] }

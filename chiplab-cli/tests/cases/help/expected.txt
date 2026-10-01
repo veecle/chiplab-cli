@@ -1,0 +1,11 @@
+$ chiplab-cli --help
+exit status: 0
+--- stdout
+Command-line client for Chiplab
+
+Usage: chiplab-cli
+
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
+--- stderr
