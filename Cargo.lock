@@ -184,6 +184,8 @@ dependencies = [
  "chiplab-api",
  "clap",
  "reqwest",
+ "serde",
+ "serde_json",
  "snapbox",
  "tokio",
  "tryfn",
