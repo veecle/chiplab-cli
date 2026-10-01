@@ -30,6 +30,7 @@
     flake-parts.lib.mkFlake {inherit inputs;} {
       imports = [
         make-shell.flakeModules.default
+        ./nix/alejandra.nix
         ./nix/jj-fix.nix
         ./nix/tombi.nix
       ];
@@ -76,22 +77,13 @@
         make-shells.default = {
           packages = [
             rustToolchain
-            pkgs.alejandra
           ];
         };
 
-        jj-fix.tools = {
-          rustfmt = {
-            command = ["rustfmt" "--edition" cargoToml.workspace.package.edition];
-            patterns = ["glob:**/*.rs"];
-          };
-          alejandra = {
-            command = ["alejandra" "--quiet" "-"];
-            patterns = ["glob:**/*.nix"];
-          };
+        jj-fix.tools.rustfmt = {
+          command = ["rustfmt" "--edition" cargoToml.workspace.package.edition];
+          patterns = ["glob:**/*.rs"];
         };
-
-        formatter = pkgs.alejandra;
 
         checks = {
           # `buildRustPackage` runs the workspace tests in its check phase, so this is also the test run.
@@ -111,14 +103,6 @@
               export CARGO_HOME="$TMPDIR/cargo"
               cd ${./.}
               cargo fmt --all --check
-              touch $out
-            '';
-
-          alejandra =
-            pkgs.runCommand "alejandra" {
-              nativeBuildInputs = [pkgs.alejandra];
-            } ''
-              alejandra --check ${./.}
               touch $out
             '';
         };
