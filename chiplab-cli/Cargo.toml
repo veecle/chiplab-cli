@@ -1,0 +1,6 @@
+[package]
+name = "chiplab-cli"
+version = { workspace = true }
+edition = { workspace = true }
+
+[dependencies]
