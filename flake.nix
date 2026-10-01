@@ -28,7 +28,14 @@
     ...
   }:
     flake-parts.lib.mkFlake {inherit inputs;} {
-      imports = [make-shell.flakeModules.default];
+      imports = [
+        make-shell.flakeModules.default
+        ./nix/tombi.nix
+      ];
+
+      # Instead of each module having to use some number of `../`'s to reference the repository root,
+      # pass down a nix path they can construct sources from.
+      _module.args.root = ./.;
 
       systems = [
         "x86_64-linux"
