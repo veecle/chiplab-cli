@@ -4,7 +4,15 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05-small";
 
-    flake-parts.url = "github:hercules-ci/flake-parts";
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
+
+    make-shell = {
+      url = "github:nicknovitski/make-shell";
+      inputs.flake-compat.follows = "";
+    };
 
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
@@ -15,10 +23,13 @@
   outputs = inputs @ {
     nixpkgs,
     flake-parts,
+    make-shell,
     rust-overlay,
     ...
   }:
     flake-parts.lib.mkFlake {inherit inputs;} {
+      imports = [make-shell.flakeModules.default];
+
       systems = [
         "x86_64-linux"
         "aarch64-linux"
@@ -54,7 +65,7 @@
 
         packages.default = chiplab-cli;
 
-        devShells.default = pkgs.mkShell {
+        make-shells.default = {
           packages = [rustToolchain];
         };
 
