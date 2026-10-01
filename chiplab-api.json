@@ -1,0 +1,577 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Internal Stable Chiplab API",
+    "description": "Internal API backing tools maintained by Veecle, such as the Chiplab CLI. It avoids sudden breaking changes, but is not a public API.",
+    "version": "1"
+  },
+  "paths": {
+    "/api/stable/jobs/{job_id}": {
+      "get": {
+        "summary": "Waits for a job to settle, or for the timeout to elapse.",
+        "description": "Waiting again for a settled job returns the same response immediately.",
+        "operationId": "wait_for_job",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "description": "Job to wait for, as returned by the endpoint that started it",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/JobId"
+            }
+          },
+          {
+            "name": "timeout",
+            "in": "query",
+            "description": "Maximum time in seconds to wait, values beyond the server-side cap are clamped to it.",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "double",
+              "default": 20.0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job settled or wait timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaitForJobResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A parameter is missing or cannot be parsed",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Job not found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request does not satisfy the documented requirements",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error"
+          }
+        }
+      }
+    },
+    "/api/stable/jobs/{job_id}/artifacts/{artifact_name}/download-tickets": {
+      "post": {
+        "summary": "Issues a presigned URL to download an artifact a job produced.",
+        "operationId": "issue_download_ticket",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "description": "Job that produced the artifact",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/JobId"
+            }
+          },
+          {
+            "name": "artifact_name",
+            "in": "path",
+            "description": "Name of the artifact, as listed in the job's result",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Download ticket issued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssueDownloadTicketResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A parameter is missing or cannot be parsed",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Job not found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request does not satisfy the documented requirements",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error"
+          }
+        }
+      }
+    },
+    "/api/stable/projects/{project_id}/test-suite-runs": {
+      "post": {
+        "summary": "Starts running a test suite against a firmware in the background.",
+        "operationId": "run_test_suite",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "description": "Project to run the test suite in",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ProjectId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunTestSuiteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Test-suite run started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunTestSuiteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request body is malformed JSON, or a parameter is missing or cannot be parsed",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Project not found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "`Content-Type` is not `application/json`",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request does not satisfy the documented requirements",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error"
+          }
+        }
+      }
+    },
+    "/api/stable/projects/{project_id}/upload-tickets": {
+      "post": {
+        "summary": "Reserves an artifact in a project and issues a presigned URL to upload its bytes to.",
+        "operationId": "issue_upload_ticket",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "description": "Project the artifact will belong to",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ProjectId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Upload ticket issued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssueUploadTicketResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A parameter is missing or cannot be parsed",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid credentials",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Project not found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request does not satisfy the documented requirements",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ArtifactId": {
+        "type": "string",
+        "pattern": "^artifact_.+$"
+      },
+      "Board": {
+        "type": "object",
+        "description": "The definition of a board and all its peripherals.",
+        "required": [
+          "model"
+        ],
+        "properties": {
+          "model": {
+            "$ref": "#/components/schemas/BoardModel"
+          },
+          "uarts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "BoardModel": {
+        "type": "string",
+        "description": "Boards supported by the Renode executor.",
+        "enum": [
+          "stm32f4_discovery",
+          "stm32f7_discovery",
+          "stm32f103_blue_pill",
+          "stm32wba52_nucleo",
+          "stm32l073_nucleo",
+          "stm32h745_nucleo",
+          "nrf52840_dk"
+        ]
+      },
+      "FailedJob": {
+        "type": "object",
+        "required": [
+          "status",
+          "job_id",
+          "project_id",
+          "input",
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "input": {
+            "type": "object",
+            "description": "What the job was started with, its shape depends on the kind of job."
+          },
+          "job_id": {
+            "$ref": "#/components/schemas/JobId"
+          },
+          "project_id": {
+            "$ref": "#/components/schemas/ProjectId"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "failed"
+            ]
+          }
+        }
+      },
+      "IssueDownloadTicketResponse": {
+        "type": "object",
+        "required": [
+          "download_url"
+        ],
+        "properties": {
+          "download_url": {
+            "type": "string",
+            "description": "Presigned URL to `GET` the artifact bytes from."
+          }
+        }
+      },
+      "IssueUploadTicketResponse": {
+        "type": "object",
+        "required": [
+          "artifact_id",
+          "upload_url"
+        ],
+        "properties": {
+          "artifact_id": {
+            "$ref": "#/components/schemas/ArtifactId",
+            "description": "Identifier to reference the uploaded artifact by."
+          },
+          "upload_url": {
+            "type": "string",
+            "description": "Presigned URL to `PUT` the artifact bytes to."
+          }
+        }
+      },
+      "JobId": {
+        "type": "string",
+        "description": "Identifier of a job, carrying the kind of the entity it tracks.",
+        "pattern": "^(run|build|run_test_suite)_.+$"
+      },
+      "ProjectId": {
+        "type": "string",
+        "pattern": "^project_.+$"
+      },
+      "RunTestSuiteId": {
+        "type": "string",
+        "pattern": "^run_test_suite_.+$"
+      },
+      "RunTestSuiteRequest": {
+        "type": "object",
+        "required": [
+          "firmware_artifact_id",
+          "suite_artifact_id",
+          "board"
+        ],
+        "properties": {
+          "board": {
+            "$ref": "#/components/schemas/Board"
+          },
+          "firmware_artifact_id": {
+            "$ref": "#/components/schemas/ArtifactId",
+            "description": "Uploaded firmware ELF to run."
+          },
+          "suite_artifact_id": {
+            "$ref": "#/components/schemas/ArtifactId",
+            "description": "Uploaded TypeScript test suite to drive the firmware with."
+          }
+        }
+      },
+      "RunTestSuiteResponse": {
+        "type": "object",
+        "required": [
+          "run_test_suite_id"
+        ],
+        "properties": {
+          "run_test_suite_id": {
+            "$ref": "#/components/schemas/RunTestSuiteId",
+            "description": "Job tracking the run, to wait on via `/jobs/{job_id}`."
+          }
+        }
+      },
+      "RunningJob": {
+        "type": "object",
+        "required": [
+          "status",
+          "job_id",
+          "project_id",
+          "input"
+        ],
+        "properties": {
+          "input": {
+            "type": "object",
+            "description": "What the job was started with, its shape depends on the kind of job."
+          },
+          "job_id": {
+            "$ref": "#/components/schemas/JobId"
+          },
+          "project_id": {
+            "$ref": "#/components/schemas/ProjectId"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "running"
+            ]
+          }
+        }
+      },
+      "SucceededJob": {
+        "type": "object",
+        "required": [
+          "status",
+          "job_id",
+          "project_id",
+          "input",
+          "result"
+        ],
+        "properties": {
+          "input": {
+            "type": "object",
+            "description": "What the job was started with, its shape depends on the kind of job."
+          },
+          "job_id": {
+            "$ref": "#/components/schemas/JobId"
+          },
+          "project_id": {
+            "$ref": "#/components/schemas/ProjectId"
+          },
+          "result": {
+            "type": "object",
+            "description": "What the job recorded on success, its shape depends on the kind of job."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "succeeded"
+            ]
+          }
+        }
+      },
+      "WaitForJobResponse": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/RunningJob"
+          },
+          {
+            "$ref": "#/components/schemas/SucceededJob"
+          },
+          {
+            "$ref": "#/components/schemas/FailedJob"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "status",
+          "mapping": {
+            "failed": "#/components/schemas/FailedJob",
+            "running": "#/components/schemas/RunningJob",
+            "succeeded": "#/components/schemas/SucceededJob"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "apiTokenAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Personal access token (`veecle_pat_…`) or JWT."
+      }
+    }
+  },
+  "security": [
+    {
+      "apiTokenAuth": []
+    }
+  ]
+}
