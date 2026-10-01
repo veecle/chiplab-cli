@@ -26,6 +26,8 @@
       src = rustSource;
       cargoLock.lockFile = root + /Cargo.lock;
       cargoBuildFlags = ["--package" "chiplab-cli"];
+      # The HTTP client needs CA certificates to be created, even when only talking to the local test proxy.
+      nativeCheckInputs = [pkgs.cacert];
     };
   in {
     _module.args = {
