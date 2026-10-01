@@ -1,0 +1,8 @@
+$ chiplab-cli run-test-suite --project project_00000000000000000000000000 --firmware hello-stm32f4-discovery.elf --test-suite hello-stm32f4-discovery.ts --board stm32f4_discovery
+exit status: 1
+--- stdout
+--- stderr
+Error: failed to upload the firmware
+
+Caused by:
+    server responded with 404 Not Found: project not found

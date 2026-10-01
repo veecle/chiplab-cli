@@ -26,6 +26,11 @@ Each case is a directory, optionally nested in subdirectories to group related c
 
 - `args`: the command-line arguments, one per line.
 - `expected.txt`: the expected exit status, stdout and stderr.
+- `exchanges.json`: the API exchanges the case makes, replayed by a local proxy standing in for Chiplab.
+  Cases making no API requests have none.
+- `no-proxy`: an empty marker file; if present, the binary runs without the proxy and without any Chiplab configuration in its environment, for testing how the CLI handles that.
+
+The binary runs within `chiplab-cli/tests/fixtures/`, so `args` can refer to the input files shared between cases stored there.
 
 To add a case, create a directory with an `args` file, then generate its `expected.txt` by re-snapshotting.
 When the output changes intentionally, re-snapshot and review the diff before committing:
@@ -36,6 +41,24 @@ SNAPSHOTS=overwrite cargo test --test cli
 
 In `expected.txt`, `[..]` matches any text within a line and `...` on a line by itself matches any number of lines.
 See [`snapbox::Assert`](https://docs.rs/snapbox/latest/snapbox/assert/struct.Assert.html) for the full wildcard details.
+
+### Recording API exchanges
+
+By default the proxy replays `exchanges.json`, failing the case on any request that doesn't match the next recorded one, and on any recorded exchange that isn't requested.
+To record the exchanges against a real Chiplab instance instead, run with `TEST_CHIPLAB_PROXY=record`, configured by `CHIPLAB_URL` and `CHIPLAB_TOKEN` as for the CLI itself.
+Recording overwrites the exchanges of every case run, so limit it to the case being recorded to keep hand-written exchanges in other cases:
+
+```sh
+TEST_CHIPLAB_PROXY=record cargo test --test cli -- --exact <case name>
+```
+
+To run the cases against a real Chiplab instance without replaying or recording the exchanges, run with `TEST_CHIPLAB_PROXY=bypass`, configured as for recording.
+
+TypeIDs are replaced with fake ones in recordings.
+Cases refer to the project to run in as `project_00000000000000000000000001`; set the real project to record or bypass in with `TEST_CHIPLAB_PROJECT_ID`.
+
+Request headers are not recorded, so no credentials end up in the recordings.
+Absolute URLs to hosts other than `CHIPLAB_URL` in responses are rewritten to point at the proxy, so requests to them (such as uploads) are recorded and replayed too.
 
 ## Generated API client
 

@@ -1,0 +1,14 @@
+[
+  {
+    "request": {
+      "method": "POST",
+      "path": "/api/stable/projects/project_00000000000000000000000000/upload-tickets"
+    },
+    "response": {
+      "status": 404,
+      "body": {
+        "text": "project not found"
+      }
+    }
+  }
+]

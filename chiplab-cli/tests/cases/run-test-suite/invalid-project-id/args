@@ -1,0 +1,9 @@
+run-test-suite
+--project
+project_00000000000000000000000000
+--firmware
+hello-stm32f4-discovery.elf
+--test-suite
+hello-stm32f4-discovery.ts
+--board
+stm32f4_discovery
