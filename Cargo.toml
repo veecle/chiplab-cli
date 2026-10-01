@@ -11,3 +11,12 @@ repository = "https://github.com/veecle/chiplab-cli"
 publish = false
 
 [workspace.dependencies]
+anyhow = { version = "1.0.104", default-features = false, features = ["std"] }
+clap = { version = "4.6.7", default-features = false, features = [
+  "default",
+  "derive"
+] }
+tokio = { version = "1.53.1", default-features = false, features = [
+  "macros",
+  "rt"
+] }

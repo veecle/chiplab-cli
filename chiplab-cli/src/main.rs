@@ -1,17 +1,16 @@
-fn main() {
-    println!("{}", greeting());
-}
+use std::process::ExitCode;
 
-fn greeting() -> &'static str {
-    "Hello, world!"
-}
+use clap::Parser;
 
-#[cfg(test)]
-mod tests {
-    use super::greeting;
+#[derive(Parser, Debug)]
+#[command(version, about)]
+struct Args {}
 
-    #[test]
-    fn greeting_is_not_empty() {
-        assert!(!greeting().is_empty());
-    }
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> anyhow::Result<ExitCode> {
+    let _args = Args::parse();
+
+    println!("Hello Chiplab!");
+
+    Ok(ExitCode::SUCCESS)
 }
