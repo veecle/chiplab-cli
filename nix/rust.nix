@@ -33,6 +33,7 @@
     make-shells.default = {
       packages = [
         rustToolchain
+        pkgs.cargo-nextest
       ];
     };
 
