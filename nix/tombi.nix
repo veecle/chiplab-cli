@@ -13,6 +13,11 @@
       };
     };
 
+    jj-fix.tools.tombi = {
+      command = ["tombi" "format" "--quiet" "--offline" "--stdin-filename=$path" "-"];
+      patterns = ["glob:**/*.toml"];
+    };
+
     checks = {
       tombi-format = pkgs.stdenvNoCC.mkDerivation {
         name = "tombi-format";
