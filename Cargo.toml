@@ -5,5 +5,9 @@ members = ["chiplab-cli"]
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
+description = "Command-line client for Chiplab"
+homepage = "https://chiplab.veecle.ai"
+repository = "https://github.com/veecle/chiplab-cli"
+publish = false
 
 [workspace.dependencies]
