@@ -12,4 +12,6 @@ Commands:
 Options:
   -h, --help     Print help
   -V, --version  Print version
+
+Authenticate by setting `CHIPLAB_TOKEN` to a Chiplab personal access token (`veecle_pat_…`).
 --- stderr

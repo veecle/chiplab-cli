@@ -13,7 +13,9 @@ name = "cli"
 
 [dependencies]
 anyhow.workspace = true
+chiplab-api.workspace = true
 clap.workspace = true
+reqwest.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 tokio.workspace = true
