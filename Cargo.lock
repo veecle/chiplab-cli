@@ -181,7 +181,9 @@ name = "chiplab-cli"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "chiplab-api",
  "clap",
+ "reqwest",
  "snapbox",
  "tokio",
  "tryfn",
