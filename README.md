@@ -1,6 +1,6 @@
 # chiplab-cli
 
-Command-line client for [Chiplab](https://chiplab.veecle.io).
+Command-line client for [Chiplab](https://chiplab.veecle.ai).
 
 The intended use case is hooking Chiplab into a CI pipeline, so the CLI is the stable interface to interact with it.
 
