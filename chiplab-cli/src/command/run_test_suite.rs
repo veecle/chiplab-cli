@@ -8,7 +8,7 @@ use chiplab_api::models::{Board, BoardModel, RunTestSuiteRequest, WaitForJobResp
 
 use crate::api;
 use crate::api::models::TestSuiteResult;
-use crate::api::models::test_suite_result::Summary;
+use crate::api::models::test_suite_result::{Outcome, Summary};
 use crate::app::App;
 
 /// Run a TypeScript test suite against a firmware binary on a simulated board.
@@ -59,6 +59,15 @@ const EXIT_INCOMPLETE: u8 = 3;
 /// Exit status for when the test suite ran to completion but some test cases failed.
 const EXIT_TESTS_FAILED: u8 = 4;
 
+/// The result printed with `--json`.
+#[derive(serde::Serialize, Debug)]
+struct TestSuiteReport {
+    job_id: String,
+    outcome: Outcome,
+    summary: Option<Summary>,
+    error: Option<String>,
+}
+
 /// Parses a board model by its API name.
 ///
 /// The generated `BoardModel` has no `FromStr`, so this goes through serde to reuse its renames,
@@ -75,7 +84,7 @@ impl Args {
             test_suite,
             board,
             download_dir,
-            json: _,
+            json,
         } = self;
 
         let firmware_artifact_id = api::upload(&app.api, &project_id, &firmware)
@@ -94,7 +103,7 @@ impl Args {
             .run_test_suite_id;
 
         eprintln!("waiting for test suite run `{job_id}`");
-        loop {
+        let (report, artifacts) = loop {
             let response = default_api::wait_for_job(&app.api, &job_id, None)
                 .await
                 .map_err(api::error)
@@ -106,31 +115,62 @@ impl Args {
                     let result: TestSuiteResult = serde_json::from_value(job.result)
                         .context("failed to parse the test suite result")?;
 
-                    let exit_code = report(result.summary);
-                    let download = maybe_download_artifacts(
-                        app,
-                        &job_id,
-                        download_dir.as_deref(),
-                        &result.artifacts,
-                    )
-                    .await;
+                    let outcome = result
+                        .summary
+                        .as_ref()
+                        .map_or(Outcome::Incomplete, Summary::outcome);
 
-                    if let Err(error) = download {
-                        if exit_code == ExitCode::SUCCESS {
-                            bail!(error);
-                        }
-
-                        eprintln!("error: {error:#}");
-                    }
-
-                    return Ok(exit_code);
+                    let report = TestSuiteReport {
+                        job_id: job.job_id,
+                        outcome,
+                        summary: result.summary,
+                        error: None,
+                    };
+                    break (report, Some(result.artifacts));
                 }
                 WaitForJobResponse::Failed(job) => {
-                    eprintln!("error: test suite run failed: {}", job.error);
-                    return Ok(ExitCode::from(EXIT_INCOMPLETE));
+                    let report = TestSuiteReport {
+                        job_id: job.job_id,
+                        outcome: Outcome::Incomplete,
+                        summary: None,
+                        error: Some(job.error),
+                    };
+                    break (report, None);
                 }
             }
+        };
+
+        if json {
+            println!("{}", serde_json::to_string(&report)?);
+        } else {
+            match (&report.summary, &report.error) {
+                (Some(summary), _) if report.outcome == Outcome::Passed => println!("{summary}"),
+                (Some(summary), _) => eprintln!("error: {summary}"),
+                (None, Some(error)) => eprintln!("error: test suite run failed: {error}"),
+                (None, None) => eprintln!("error: test suite did not run to completion"),
+            }
         }
+
+        let exit_code = match report.outcome {
+            Outcome::Passed => ExitCode::SUCCESS,
+            Outcome::Failed => ExitCode::from(EXIT_TESTS_FAILED),
+            Outcome::Incomplete => ExitCode::from(EXIT_INCOMPLETE),
+        };
+
+        if let Some(artifacts) = artifacts {
+            let download =
+                maybe_download_artifacts(app, &job_id, download_dir.as_deref(), &artifacts).await;
+
+            if let Err(error) = download {
+                if exit_code == ExitCode::SUCCESS {
+                    bail!(error);
+                }
+
+                eprintln!("error: {error:#}");
+            }
+        }
+
+        Ok(exit_code)
     }
 }
 
@@ -156,20 +196,4 @@ async fn maybe_download_artifacts(
         .for_each(|path| eprintln!("downloaded `{path}`"));
 
     Ok(())
-}
-
-/// Prints the test suite outcome and returns the matching exit status.
-fn report(summary: Option<Summary>) -> ExitCode {
-    let Some(summary) = summary else {
-        eprintln!("error: test suite did not run to completion");
-        return ExitCode::from(EXIT_INCOMPLETE);
-    };
-
-    if summary.failed == 0 {
-        println!("{summary}");
-        ExitCode::SUCCESS
-    } else {
-        eprintln!("error: {summary}");
-        ExitCode::from(EXIT_TESTS_FAILED)
-    }
 }
