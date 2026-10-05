@@ -47,6 +47,10 @@ pub struct Args {
     /// Existing files with the same names are overwritten.
     #[arg(long, value_name = "DIR")]
     download_dir: Option<Utf8PathBuf>,
+
+    /// Print the test suite result as a single JSON line.
+    #[arg(long)]
+    json: bool,
 }
 
 /// Exit status for when the test suite failed to run to completion.
@@ -71,6 +75,7 @@ impl Args {
             test_suite,
             board,
             download_dir,
+            json: _,
         } = self;
 
         let firmware_artifact_id = api::upload(&app.api, &project_id, &firmware)
