@@ -197,3 +197,99 @@ async fn maybe_download_artifacts(
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use serde_json::json;
+
+    use super::{Outcome, Summary, TestSuiteReport};
+
+    #[test]
+    fn serialize_test_suite_report() {
+        struct Test {
+            name: &'static str,
+            input: TestSuiteReport,
+            output: serde_json::Value,
+        }
+
+        vec![
+            Test {
+                name: "passed run should include the summary",
+                input: TestSuiteReport {
+                    job_id: "job_1".to_string(),
+                    outcome: Outcome::Passed,
+                    summary: Some(Summary {
+                        planned: 2,
+                        passed: 2,
+                        failed: 0,
+                    }),
+                    error: None,
+                },
+                output: json!({
+                    "job_id": "job_1",
+                    "outcome": "passed",
+                    "summary": { "planned": 2, "passed": 2, "failed": 0 },
+                    "error": null,
+                }),
+            },
+            Test {
+                name: "failed run with skipped tests should include the summary",
+                input: TestSuiteReport {
+                    job_id: "job_1".to_string(),
+                    outcome: Outcome::Failed,
+                    summary: Some(Summary {
+                        planned: 3,
+                        passed: 1,
+                        failed: 1,
+                    }),
+                    error: None,
+                },
+                output: json!({
+                    "job_id": "job_1",
+                    "outcome": "failed",
+                    "summary": { "planned": 3, "passed": 1, "failed": 1 },
+                    "error": null,
+                }),
+            },
+            Test {
+                name: "incomplete run should have no summary",
+                input: TestSuiteReport {
+                    job_id: "job_1".to_string(),
+                    outcome: Outcome::Incomplete,
+                    summary: None,
+                    error: None,
+                },
+                output: json!({
+                    "job_id": "job_1",
+                    "outcome": "incomplete",
+                    "summary": null,
+                    "error": null,
+                }),
+            },
+            Test {
+                name: "failed job should include the error",
+                input: TestSuiteReport {
+                    job_id: "job_1".to_string(),
+                    outcome: Outcome::Incomplete,
+                    summary: None,
+                    error: Some("sandbox crashed".to_string()),
+                },
+                output: json!({
+                    "job_id": "job_1",
+                    "outcome": "incomplete",
+                    "summary": null,
+                    "error": "sandbox crashed",
+                }),
+            },
+        ]
+        .into_iter()
+        .for_each(|test| {
+            let got = serde_json::to_value(&test.input).unwrap();
+            assert_eq!(
+                got, test.output,
+                "{:?}: got = {:?}, want = {:?}",
+                test.name, got, test.output
+            );
+        });
+    }
+}
