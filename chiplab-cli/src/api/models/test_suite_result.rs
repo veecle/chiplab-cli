@@ -11,7 +11,7 @@ pub struct TestSuiteResult {
 }
 
 /// The pass/fail counts of a completed test suite run.
-#[derive(serde::Deserialize, Debug)]
+#[derive(serde::Deserialize, serde::Serialize, Debug)]
 pub struct Summary {
     /// Includes skipped tests, which are neither passed nor failed.
     pub planned: u64,
@@ -28,5 +28,33 @@ impl Summary {
         self.planned
             .saturating_sub(self.passed)
             .saturating_sub(self.failed)
+    }
+}
+
+impl std::fmt::Display for Summary {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let Self {
+            planned,
+            passed,
+            failed,
+        } = *self;
+        let skipped = self.skipped();
+        let skipped = if skipped > 0 {
+            format_args!(", {skipped} skipped")
+        } else {
+            format_args!("")
+        };
+
+        if failed == 0 {
+            write!(
+                f,
+                "test suite passed: {passed} of {planned} tests passed{skipped}"
+            )
+        } else {
+            write!(
+                f,
+                "test suite failed: {failed} of {planned} tests failed, {passed} passed{skipped}"
+            )
+        }
     }
 }

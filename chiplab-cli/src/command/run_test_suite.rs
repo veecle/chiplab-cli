@@ -166,41 +166,10 @@ fn report(summary: Option<Summary>) -> ExitCode {
     };
 
     if summary.failed == 0 {
-        println!("{}", summarize(summary));
+        println!("{summary}");
         ExitCode::SUCCESS
     } else {
-        eprintln!("error: {}", summarize(summary));
+        eprintln!("error: {summary}");
         ExitCode::from(EXIT_TESTS_FAILED)
     }
-}
-
-fn summarize(summary: Summary) -> impl std::fmt::Display {
-    let Summary {
-        planned,
-        passed,
-        failed,
-    } = summary;
-    let skipped = summary.skipped();
-
-    std::fmt::from_fn(move |f| {
-        let skipped = if skipped > 0 {
-            format_args!(", {skipped} skipped")
-        } else {
-            format_args!("")
-        };
-
-        if failed == 0 {
-            write!(
-                f,
-                "test suite passed: {passed} of {planned} tests passed{skipped}"
-            )?;
-        } else {
-            write!(
-                f,
-                "test suite failed: {failed} of {planned} tests failed, {passed} passed{skipped}"
-            )?;
-        }
-
-        Ok(())
-    })
 }
