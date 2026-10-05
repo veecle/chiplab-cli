@@ -62,9 +62,13 @@ const EXIT_TESTS_FAILED: u8 = 4;
 /// The result printed with `--json`.
 #[derive(serde::Serialize, Debug)]
 struct TestSuiteReport {
+    /// The ID of the test suite run job.
     job_id: String,
+    /// `passed`, `failed`, or `incomplete`.
     outcome: Outcome,
+    /// Missing if the suite did not run to completion.
     summary: Option<Summary>,
+    /// The job error, present only if the job itself failed rather than the suite.
     error: Option<String>,
 }
 
@@ -144,8 +148,10 @@ impl Args {
             println!("{}", serde_json::to_string(&report)?);
         } else {
             match (&report.summary, &report.error) {
-                (Some(summary), _) if report.outcome == Outcome::Passed => println!("{summary}"),
-                (Some(summary), _) => eprintln!("error: {summary}"),
+                (Some(summary), _) if report.outcome == Outcome::Passed => {
+                    println!("{}", summarize(summary));
+                }
+                (Some(summary), _) => eprintln!("error: {}", summarize(summary)),
                 (None, Some(error)) => eprintln!("error: test suite run failed: {error}"),
                 (None, None) => eprintln!("error: test suite did not run to completion"),
             }
@@ -196,6 +202,37 @@ async fn maybe_download_artifacts(
         .for_each(|path| eprintln!("downloaded `{path}`"));
 
     Ok(())
+}
+
+fn summarize(summary: &Summary) -> impl std::fmt::Display {
+    let Summary {
+        planned,
+        passed,
+        failed,
+    } = *summary;
+    let skipped = summary.skipped();
+
+    std::fmt::from_fn(move |f| {
+        let skipped = if skipped > 0 {
+            format_args!(", {skipped} skipped")
+        } else {
+            format_args!("")
+        };
+
+        if failed == 0 {
+            write!(
+                f,
+                "test suite passed: {passed} of {planned} tests passed{skipped}"
+            )?;
+        } else {
+            write!(
+                f,
+                "test suite failed: {failed} of {planned} tests failed, {passed} passed{skipped}"
+            )?;
+        }
+
+        Ok(())
+    })
 }
 
 #[cfg(test)]
@@ -285,11 +322,7 @@ mod tests {
         .into_iter()
         .for_each(|test| {
             let got = serde_json::to_value(&test.input).unwrap();
-            assert_eq!(
-                got, test.output,
-                "{:?}: got = {:?}, want = {:?}",
-                test.name, got, test.output
-            );
+            assert_eq!(got, test.output, "{}", test.name);
         });
     }
 }

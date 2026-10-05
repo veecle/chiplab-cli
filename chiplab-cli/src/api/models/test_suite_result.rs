@@ -44,39 +44,14 @@ impl Summary {
             .saturating_sub(self.failed)
     }
 
+    /// Returns the overall outcome of the run.
+    ///
+    /// A summary only exists for runs that completed, so this never returns [`Outcome::Incomplete`].
     pub fn outcome(&self) -> Outcome {
         if self.failed == 0 {
             Outcome::Passed
         } else {
             Outcome::Failed
-        }
-    }
-}
-
-impl std::fmt::Display for Summary {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let Self {
-            planned,
-            passed,
-            failed,
-        } = *self;
-        let skipped = self.skipped();
-        let skipped = if skipped > 0 {
-            format_args!(", {skipped} skipped")
-        } else {
-            format_args!("")
-        };
-
-        if failed == 0 {
-            write!(
-                f,
-                "test suite passed: {passed} of {planned} tests passed{skipped}"
-            )
-        } else {
-            write!(
-                f,
-                "test suite failed: {failed} of {planned} tests failed, {passed} passed{skipped}"
-            )
         }
     }
 }
