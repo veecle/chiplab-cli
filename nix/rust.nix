@@ -28,6 +28,10 @@
       cargoBuildFlags = ["--package" "chiplab-cli"];
     };
   in {
+    _module.args = {
+      inherit cargoToml rustToolchain;
+    };
+
     packages.default = chiplab-cli;
 
     make-shells.default = {

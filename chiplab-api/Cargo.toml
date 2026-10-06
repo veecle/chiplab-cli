@@ -1,0 +1,20 @@
+[package]
+name = "chiplab-api"
+version.workspace = true
+edition.workspace = true
+description = "Internal API backing tools maintained by Veecle, such as the Chiplab CLI. It avoids sudden breaking changes, but is not a public API."
+homepage.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+serde_repr.workspace = true
+url.workspace = true
+
+# This crate is generated, non-idiomatic code, so do not fail CI on its warnings.
+[lints]
+clippy.all.level = "allow"
+rust.warnings.level = "allow"

@@ -36,3 +36,25 @@ SNAPSHOTS=overwrite cargo test --test cli
 
 In `expected.txt`, `[..]` matches any text within a line and `...` on a line by itself matches any number of lines.
 See [`snapbox::Assert`](https://docs.rs/snapbox/latest/snapbox/assert/struct.Assert.html) for the full wildcard details.
+
+## Generated API client
+
+The `chiplab-api/` crate is generated from the OpenAPI spec in `chiplab-api.json`, using the templates in `openapi-templates/`.
+Neither `chiplab-api/` nor `chiplab-api.json` should be edited by hand:
+
+- `chiplab-api.json` is the source of truth for the API and is exported from the Chiplab service.
+- `chiplab-api/` must match a fresh generation; the `generated-chiplab-api` check rejects any difference.
+
+If a change needs something from the API that is not available in the generated client, raise it in an issue instead.
+
+To update the spec, download the current version from the Chiplab service:
+
+```sh
+curl -fsSL https://chiplab.veecle.ai/api/stable/openapi.json -o chiplab-api.json
+```
+
+After changing `chiplab-api.json` or `openapi-templates/`, regenerate the crate:
+
+```sh
+nix run .#update-chiplab-api
+```
