@@ -4,6 +4,10 @@ pub struct TestSuiteResult {
     /// Missing if the suite did not run to completion, e.g. because it did not compile or exited
     /// early.
     pub summary: Option<Summary>,
+
+    /// Names of the artifacts the run produced.
+    #[serde(default)]
+    pub artifacts: Vec<String>,
 }
 
 /// The pass/fail counts of a completed test suite run.
