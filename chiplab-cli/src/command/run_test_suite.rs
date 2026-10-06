@@ -92,35 +92,39 @@ impl Args {
                 .await
                 .map_err(api::error)
                 .context("failed to wait for the test suite run")?;
+            
             match response {
                 WaitForJobResponse::Running(_) => continue,
                 WaitForJobResponse::Succeeded(job) => {
                     let result: TestSuiteResult = serde_json::from_value(job.result)
                         .context("failed to parse the test suite result")?;
 
-                    if let Some(dir) = &download_dir {
-                        if result.artifacts.is_empty() {
-                            eprintln!("no artifacts to download");
-                        }
+                    let exit_code = report(result.summary);
 
-                        api::download_all(&app.api, &job_id, &result.artifacts, dir)
-                            .await
-                            .context("failed to download the artifacts")?
-                            .iter()
-                            .for_each(|path| eprintln!("downloaded `{}`", path.display()));
-                    }
-
-                    let Some(summary) = result.summary else {
-                        eprintln!("error: test suite did not run to completion");
-                        return Ok(ExitCode::from(EXIT_INCOMPLETE));
+                    let Some(dir) = &download_dir else {
+                        return Ok(exit_code);
                     };
 
-                    if summary.failed == 0 {
-                        println!("{}", summarize(summary));
-                        return Ok(ExitCode::SUCCESS);
-                    } else {
-                        eprintln!("error: {}", summarize(summary));
-                        return Ok(ExitCode::from(EXIT_TESTS_FAILED));
+                    if result.artifacts.is_empty() {
+                        eprintln!("no artifacts to download");
+                        return Ok(exit_code);
+                    }
+
+                    match api::download_all(&app.api, &job_id, &result.artifacts, dir).await {
+                        Ok(paths) => {
+                            for path in paths {
+                                eprintln!("downloaded `{}`", path.display());
+                            }
+                            return Ok(exit_code);
+                        }
+                        // Keep the test failure exit status so callers can still classify the run.
+                        Err(error) if exit_code != ExitCode::SUCCESS => {
+                            eprintln!("error: failed to download the artifacts: {error:#}");
+                            return Ok(exit_code);
+                        }
+                        Err(error) => {
+                            return Err(error.context("failed to download the artifacts"));
+                        }
                     }
                 }
                 WaitForJobResponse::Failed(job) => {
@@ -129,6 +133,22 @@ impl Args {
                 }
             }
         }
+    }
+}
+
+/// Prints the test suite outcome and returns the matching exit status.
+fn report(summary: Option<Summary>) -> ExitCode {
+    let Some(summary) = summary else {
+        eprintln!("error: test suite did not run to completion");
+        return ExitCode::from(EXIT_INCOMPLETE);
+    };
+
+    if summary.failed == 0 {
+        println!("{}", summarize(summary));
+        ExitCode::SUCCESS
+    } else {
+        eprintln!("error: {}", summarize(summary));
+        ExitCode::from(EXIT_TESTS_FAILED)
     }
 }
 
