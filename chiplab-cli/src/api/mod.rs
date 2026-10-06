@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 use anyhow::Context;
 use chiplab_api::apis::default_api;
 use chiplab_api::apis::{Error, configuration::Configuration};
+use tokio::io::AsyncWriteExt;
 
 pub mod models;
 
@@ -66,18 +67,25 @@ pub async fn download(
         .await
         .map_err(error)?;
 
-    let contents = configuration
+    let mut response = configuration
         .client
         .get(&ticket.download_url)
         .send()
         .await?
-        .error_for_status()?
-        .bytes()
-        .await?;
+        .error_for_status()?;
 
     let path = dir.join(artifact_name);
-    std::fs::write(&path, contents)
-        .with_context(|| format!("failed to write `{}`", path.display()))?;
+    let write_context = || format!("failed to write `{}`", path.display());
+
+    let mut file = tokio::fs::File::create(&path)
+        .await
+        .with_context(write_context)?;
+
+    while let Some(chunk) = response.chunk().await? {
+        file.write_all(&chunk).await.with_context(write_context)?;
+    }
+
+    file.flush().await.with_context(write_context)?;
 
     Ok(path)
 }
@@ -91,7 +99,8 @@ pub async fn download_all(
     artifact_names: &[String],
     dir: &Path,
 ) -> anyhow::Result<Vec<PathBuf>> {
-    std::fs::create_dir_all(dir)
+    tokio::fs::create_dir_all(dir)
+        .await
         .with_context(|| format!("failed to create `{}`", dir.display()))?;
 
     futures_util::future::try_join_all(artifact_names.iter().map(|name| async move {
