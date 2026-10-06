@@ -1,5 +1,5 @@
 use std::fmt::Debug;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use anyhow::Context;
 use chiplab_api::apis::default_api;
@@ -50,4 +50,34 @@ pub async fn upload(
     }
 
     Ok(ticket.artifact_id)
+}
+
+/// Downloads the artifact `artifact_name` produced by the job into `dir`, returning its path.
+///
+/// The backend guarantees artifact names are plain filenames, so the file always lands in `dir`.
+/// Overwrites any existing file with the same name.
+pub async fn download(
+    configuration: &Configuration,
+    job_id: &str,
+    artifact_name: &str,
+    dir: &Path,
+) -> anyhow::Result<PathBuf> {
+    let ticket = default_api::issue_download_ticket(configuration, job_id, artifact_name)
+        .await
+        .map_err(error)?;
+
+    let contents = configuration
+        .client
+        .get(&ticket.download_url)
+        .send()
+        .await?
+        .error_for_status()?
+        .bytes()
+        .await?;
+
+    let path = dir.join(artifact_name);
+    std::fs::write(&path, contents)
+        .with_context(|| format!("failed to write `{}`", path.display()))?;
+
+    Ok(path)
 }
