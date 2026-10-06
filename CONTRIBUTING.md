@@ -28,7 +28,10 @@ The main test approach is fixture tests in `chiplab-cli/tests/cases/`, which run
 Each case is a directory, optionally nested in subdirectories to group related cases, containing:
 
 - `args`: the command-line arguments, one per line.
-- `expected.txt`: the expected exit status, stdout and stderr.
+  `[TEMP]` is replaced with the path of a fresh temporary directory, for cases that write files.
+- `temp/`: files copied into the temporary directory before running, if present.
+- `expected.txt`: the expected exit status, stdout and stderr, followed by the files in the temporary directory.
+  The proxy's URL is shown as `[CHIPLAB_URL]`.
 - `exchanges.json`: the API exchanges the case makes, replayed by a local proxy standing in for Chiplab.
   Cases making no API requests have none.
 - `no-proxy`: an empty marker file; if present, the binary runs without the proxy and without any Chiplab configuration in its environment, for testing how the CLI handles that.

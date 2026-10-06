@@ -81,9 +81,10 @@ pub async fn download(
     let file = dir.create(artifact_name).with_context(write_context)?;
     let mut file = tokio::fs::File::from_std(file.into_std());
 
-    while let Some(chunk) = response.chunk().await? {
-        file.write_all(&chunk).await.with_context(write_context)?;
-    }
+    tokio::io::copy_buf(
+        &mut tokio_util::io::StreamReader::new(response.bytes_stream()),
+        &mut file,
+    ).await.with_context(write_context)?;
 
     file.flush().await.with_context(write_context)?;
 
@@ -99,11 +100,10 @@ pub async fn download_all(
     artifact_names: &[String],
     dir: &Utf8Path,
 ) -> anyhow::Result<Vec<Utf8PathBuf>> {
-    let handle = {
-        Dir::create_ambient_dir_all(dir, ambient_authority())?;
-        Dir::open_ambient_dir(dir, ambient_authority())
-    }
-    .with_context(|| format!("failed to open `{dir}`"))?;
+    let open_context = || format!("failed to open `{dir}`");
+
+    Dir::create_ambient_dir_all(dir, ambient_authority()).with_context(open_context)?;
+    let handle = Dir::open_ambient_dir(dir, ambient_authority()).with_context(open_context)?;
 
     futures_util::future::try_join_all(artifact_names.iter().map(|name| {
         let handle = &handle;

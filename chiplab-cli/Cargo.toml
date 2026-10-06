@@ -27,5 +27,6 @@ tokio.workspace = true
 regex = { workspace = true, features = ["std", "unicode-perl"] }
 reqwest = { workspace = true, features = ["blocking", "rustls"] }
 snapbox = { workspace = true, features = ["cmd", "color-auto", "diff"] }
+tempfile = { workspace = true }
 tiny_http = { workspace = true }
 tryfn = { workspace = true, features = ["color-auto", "diff"] }
