@@ -13,6 +13,8 @@ name = "cli"
 
 [dependencies]
 anyhow.workspace = true
+camino.workspace = true
+cap-std.workspace = true
 chiplab-api.workspace = true
 clap.workspace = true
 futures-util.workspace = true

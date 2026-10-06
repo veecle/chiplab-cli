@@ -1,7 +1,10 @@
 use std::fmt::Debug;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use anyhow::Context;
+use camino::{Utf8Path, Utf8PathBuf};
+use cap_std::ambient_authority;
+use cap_std::fs_utf8::Dir;
 use chiplab_api::apis::default_api;
 use chiplab_api::apis::{Error, configuration::Configuration};
 use tokio::io::AsyncWriteExt;
@@ -53,16 +56,15 @@ pub async fn upload(
     Ok(ticket.artifact_id)
 }
 
-/// Downloads the artifact `artifact_name` produced by the job into `dir`, returning its path.
+/// Downloads the artifact `artifact_name` produced by the job into `dir`.
 ///
-/// The backend guarantees artifact names are plain filenames, so the file always lands in `dir`.
-/// Overwrites any existing file with the same name.
+/// Fails if `artifact_name` resolves outside `dir`. Overwrites any existing file with the same name.
 pub async fn download(
     configuration: &Configuration,
     job_id: &str,
     artifact_name: &str,
-    dir: &Path,
-) -> anyhow::Result<PathBuf> {
+    dir: &Dir,
+) -> anyhow::Result<()> {
     let ticket = default_api::issue_download_ticket(configuration, job_id, artifact_name)
         .await
         .map_err(error)?;
@@ -74,12 +76,10 @@ pub async fn download(
         .await?
         .error_for_status()?;
 
-    let path = dir.join(artifact_name);
-    let write_context = || format!("failed to write `{}`", path.display());
+    let write_context = || format!("failed to write `{artifact_name}`");
 
-    let mut file = tokio::fs::File::create(&path)
-        .await
-        .with_context(write_context)?;
+    let file = dir.create(artifact_name).with_context(write_context)?;
+    let mut file = tokio::fs::File::from_std(file.into_std());
 
     while let Some(chunk) = response.chunk().await? {
         file.write_all(&chunk).await.with_context(write_context)?;
@@ -87,7 +87,7 @@ pub async fn download(
 
     file.flush().await.with_context(write_context)?;
 
-    Ok(path)
+    Ok(())
 }
 
 /// Downloads all the artifacts the job produced into `dir` concurrently, creating `dir` if missing.
@@ -97,16 +97,23 @@ pub async fn download_all(
     configuration: &Configuration,
     job_id: &str,
     artifact_names: &[String],
-    dir: &Path,
-) -> anyhow::Result<Vec<PathBuf>> {
-    tokio::fs::create_dir_all(dir)
-        .await
-        .with_context(|| format!("failed to create `{}`", dir.display()))?;
+    dir: &Utf8Path,
+) -> anyhow::Result<Vec<Utf8PathBuf>> {
+    let handle = {
+        Dir::create_ambient_dir_all(dir, ambient_authority())?;
+        Dir::open_ambient_dir(dir, ambient_authority())
+    }
+    .with_context(|| format!("failed to open `{dir}`"))?;
 
-    futures_util::future::try_join_all(artifact_names.iter().map(|name| async move {
-        download(configuration, job_id, name, dir)
-            .await
-            .with_context(|| format!("failed to download artifact `{name}`"))
+    futures_util::future::try_join_all(artifact_names.iter().map(|name| {
+        let handle = &handle;
+        async move {
+            download(configuration, job_id, name, handle)
+                .await
+                .with_context(|| format!("failed to download artifact `{name}`"))?;
+
+            Ok(dir.join(name))
+        }
     }))
     .await
 }

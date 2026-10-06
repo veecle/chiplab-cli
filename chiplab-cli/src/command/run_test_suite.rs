@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use anyhow::Context;
+use camino::Utf8PathBuf;
 use chiplab_api::apis::default_api;
 use chiplab_api::models::{Board, BoardModel, RunTestSuiteRequest, WaitForJobResponse};
 
@@ -44,7 +45,7 @@ pub struct Args {
     ///
     /// Existing files with the same names are overwritten.
     #[arg(long, value_name = "DIR")]
-    download_dir: Option<PathBuf>,
+    download_dir: Option<Utf8PathBuf>,
 }
 
 /// Exit status for when the test suite failed to run to completion.
@@ -92,7 +93,7 @@ impl Args {
                 .await
                 .map_err(api::error)
                 .context("failed to wait for the test suite run")?;
-            
+
             match response {
                 WaitForJobResponse::Running(_) => continue,
                 WaitForJobResponse::Succeeded(job) => {
@@ -113,7 +114,7 @@ impl Args {
                     match api::download_all(&app.api, &job_id, &result.artifacts, dir).await {
                         Ok(paths) => {
                             for path in paths {
-                                eprintln!("downloaded `{}`", path.display());
+                                eprintln!("downloaded `{path}`");
                             }
                             return Ok(exit_code);
                         }
