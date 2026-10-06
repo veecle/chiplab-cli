@@ -24,12 +24,13 @@
           {
             "name": "timeout",
             "in": "query",
-            "description": "Maximum time in seconds to wait, values beyond the server-side cap are clamped to it.",
+            "description": "Maximum time in seconds to wait, values beyond the maximum are clamped to it.",
             "required": false,
             "schema": {
               "type": "number",
               "format": "double",
               "default": 20.0,
+              "maximum": 120,
               "minimum": 0
             }
           }
