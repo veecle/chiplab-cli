@@ -1,0 +1,96 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+env:
+  TAG: ${{ github.ref_name }}
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - uses: cachix/install-nix-action@a49548c11d9846ad46ecc0115273879b045f001c  # v31.10.7
+
+      # The binary reports the `Cargo.toml` version, so a tag without a version bump would publish a mislabelled release.
+      - name: Check the tag matches the version
+        run: |
+          version="$(nix eval --raw .#packages.x86_64-linux.default.version)"
+          if [[ "$TAG" != "v$version" ]]; then
+            echo "::error::tag $TAG does not match the Cargo.toml version $version, expected v$version"
+            exit 1
+          fi
+
+  build:
+    runs-on: ${{ matrix.runs-on }}
+    needs:
+      - version
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-musl
+            runs-on: ubuntu-latest
+            installables: .#static
+          - target: aarch64-unknown-linux-musl
+            runs-on: ubuntu-24.04-arm
+            installables: .#static
+          - target: aarch64-apple-darwin
+            runs-on: macos-latest
+            installables: .#default .#checks.aarch64-darwin.package-portable
+    timeout-minutes: 30
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - uses: cachix/install-nix-action@a49548c11d9846ad46ecc0115273879b045f001c  # v31.10.7
+
+      - name: Build
+        run: nix build --print-build-logs --out-link result ${{ matrix.installables }}
+
+      # Named without the version, so `releases/latest/download/<name>` always points at the newest release.
+      - name: Package
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          tar --create --gzip --file "chiplab-cli-$TARGET.tar.gz" --directory result/bin .
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: ${{ matrix.target }}
+          path: chiplab-cli-${{ matrix.target }}.tar.gz
+          if-no-files-found: error
+
+  release:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    timeout-minutes: 10
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          path: assets
+          merge-multiple: true
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          cd assets
+          sha256sum -- *.tar.gz > sha256sums.txt
+          gh release create "$TAG" --verify-tag --generate-notes --title "$TAG" -- *

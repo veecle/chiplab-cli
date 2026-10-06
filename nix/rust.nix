@@ -21,7 +21,7 @@
       );
     };
 
-    chiplab-cli = rustPlatform.buildRustPackage {
+    chiplabCliArgs = {
       pname = "chiplab-cli";
       inherit (cargoToml.workspace.package) version;
       src = rustSource;
@@ -30,9 +30,11 @@
       # The HTTP client needs CA certificates to be created, even when only talking to the local test proxy.
       nativeCheckInputs = [pkgs.cacert];
     };
+
+    chiplab-cli = rustPlatform.buildRustPackage chiplabCliArgs;
   in {
     _module.args = {
-      inherit cargoToml rustToolchain;
+      inherit cargoToml rustToolchain chiplabCliArgs;
     };
 
     packages.default = chiplab-cli;
