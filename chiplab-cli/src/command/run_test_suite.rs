@@ -39,6 +39,12 @@ pub struct Args {
     /// See <https://chiplab.veecle.ai/mcp/resources/docs/boards.md> for the available boards.
     #[arg(short, long, value_name = "MODEL", value_parser = parse_board_model)]
     board: BoardModel,
+
+    /// Directory to download the run's artifacts to, created if missing.
+    ///
+    /// Existing files with the same names are overwritten.
+    #[arg(long, value_name = "DIR")]
+    download_dir: Option<PathBuf>,
 }
 
 /// Exit status for when the test suite failed to run to completion.
@@ -62,6 +68,7 @@ impl Args {
             firmware,
             test_suite,
             board,
+            download_dir: _,
         } = self;
 
         let firmware_artifact_id = api::upload(&app.api, &project_id, &firmware)
