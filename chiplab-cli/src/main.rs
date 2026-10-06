@@ -2,15 +2,23 @@ use std::process::ExitCode;
 
 use clap::Parser;
 
+use crate::app::App;
+use crate::command::Command;
+
+mod app;
+mod command;
+
 #[derive(Parser, Debug)]
 #[command(version, about)]
-struct Args {}
+struct Args {
+    #[command(subcommand)]
+    command: Command,
+}
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<ExitCode> {
-    let _args = Args::parse();
+    let args = Args::parse();
+    let app = App::new()?;
 
-    println!("Hello Chiplab!");
-
-    Ok(ExitCode::SUCCESS)
+    args.command.run(&app).await
 }
