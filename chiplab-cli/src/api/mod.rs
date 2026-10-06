@@ -81,3 +81,23 @@ pub async fn download(
 
     Ok(path)
 }
+
+/// Downloads all the artifacts the job produced into `dir` concurrently, creating `dir` if missing.
+///
+/// Returns the paths of the downloaded files, in the same order as `artifact_names`.
+pub async fn download_all(
+    configuration: &Configuration,
+    job_id: &str,
+    artifact_names: &[String],
+    dir: &Path,
+) -> anyhow::Result<Vec<PathBuf>> {
+    std::fs::create_dir_all(dir)
+        .with_context(|| format!("failed to create `{}`", dir.display()))?;
+
+    futures_util::future::try_join_all(artifact_names.iter().map(|name| async move {
+        download(configuration, job_id, name, dir)
+            .await
+            .with_context(|| format!("failed to download artifact `{name}`"))
+    }))
+    .await
+}

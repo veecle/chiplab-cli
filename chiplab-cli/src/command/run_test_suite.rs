@@ -68,7 +68,7 @@ impl Args {
             firmware,
             test_suite,
             board,
-            download_dir: _,
+            download_dir,
         } = self;
 
         let firmware_artifact_id = api::upload(&app.api, &project_id, &firmware)
@@ -97,6 +97,19 @@ impl Args {
                 WaitForJobResponse::Succeeded(job) => {
                     let result: TestSuiteResult = serde_json::from_value(job.result)
                         .context("failed to parse the test suite result")?;
+
+                    if let Some(dir) = &download_dir {
+                        if result.artifacts.is_empty() {
+                            eprintln!("no artifacts to download");
+                        }
+
+                        api::download_all(&app.api, &job_id, &result.artifacts, dir)
+                            .await
+                            .context("failed to download the artifacts")?
+                            .iter()
+                            .for_each(|path| eprintln!("downloaded `{}`", path.display()));
+                    }
+
                     let Some(summary) = result.summary else {
                         eprintln!("error: test suite did not run to completion");
                         return Ok(ExitCode::from(EXIT_INCOMPLETE));
