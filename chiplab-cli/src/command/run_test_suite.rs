@@ -72,6 +72,36 @@ struct TestSuiteReport {
     error: Option<String>,
 }
 
+impl TestSuiteReport {
+    /// Prints the report as a JSON line, or as plain text.
+    fn print(&self, json: bool) -> anyhow::Result<()> {
+        if json {
+            println!("{}", serde_json::to_string(self)?);
+            return Ok(());
+        }
+
+        match (&self.summary, &self.error) {
+            (Some(summary), _) if self.outcome == Outcome::Passed => {
+                println!("{}", summarize(summary));
+            }
+            (Some(summary), _) => eprintln!("error: {}", summarize(summary)),
+            (None, Some(error)) => eprintln!("error: test suite run failed: {error}"),
+            (None, None) => eprintln!("error: test suite did not run to completion"),
+        }
+
+        Ok(())
+    }
+
+    /// The exit status matching the outcome.
+    fn exit_code(&self) -> ExitCode {
+        match self.outcome {
+            Outcome::Passed => ExitCode::SUCCESS,
+            Outcome::Failed => ExitCode::from(EXIT_TESTS_FAILED),
+            Outcome::Incomplete => ExitCode::from(EXIT_INCOMPLETE),
+        }
+    }
+}
+
 /// Parses a board model by its API name.
 ///
 /// The generated `BoardModel` has no `FromStr`, so this goes through serde to reuse its renames,
@@ -130,7 +160,7 @@ impl Args {
                         summary: result.summary,
                         error: None,
                     };
-                    break (report, Some(result.artifacts));
+                    break (report, result.artifacts);
                 }
                 WaitForJobResponse::Failed(job) => {
                     let report = TestSuiteReport {
@@ -139,41 +169,23 @@ impl Args {
                         summary: None,
                         error: Some(job.error),
                     };
-                    break (report, None);
+                    break (report, Vec::default());
                 }
             }
         };
 
-        if json {
-            println!("{}", serde_json::to_string(&report)?);
-        } else {
-            match (&report.summary, &report.error) {
-                (Some(summary), _) if report.outcome == Outcome::Passed => {
-                    println!("{}", summarize(summary));
-                }
-                (Some(summary), _) => eprintln!("error: {}", summarize(summary)),
-                (None, Some(error)) => eprintln!("error: test suite run failed: {error}"),
-                (None, None) => eprintln!("error: test suite did not run to completion"),
+        let download =
+            maybe_download_artifacts(app, &job_id, download_dir.as_deref(), &artifacts).await;
+
+        report.print(json)?;
+        let exit_code = report.exit_code();
+
+        if let Err(error) = download {
+            if exit_code == ExitCode::SUCCESS {
+                bail!(error);
             }
-        }
 
-        let exit_code = match report.outcome {
-            Outcome::Passed => ExitCode::SUCCESS,
-            Outcome::Failed => ExitCode::from(EXIT_TESTS_FAILED),
-            Outcome::Incomplete => ExitCode::from(EXIT_INCOMPLETE),
-        };
-
-        if let Some(artifacts) = artifacts {
-            let download =
-                maybe_download_artifacts(app, &job_id, download_dir.as_deref(), &artifacts).await;
-
-            if let Err(error) = download {
-                if exit_code == ExitCode::SUCCESS {
-                    bail!(error);
-                }
-
-                eprintln!("error: {error:#}");
-            }
+            eprintln!("error: {error:#}");
         }
 
         Ok(exit_code)
