@@ -1,7 +1,6 @@
 use std::fmt::Debug;
 use std::path::Path;
 
-use anyhow::Context;
 use camino::{Utf8Path, Utf8PathBuf};
 use cap_std::ambient_authority;
 use cap_std::fs_utf8::Dir;
@@ -10,10 +9,12 @@ use chiplab_api::apis::{Error, configuration::Configuration};
 use futures_util::TryStreamExt;
 use tokio::io::AsyncWriteExt;
 
+use crate::error::{BoxError, Result, WrapError};
+
 pub mod models;
 
 /// Converts an API error into one that includes the response body the server sent.
-pub fn error<T>(error: Error<T>) -> anyhow::Error
+pub fn error<T>(error: Error<T>) -> BoxError
 where
     T: Debug + Send + Sync + 'static,
 {
@@ -21,12 +22,12 @@ where
         Error::ResponseError(response) => {
             let content = response.content.trim();
             if content.is_empty() {
-                anyhow::anyhow!("server responded with {}", response.status)
+                format!("server responded with {}", response.status).into()
             } else {
-                anyhow::anyhow!("server responded with {}: {content}", response.status)
+                format!("server responded with {}: {content}", response.status).into()
             }
         }
-        error => anyhow::Error::new(error),
+        error => error.into(),
     }
 }
 
@@ -35,9 +36,9 @@ pub async fn upload(
     configuration: &Configuration,
     project_id: &str,
     path: &Path,
-) -> anyhow::Result<String> {
+) -> Result<String> {
     let contents =
-        std::fs::read(path).with_context(|| format!("failed to read `{}`", path.display()))?;
+        std::fs::read(path).wrap_error_with(|| format!("failed to read `{}`", path.display()))?;
 
     let ticket = default_api::issue_upload_ticket(configuration, project_id)
         .await
@@ -49,9 +50,9 @@ pub async fn upload(
         .body(contents)
         .send()
         .await
-        .context("failed to send the upload")?;
+        .wrap_error("failed to send the upload")?;
     if !response.status().is_success() {
-        anyhow::bail!("upload server responded with {}", response.status());
+        return Err(format!("upload server responded with {}", response.status()).into());
     }
 
     Ok(ticket.artifact_id)
@@ -65,7 +66,7 @@ pub async fn download(
     job_id: &str,
     artifact_name: &str,
     dir: &Dir,
-) -> anyhow::Result<()> {
+) -> Result<()> {
     let ticket = default_api::issue_download_ticket(configuration, job_id, artifact_name)
         .await
         .map_err(error)?;
@@ -79,15 +80,15 @@ pub async fn download(
 
     let write_context = || format!("failed to write `{artifact_name}`");
 
-    let file = dir.create(artifact_name).with_context(write_context)?;
+    let file = dir.create(artifact_name).wrap_error_with(write_context)?;
     let mut file = tokio::fs::File::from_std(file.into_std());
 
     let stream = response.bytes_stream().map_err(std::io::Error::other);
     tokio::io::copy_buf(&mut tokio_util::io::StreamReader::new(stream), &mut file)
         .await
-        .with_context(write_context)?;
+        .wrap_error_with(write_context)?;
 
-    file.shutdown().await.with_context(write_context)?;
+    file.shutdown().await.wrap_error_with(write_context)?;
 
     Ok(())
 }
@@ -100,18 +101,18 @@ pub async fn download_all(
     job_id: &str,
     artifact_names: &[String],
     dir: &Utf8Path,
-) -> anyhow::Result<Vec<Utf8PathBuf>> {
+) -> Result<Vec<Utf8PathBuf>> {
     let open_context = || format!("failed to open `{dir}`");
 
-    Dir::create_ambient_dir_all(dir, ambient_authority()).with_context(open_context)?;
-    let handle = Dir::open_ambient_dir(dir, ambient_authority()).with_context(open_context)?;
+    Dir::create_ambient_dir_all(dir, ambient_authority()).wrap_error_with(open_context)?;
+    let handle = Dir::open_ambient_dir(dir, ambient_authority()).wrap_error_with(open_context)?;
 
     futures_util::future::try_join_all(artifact_names.iter().map(|name| {
         let handle = &handle;
         async move {
             download(configuration, job_id, name, handle)
                 .await
-                .with_context(|| format!("failed to download artifact `{name}`"))?;
+                .wrap_error_with(|| format!("failed to download artifact `{name}`"))?;
 
             Ok(dir.join(name))
         }
