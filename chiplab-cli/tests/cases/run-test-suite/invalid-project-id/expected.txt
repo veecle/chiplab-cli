@@ -2,7 +2,6 @@ $ chiplab-cli run-test-suite --project project_00000000000000000000000000 --firm
 exit status: 1
 --- stdout
 --- stderr
-Error: failed to upload the firmware
-
+error: failed to upload the firmware
 Caused by:
-    server responded with 404 Not Found: project not found
+  - server responded with 404 Not Found: project not found

@@ -2,7 +2,6 @@ $ chiplab-cli run-test-suite --project project --firmware firmware.elf --test-su
 exit status: 1
 --- stdout
 --- stderr
-Error: failed to read `CHIPLAB_TOKEN`
-
+error: failed to read `CHIPLAB_TOKEN`
 Caused by:
-    environment variable not found
+  - environment variable not found
