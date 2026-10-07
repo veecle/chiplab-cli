@@ -22,9 +22,14 @@ struct Args {
 }
 
 #[tokio::main(flavor = "current_thread")]
-async fn main() -> anyhow::Result<ExitCode> {
+async fn main() -> ExitCode {
     let args = Args::parse();
-    let app = App::new()?;
 
-    args.command.run(&app).await
+    let result: error::Result<ExitCode> = async {
+        let app = App::new()?;
+        Ok(args.command.run(&app).await?)
+    }
+    .await;
+
+    result.unwrap_or_else(|error| error::report(&error))
 }
