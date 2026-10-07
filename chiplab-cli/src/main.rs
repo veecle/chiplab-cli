@@ -25,11 +25,14 @@ struct Args {
 async fn main() -> ExitCode {
     let args = Args::parse();
 
-    let result: error::Result<ExitCode> = async {
+    let result: error::Result<()> = async {
         let app = App::new()?;
-        Ok(args.command.run(&app).await?)
+        args.command.run(&app).await
     }
     .await;
 
-    result.unwrap_or_else(|error| error::report(&error))
+    match result {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(error) => error::report(&error),
+    }
 }
