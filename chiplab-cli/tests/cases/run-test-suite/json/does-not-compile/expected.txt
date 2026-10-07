@@ -1,0 +1,6 @@
+$ chiplab-cli run-test-suite --project project_00000000000000000000000001 --firmware hello-stm32f4-discovery.elf --test-suite does-not-compile.ts --board stm32f4_discovery --json
+exit status: 3
+--- stdout
+{"job_id":"run_test_suite_00000000000000000000000001","outcome":"incomplete","summary":null,"error":null}
+--- stderr
+waiting for test suite run `run_test_suite_00000000000000000000000001`
