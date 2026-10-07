@@ -76,7 +76,7 @@ If a change needs something from the API that is not available in the generated 
 To update the spec, download the current version from the Chiplab service:
 
 ```sh
-curl -fsSL https://chiplab.veecle.ai/api/stable/openapi.json -o chiplab-api.json
+curl -fsSL https://chiplab.veecle.ai/api/stable/openapi.json | jq . > chiplab-api.json
 ```
 
 After changing `chiplab-api.json` or `openapi-templates/`, regenerate the crate:

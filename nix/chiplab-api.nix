@@ -67,6 +67,9 @@
       '';
     };
   in {
+    # Used to pretty-print the spec when downloading it.
+    make-shells.default.packages = [pkgs.jq];
+
     apps.update-chiplab-api = {
       type = "app";
       meta.description = "Regenerate the chiplab-api client from chiplab-api.json.";
