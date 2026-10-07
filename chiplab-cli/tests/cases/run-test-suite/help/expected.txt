@@ -7,7 +7,7 @@ The firmware and test suite are uploaded to the project, then run in a sandboxed
 
 Exits with status 3 if the test suite failed to run to completion, or status 4 if it ran to completion but one or more test cases failed.
 
-Usage: chiplab-cli run-test-suite --project <PROJECT_ID> --firmware <FILE> --test-suite <FILE> --board <MODEL>
+Usage: chiplab-cli run-test-suite [OPTIONS] --project <PROJECT_ID> --firmware <FILE> --test-suite <FILE> --board <MODEL>
 
 Options:
   -p, --project <PROJECT_ID>
@@ -25,6 +25,11 @@ Options:
           The board model to simulate, e.g. `stm32f4_discovery`.
 
           See <https://chiplab.veecle.ai/mcp/resources/docs/boards.md> for the available boards.
+
+      --download-dir <DIR>
+          Directory to download the run's artifacts to. If missing, no artifacts are downloaded.
+
+          The given directory is created if it does not already exist. Existing files with the same names are overwritten.
 
   -h, --help
           Print help (see a summary with '-h')

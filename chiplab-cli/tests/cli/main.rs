@@ -15,6 +15,12 @@ mod proxy;
 const CASES: &str = "tests/cases";
 const FIXTURES: &str = "tests/fixtures";
 
+/// Stands in for the path of the case's temporary directory in `args` and `expected.txt`.
+const TEMP: &str = "[TEMP]";
+
+/// Stands in for the proxy's URL in `expected.txt`.
+const CHIPLAB_URL: &str = "[CHIPLAB_URL]";
+
 fn main() {
     tryfn::Harness::new(CASES, setup, test)
         .select(["args"])
@@ -46,6 +52,17 @@ fn case_name(case_directory: &Path) -> String {
 }
 
 fn test(args_path: &Path) -> anyhow::Result<String> {
+    let case_directory = args_path
+        .parent()
+        .expect("`args` is always inside a case directory");
+
+    let temp = tempfile::tempdir()?;
+    let temp_path = temp.path().to_str().expect("temporary paths are UTF-8");
+    let seed = case_directory.join("temp");
+    if seed.exists() {
+        copy_files(&seed, temp.path())?;
+    }
+
     let args: Vec<String> = std::fs::read_to_string(args_path)?
         .lines()
         .map(str::to_owned)
@@ -81,7 +98,7 @@ fn test(args_path: &Path) -> anyhow::Result<String> {
         .env_clear()
         .envs(forwarded_environment)
         .current_dir(FIXTURES)
-        .args(&args);
+        .args(args.iter().map(|arg| arg.replace(TEMP, temp_path)));
 
     if let Some(proxy) = &proxy {
         command = command
@@ -103,6 +120,12 @@ fn test(args_path: &Path) -> anyhow::Result<String> {
     push_trimmed(&mut rendered, &output.stdout);
     writeln!(rendered, "--- stderr")?;
     push_trimmed(&mut rendered, &output.stderr);
+    push_files(&mut rendered, temp.path(), temp.path())?;
+    let mut rendered = rendered.replace(temp_path, TEMP);
+    if let Some(proxy) = &proxy {
+        // The proxy's port differs between runs.
+        rendered = rendered.replace(proxy.base_url(), CHIPLAB_URL);
+    }
 
     if let Some(proxy) = proxy
         && let Err(error) = proxy.finish()
@@ -111,6 +134,46 @@ fn test(args_path: &Path) -> anyhow::Result<String> {
     }
 
     Ok(rendered)
+}
+
+/// Copies every directory and file under `from` into `to`.
+fn copy_files(from: &Path, to: &Path) -> anyhow::Result<()> {
+    for entry in std::fs::read_dir(from)? {
+        let entry = entry?;
+        let target = to.join(entry.file_name());
+        if entry.file_type()?.is_dir() {
+            std::fs::create_dir(&target)?;
+            copy_files(&entry.path(), &target)?;
+        } else {
+            std::fs::copy(entry.path(), target)?;
+        }
+    }
+
+    Ok(())
+}
+
+/// Appends every directory and file under `directory` with its contents, sorted by path.
+fn push_files(rendered: &mut String, root: &Path, directory: &Path) -> anyhow::Result<()> {
+    let mut entries = std::fs::read_dir(directory)?.collect::<Result<Vec<_>, _>>()?;
+    entries.sort_by_key(|entry| entry.path());
+
+    for entry in entries {
+        let path = entry.path();
+        let relative = path
+            .strip_prefix(root)?
+            .display()
+            .to_string()
+            .replace('\\', "/");
+        if entry.file_type()?.is_dir() {
+            writeln!(rendered, "--- {TEMP}/{relative}/")?;
+            push_files(rendered, root, &path)?;
+        } else {
+            writeln!(rendered, "--- {TEMP}/{relative}")?;
+            push_trimmed(rendered, &std::fs::read(&path)?);
+        }
+    }
+
+    Ok(())
 }
 
 /// Appends `output` with trailing whitespace stripped from each line.

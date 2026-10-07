@@ -1,7 +1,8 @@
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-use anyhow::Context;
+use anyhow::{Context, bail};
+use camino::{Utf8Path, Utf8PathBuf};
 use chiplab_api::apis::default_api;
 use chiplab_api::models::{Board, BoardModel, RunTestSuiteRequest, WaitForJobResponse};
 
@@ -39,6 +40,13 @@ pub struct Args {
     /// See <https://chiplab.veecle.ai/mcp/resources/docs/boards.md> for the available boards.
     #[arg(short, long, value_name = "MODEL", value_parser = parse_board_model)]
     board: BoardModel,
+
+    /// Directory to download the run's artifacts to. If missing, no artifacts are downloaded.
+    ///
+    /// The given directory is created if it does not already exist.
+    /// Existing files with the same names are overwritten.
+    #[arg(long, value_name = "DIR")]
+    download_dir: Option<Utf8PathBuf>,
 }
 
 /// Exit status for when the test suite failed to run to completion.
@@ -62,6 +70,7 @@ impl Args {
             firmware,
             test_suite,
             board,
+            download_dir,
         } = self;
 
         let firmware_artifact_id = api::upload(&app.api, &project_id, &firmware)
@@ -85,23 +94,31 @@ impl Args {
                 .await
                 .map_err(api::error)
                 .context("failed to wait for the test suite run")?;
+
             match response {
                 WaitForJobResponse::Running(_) => continue,
                 WaitForJobResponse::Succeeded(job) => {
                     let result: TestSuiteResult = serde_json::from_value(job.result)
                         .context("failed to parse the test suite result")?;
-                    let Some(summary) = result.summary else {
-                        eprintln!("error: test suite did not run to completion");
-                        return Ok(ExitCode::from(EXIT_INCOMPLETE));
-                    };
 
-                    if summary.failed == 0 {
-                        println!("{}", summarize(summary));
-                        return Ok(ExitCode::SUCCESS);
-                    } else {
-                        eprintln!("error: {}", summarize(summary));
-                        return Ok(ExitCode::from(EXIT_TESTS_FAILED));
+                    let exit_code = report(result.summary);
+                    let download = maybe_download_artifacts(
+                        app,
+                        &job_id,
+                        download_dir.as_deref(),
+                        &result.artifacts,
+                    )
+                    .await;
+
+                    if let Err(error) = download {
+                        if exit_code == ExitCode::SUCCESS {
+                            bail!(error);
+                        }
+
+                        eprintln!("error: {error:#}");
                     }
+
+                    return Ok(exit_code);
                 }
                 WaitForJobResponse::Failed(job) => {
                     eprintln!("error: test suite run failed: {}", job.error);
@@ -109,6 +126,46 @@ impl Args {
                 }
             }
         }
+    }
+}
+
+async fn maybe_download_artifacts(
+    app: &App,
+    job_id: &str,
+    dir: Option<&Utf8Path>,
+    artifacts: &[String],
+) -> anyhow::Result<()> {
+    let Some(dir) = dir else {
+        return Ok(());
+    };
+
+    if artifacts.is_empty() {
+        eprintln!("no artifacts to download");
+        return Ok(());
+    }
+
+    api::download_all(&app.api, job_id, artifacts, dir)
+        .await
+        .context("failed to download the artifacts")?
+        .iter()
+        .for_each(|path| eprintln!("downloaded `{path}`"));
+
+    Ok(())
+}
+
+/// Prints the test suite outcome and returns the matching exit status.
+fn report(summary: Option<Summary>) -> ExitCode {
+    let Some(summary) = summary else {
+        eprintln!("error: test suite did not run to completion");
+        return ExitCode::from(EXIT_INCOMPLETE);
+    };
+
+    if summary.failed == 0 {
+        println!("{}", summarize(summary));
+        ExitCode::SUCCESS
+    } else {
+        eprintln!("error: {}", summarize(summary));
+        ExitCode::from(EXIT_TESTS_FAILED)
     }
 }
 
