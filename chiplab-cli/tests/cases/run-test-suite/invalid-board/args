@@ -1,0 +1,9 @@
+run-test-suite
+--project
+project
+--firmware
+firmware.elf
+--test-suite
+test-suite.ts
+--board
+not_a_board

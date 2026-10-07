@@ -1,0 +1,8 @@
+$ chiplab-cli run-test-suite --project project --firmware firmware.elf --test-suite test-suite.ts --board stm32f4_discovery
+exit status: 1
+--- stdout
+--- stderr
+Error: failed to read `CHIPLAB_TOKEN`
+
+Caused by:
+    environment variable not found
