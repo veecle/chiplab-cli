@@ -60,7 +60,7 @@ TEST_CHIPLAB_PROXY=record cargo test --test cli -- --exact <case name>
 
 To run the cases against a real Chiplab instance without replaying or recording the exchanges, run with `TEST_CHIPLAB_PROXY=bypass`, configured as for recording.
 
-TypeIDs are replaced with fake ones in recordings.
+TypeIDs are replaced with fake ones in recordings, and temporary directories that Chiplab creates on its side (such as `./tmp/foo-QHpLw0` in test suite artifacts) with `[CHIPLAB_TEMP_DIR]`.
 Cases refer to the project to run in as `project_00000000000000000000000001`; set the real project to record or bypass in with `TEST_CHIPLAB_PROJECT_ID`.
 
 Request headers are not recorded, so no credentials end up in the recordings.

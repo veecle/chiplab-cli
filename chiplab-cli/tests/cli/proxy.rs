@@ -12,6 +12,7 @@ use std::thread::JoinHandle;
 use regex::Regex;
 
 use crate::error::{BoxError, Chain, Result, ResultExt};
+use crate::temp_dir;
 
 /// Stands in for the proxy's own URL in recorded bodies, as its port differs between runs.
 const BASE_URL_PLACEHOLDER: &str = "{{base_url}}";
@@ -273,11 +274,11 @@ impl Upstream {
                 }
             });
             for_each_string(&mut value, &mut |string| {
-                *string = self.ids.normalize(string);
+                *string = temp_dir::redact(&self.ids.normalize(string));
             });
             Some(Body::Json(value))
         } else {
-            Some(Body::Text(self.ids.normalize(&text)))
+            Some(Body::Text(temp_dir::redact(&self.ids.normalize(&text))))
         };
         Ok(Response { status, body })
     }
