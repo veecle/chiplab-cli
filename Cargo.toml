@@ -11,7 +11,6 @@ repository = "https://github.com/veecle/chiplab-cli"
 publish = false
 
 [workspace.dependencies]
-anyhow = { version = "1.0.104", default-features = false, features = ["std"] }
 camino = { version = "1.2.1", default-features = false }
 cap-std = { version = "4.0.3", default-features = false, features = ["fs_utf8"] }
 chiplab-api = { path = "chiplab-api" }

@@ -148,7 +148,7 @@ fn exit_code(error: &(dyn Error + 'static)) -> u8 {
 }
 
 /// Formats an error followed by its full `source()` chain.
-struct Chain<'a>(&'a (dyn Error + 'static));
+pub struct Chain<'a>(pub &'a (dyn Error + 'static));
 
 impl Display for Chain<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {

@@ -23,8 +23,9 @@ use std::str::FromStr;
 use std::sync::{Arc, LazyLock};
 use std::thread::JoinHandle;
 
-use anyhow::Context;
 use regex::Regex;
+
+use crate::error::{BoxError, Chain, Result, WrapError};
 
 /// Stands in for the proxy's own URL in recorded bodies, as its port differs between runs.
 const BASE_URL_PLACEHOLDER: &str = "{{base_url}}";
@@ -69,28 +70,35 @@ enum Body {
 }
 
 /// Reads the exchanges recorded at `path`, a missing file means no exchanges.
-fn load(path: &Path) -> anyhow::Result<Vec<Exchange>> {
-    match std::fs::read_to_string(path) {
-        Ok(contents) => serde_json::from_str(&contents)
-            .with_context(|| format!("failed to parse `{}`", path.display())),
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(Vec::new()),
-        Err(error) => Err(error).with_context(|| format!("failed to read `{}`", path.display())),
-    }
+fn load(path: &Path) -> Result<Vec<Exchange>> {
+    let contents = match std::fs::read_to_string(path) {
+        Ok(contents) => contents,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(Vec::new()),
+        Err(error) => {
+            Err(error).wrap_error_with(|| format!("failed to read `{}`", path.display()))?
+        }
+    };
+
+    Ok(serde_json::from_str(&contents)
+        .wrap_error_with(|| format!("failed to parse `{}`", path.display()))?)
 }
 
 /// Writes `exchanges` to `path`, removing the file instead if there are none.
-fn save(path: &Path, exchanges: &[Exchange]) -> anyhow::Result<()> {
+fn save(path: &Path, exchanges: &[Exchange]) -> Result<()> {
     if exchanges.is_empty() {
-        return match std::fs::remove_file(path) {
+        match std::fs::remove_file(path) {
             Err(error) if error.kind() != std::io::ErrorKind::NotFound => {
-                Err(error).with_context(|| format!("failed to remove `{}`", path.display()))
+                Err(error).wrap_error_with(|| format!("failed to remove `{}`", path.display()))?
             }
-            _ => Ok(()),
-        };
+            _ => {}
+        }
+        return Ok(());
     }
     let mut contents = serde_json::to_string_pretty(exchanges)?;
     contents.push('\n');
-    std::fs::write(path, contents).with_context(|| format!("failed to write `{}`", path.display()))
+    std::fs::write(path, contents)
+        .wrap_error_with(|| format!("failed to write `{}`", path.display()))?;
+    Ok(())
 }
 
 /// How the proxy answers requests.
@@ -109,24 +117,30 @@ pub enum Mode {
 
 impl Mode {
     /// Reads the mode from `TEST_CHIPLAB_PROXY`, defaulting to [`Mode::Replay`].
-    pub fn from_env() -> anyhow::Result<Self> {
-        match std::env::var("TEST_CHIPLAB_PROXY") {
-            Ok(mode) => mode.parse().context("failed to parse `TEST_CHIPLAB_PROXY`"),
-            Err(std::env::VarError::NotPresent) => Ok(Self::default()),
-            Err(error) => Err(error).context("failed to read `TEST_CHIPLAB_PROXY`"),
-        }
+    pub fn from_env() -> Result<Self> {
+        let mode = match std::env::var("TEST_CHIPLAB_PROXY") {
+            Ok(mode) => mode,
+            Err(std::env::VarError::NotPresent) => return Ok(Self::default()),
+            Err(error) => Err(error).wrap_error("failed to read `TEST_CHIPLAB_PROXY`")?,
+        };
+
+        Ok(mode
+            .parse()
+            .wrap_error("failed to parse `TEST_CHIPLAB_PROXY`")?)
     }
 }
 
 impl FromStr for Mode {
-    type Err = anyhow::Error;
+    type Err = BoxError;
 
-    fn from_str(mode: &str) -> anyhow::Result<Self> {
+    fn from_str(mode: &str) -> Result<Self> {
         match mode {
             "replay" => Ok(Self::Replay),
             "record" => Ok(Self::Record),
             "bypass" => Ok(Self::Bypass),
-            _ => anyhow::bail!("unknown mode `{mode}`, expected `replay`, `record` or `bypass`"),
+            _ => Err(
+                format!("unknown mode `{mode}`, expected `replay`, `record` or `bypass`").into(),
+            ),
         }
     }
 }
@@ -159,25 +173,27 @@ impl Upstream {
     /// Configures the instance from `CHIPLAB_URL` and `CHIPLAB_TOKEN`, as the CLI itself does.
     ///
     /// `TEST_CHIPLAB_PROJECT_ID` optionally sets the real project behind [`PROJECT_ID`].
-    fn from_env() -> anyhow::Result<Self> {
+    fn from_env() -> Result<Self> {
         let url = match std::env::var("CHIPLAB_URL") {
             Ok(url) => url,
             Err(std::env::VarError::NotPresent) => DEFAULT_URL.to_owned(),
-            Err(error) => return Err(error).context("failed to read `CHIPLAB_URL`"),
+            Err(error) => Err(error).wrap_error("failed to read `CHIPLAB_URL`")?,
         };
-        let token = std::env::var("CHIPLAB_TOKEN").context("failed to read `CHIPLAB_TOKEN`")?;
+        let token = std::env::var("CHIPLAB_TOKEN").wrap_error("failed to read `CHIPLAB_TOKEN`")?;
 
         let mut ids = Ids::default();
         match std::env::var("TEST_CHIPLAB_PROJECT_ID") {
             Ok(project_id) => {
                 let fake_id = ids.normalize(&project_id);
-                anyhow::ensure!(
-                    fake_id == PROJECT_ID,
-                    "`TEST_CHIPLAB_PROJECT_ID` must be a project TypeID, got `{project_id}`",
-                );
+                if fake_id != PROJECT_ID {
+                    return Err(format!(
+                        "`TEST_CHIPLAB_PROJECT_ID` must be a project TypeID, got `{project_id}`"
+                    )
+                    .into());
+                }
             }
             Err(std::env::VarError::NotPresent) => {}
-            Err(error) => return Err(error).context("failed to read `TEST_CHIPLAB_PROJECT_ID`"),
+            Err(error) => Err(error).wrap_error("failed to read `TEST_CHIPLAB_PROJECT_ID`")?,
         }
 
         let user_agent = concat!(
@@ -194,7 +210,7 @@ impl Upstream {
             .user_agent(user_agent)
             .timeout(std::time::Duration::from_secs(5 * 60))
             .build()
-            .context("failed to create the HTTP client")?;
+            .wrap_error("failed to create the HTTP client")?;
         Ok(Self {
             url: url.trim_end_matches('/').to_owned(),
             token,
@@ -212,7 +228,7 @@ impl Upstream {
         request: &Request,
         content_type: Option<&str>,
         body: Vec<u8>,
-    ) -> anyhow::Result<Response> {
+    ) -> Result<Response> {
         let method = reqwest::Method::from_bytes(request.method.as_bytes())?;
         let mut builder = match request.path.strip_prefix(EXTERNAL_PREFIX) {
             Some(index) => {
@@ -220,7 +236,7 @@ impl Upstream {
                     .parse::<usize>()
                     .ok()
                     .and_then(|index| self.external.get(index))
-                    .with_context(|| format!("unknown external URL `{}`", request.path))?;
+                    .ok_or_else(|| format!("unknown external URL `{}`", request.path))?;
                 self.client.request(method, url)
             }
             None => {
@@ -234,7 +250,8 @@ impl Upstream {
             Some(content_type) => {
                 builder = builder.header(reqwest::header::CONTENT_TYPE, content_type);
                 if is_json(content_type) {
-                    let body = std::str::from_utf8(&body).context("invalid JSON request body")?;
+                    let body =
+                        std::str::from_utf8(&body).wrap_error("invalid JSON request body")?;
                     self.ids.denormalize(body).into_bytes()
                 } else {
                     body
@@ -375,7 +392,7 @@ pub struct Proxy {
 
 impl Proxy {
     /// Starts a proxy replaying the exchanges at `exchanges_path`, recording to it, or bypassing it.
-    pub fn start(mode: Mode, exchanges_path: &Path) -> anyhow::Result<Self> {
+    pub fn start(mode: Mode, exchanges_path: &Path) -> Result<Self> {
         let backend = match mode {
             Mode::Replay => Backend::Replay(load(exchanges_path)?),
             Mode::Record | Mode::Bypass => Backend::Forward {
@@ -384,14 +401,13 @@ impl Proxy {
             },
         };
 
-        let server = tiny_http::Server::http("127.0.0.1:0")
-            .map_err(|error| anyhow::anyhow!(error))
-            .context("failed to start the proxy")?;
+        let server =
+            tiny_http::Server::http("127.0.0.1:0").wrap_error("failed to start the proxy")?;
         let server = Arc::new(server);
         let port = server
             .server_addr()
             .to_ip()
-            .context("the proxy doesn't listen on an IP address")?
+            .ok_or("the proxy doesn't listen on an IP address")?
             .port();
         let base_url = format!("http://127.0.0.1:{port}");
 
@@ -427,25 +443,26 @@ impl Proxy {
     /// Stops the proxy, saving the recorded exchanges in record mode.
     ///
     /// Fails if any request didn't match the recording, or if recorded exchanges weren't requested.
-    pub fn finish(self) -> anyhow::Result<()> {
+    pub fn finish(self) -> Result<()> {
         self.server.unblock();
         let state = self
             .thread
             .join()
-            .map_err(|_| anyhow::anyhow!("the proxy thread panicked"))?;
+            .map_err(|_| "the proxy thread panicked")?;
 
         if !state.errors.is_empty() {
-            anyhow::bail!("proxy errors:\n{}", state.errors.join("\n"));
+            return Err(format!("proxy errors:\n{}", state.errors.join("\n")).into());
         }
         match state.backend {
             Backend::Replay(exchanges) => {
                 if let Some(exchange) = exchanges.get(state.next) {
-                    anyhow::bail!(
+                    return Err(format!(
                         "{} recorded exchanges were not requested, starting with `{} {}`",
                         exchanges.len() - state.next,
                         exchange.request.method,
                         exchange.request.path,
-                    );
+                    )
+                    .into());
                 }
                 Ok(())
             }
@@ -470,7 +487,7 @@ struct State {
 impl State {
     fn handle(&mut self, mut request: tiny_http::Request) {
         let response = self.exchange(&mut request).unwrap_or_else(|error| {
-            let message = format!("{error:#}");
+            let message = Chain(&*error).to_string();
             self.errors.push(message.clone());
             Response {
                 status: 500,
@@ -481,12 +498,12 @@ impl State {
         let _ = request.respond(self.http_response(&response));
     }
 
-    fn exchange(&mut self, request: &mut tiny_http::Request) -> anyhow::Result<Response> {
+    fn exchange(&mut self, request: &mut tiny_http::Request) -> Result<Response> {
         let mut body = Vec::new();
         request
             .as_reader()
             .read_to_end(&mut body)
-            .context("failed to read the request body")?;
+            .wrap_error("failed to read the request body")?;
         let content_type = request
             .headers()
             .iter()
@@ -494,7 +511,8 @@ impl State {
             .map(|header| header.value.as_str().to_owned());
         let json_body = match content_type.as_deref() {
             Some(content_type) if is_json(content_type) => Some(
-                serde_json::from_slice(&body).context("failed to parse the JSON request body")?,
+                serde_json::from_slice(&body)
+                    .wrap_error("failed to parse the JSON request body")?,
             ),
             _ => None,
         };
@@ -506,24 +524,26 @@ impl State {
 
         match &mut self.backend {
             Backend::Replay(exchanges) => {
-                let exchange = exchanges.get(self.next).with_context(|| {
+                let exchange = exchanges.get(self.next).ok_or_else(|| {
                     format!(
                         "unexpected request `{} {}` after all recorded exchanges",
                         actual.method, actual.path
                     )
                 })?;
-                anyhow::ensure!(
-                    exchange.request == actual,
-                    "request {actual:?} doesn't match recorded request {:?}",
-                    exchange.request,
-                );
+                if exchange.request != actual {
+                    return Err(format!(
+                        "request {actual:?} doesn't match recorded request {:?}",
+                        exchange.request,
+                    )
+                    .into());
+                }
                 self.next += 1;
                 Ok(exchange.response.clone())
             }
             Backend::Forward { upstream, record } => {
                 let response = upstream
                     .forward(&actual, content_type.as_deref(), body)
-                    .with_context(|| {
+                    .wrap_error_with(|| {
                         format!("failed to forward `{} {}`", actual.method, actual.path)
                     })?;
                 if *record {
