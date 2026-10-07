@@ -8,6 +8,7 @@ use crate::command::Command;
 mod api;
 mod app;
 mod command;
+mod error;
 
 #[derive(Parser, Debug)]
 #[command(
