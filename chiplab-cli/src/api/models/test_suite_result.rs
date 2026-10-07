@@ -19,20 +19,6 @@ pub struct Summary {
     pub failed: u64,
 }
 
-/// How a test suite run went overall.
-#[derive(serde::Serialize, Clone, Copy, Debug, PartialEq, Eq)]
-#[serde(rename_all = "lowercase")]
-pub enum Outcome {
-    /// No test failed, though some may have been skipped.
-    Passed,
-
-    /// Some tests failed.
-    Failed,
-
-    /// The suite did not run to completion.
-    Incomplete,
-}
-
 impl Summary {
     /// The number of planned tests that neither passed nor failed.
     ///
@@ -42,16 +28,5 @@ impl Summary {
         self.planned
             .saturating_sub(self.passed)
             .saturating_sub(self.failed)
-    }
-
-    /// Returns the overall outcome of the run.
-    ///
-    /// A summary only exists for runs that completed, so this never returns [`Outcome::Incomplete`].
-    pub fn outcome(&self) -> Outcome {
-        if self.failed == 0 {
-            Outcome::Passed
-        } else {
-            Outcome::Failed
-        }
     }
 }

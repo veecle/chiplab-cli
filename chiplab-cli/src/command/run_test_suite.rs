@@ -8,7 +8,7 @@ use chiplab_api::models::{Board, BoardModel, RunTestSuiteRequest, WaitForJobResp
 
 use crate::api;
 use crate::api::models::TestSuiteResult;
-use crate::api::models::test_suite_result::{Outcome, Summary};
+use crate::api::models::test_suite_result::Summary;
 use crate::app::App;
 
 /// Run a TypeScript test suite against a firmware binary on a simulated board.
@@ -59,6 +59,20 @@ const EXIT_INCOMPLETE: u8 = 3;
 /// Exit status for when the test suite ran to completion but some test cases failed.
 const EXIT_TESTS_FAILED: u8 = 4;
 
+/// How a test suite run went overall.
+#[derive(serde::Serialize, Clone, Copy, Debug, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+enum Outcome {
+    /// No test failed, though some may have been skipped.
+    Passed,
+
+    /// Some tests failed.
+    Failed,
+
+    /// The suite did not run to completion.
+    Incomplete,
+}
+
 /// The result printed with `--json`.
 #[derive(serde::Serialize, Debug)]
 struct TestSuiteReport {
@@ -73,6 +87,22 @@ struct TestSuiteReport {
 }
 
 impl TestSuiteReport {
+    /// Builds a report, deriving the outcome from the summary.
+    fn new(job_id: String, summary: Option<Summary>, error: Option<String>) -> Self {
+        let outcome = match &summary {
+            None => Outcome::Incomplete,
+            Some(summary) if summary.failed == 0 => Outcome::Passed,
+            Some(_) => Outcome::Failed,
+        };
+
+        Self {
+            job_id,
+            outcome,
+            summary,
+            error,
+        }
+    }
+
     /// Prints the report as a JSON line, or as plain text.
     fn print(&self, json: bool) -> anyhow::Result<()> {
         if json {
@@ -149,26 +179,11 @@ impl Args {
                     let result: TestSuiteResult = serde_json::from_value(job.result)
                         .context("failed to parse the test suite result")?;
 
-                    let outcome = result
-                        .summary
-                        .as_ref()
-                        .map_or(Outcome::Incomplete, Summary::outcome);
-
-                    let report = TestSuiteReport {
-                        job_id: job.job_id,
-                        outcome,
-                        summary: result.summary,
-                        error: None,
-                    };
+                    let report = TestSuiteReport::new(job.job_id, result.summary, None);
                     break (report, result.artifacts);
                 }
                 WaitForJobResponse::Failed(job) => {
-                    let report = TestSuiteReport {
-                        job_id: job.job_id,
-                        outcome: Outcome::Incomplete,
-                        summary: None,
-                        error: Some(job.error),
-                    };
+                    let report = TestSuiteReport::new(job.job_id, None, Some(job.error));
                     break (report, Vec::default());
                 }
             }
@@ -251,7 +266,7 @@ fn summarize(summary: &Summary) -> impl std::fmt::Display {
 mod tests {
     use serde_json::json;
 
-    use super::{Outcome, Summary, TestSuiteReport};
+    use super::{Summary, TestSuiteReport};
 
     #[test]
     fn serialize_test_suite_report() {
@@ -264,16 +279,15 @@ mod tests {
         vec![
             Test {
                 name: "passed run should include the summary",
-                input: TestSuiteReport {
-                    job_id: "job_1".to_string(),
-                    outcome: Outcome::Passed,
-                    summary: Some(Summary {
+                input: TestSuiteReport::new(
+                    "job_1".to_string(),
+                    Some(Summary {
                         planned: 2,
                         passed: 2,
                         failed: 0,
                     }),
-                    error: None,
-                },
+                    None,
+                ),
                 output: json!({
                     "job_id": "job_1",
                     "outcome": "passed",
@@ -283,16 +297,15 @@ mod tests {
             },
             Test {
                 name: "failed run with skipped tests should include the summary",
-                input: TestSuiteReport {
-                    job_id: "job_1".to_string(),
-                    outcome: Outcome::Failed,
-                    summary: Some(Summary {
+                input: TestSuiteReport::new(
+                    "job_1".to_string(),
+                    Some(Summary {
                         planned: 3,
                         passed: 1,
                         failed: 1,
                     }),
-                    error: None,
-                },
+                    None,
+                ),
                 output: json!({
                     "job_id": "job_1",
                     "outcome": "failed",
@@ -302,12 +315,7 @@ mod tests {
             },
             Test {
                 name: "incomplete run should have no summary",
-                input: TestSuiteReport {
-                    job_id: "job_1".to_string(),
-                    outcome: Outcome::Incomplete,
-                    summary: None,
-                    error: None,
-                },
+                input: TestSuiteReport::new("job_1".to_string(), None, None),
                 output: json!({
                     "job_id": "job_1",
                     "outcome": "incomplete",
@@ -317,12 +325,11 @@ mod tests {
             },
             Test {
                 name: "failed job should include the error",
-                input: TestSuiteReport {
-                    job_id: "job_1".to_string(),
-                    outcome: Outcome::Incomplete,
-                    summary: None,
-                    error: Some("sandbox crashed".to_string()),
-                },
+                input: TestSuiteReport::new(
+                    "job_1".to_string(),
+                    None,
+                    Some("sandbox crashed".to_string()),
+                ),
                 output: json!({
                     "job_id": "job_1",
                     "outcome": "incomplete",
