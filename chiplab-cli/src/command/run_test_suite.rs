@@ -1,3 +1,4 @@
+use std::io::Write;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
@@ -106,7 +107,10 @@ impl TestSuiteReport {
     /// Prints the report as a JSON line, or as plain text.
     fn print(&self, json: bool) -> anyhow::Result<()> {
         if json {
-            println!("{}", serde_json::to_string(self)?);
+            let mut stdout = std::io::stdout().lock();
+            serde_json::to_writer(&mut stdout, self)?;
+            writeln!(stdout)?;
+
             return Ok(());
         }
 
