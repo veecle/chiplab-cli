@@ -9,7 +9,7 @@ use crate::api;
 use crate::api::models::TestSuiteResult;
 use crate::api::models::test_suite_result::Summary;
 use crate::app::App;
-use crate::error::{BoxError, Result, Silent, WithExitCode, WrapError};
+use crate::error::{self, Result, Silent, WithExitCode, WrapError};
 
 /// Run a TypeScript test suite against a firmware binary on a simulated board.
 ///
@@ -122,29 +122,36 @@ impl TestSuiteReport {
         Ok(())
     }
 
+    /// The exit status matching the outcome.
+    fn exit_code(&self) -> u8 {
+        match self.outcome {
+            Outcome::Passed => 0,
+            Outcome::Failed => EXIT_TESTS_FAILED,
+            Outcome::Incomplete => EXIT_INCOMPLETE,
+        }
+    }
+
     /// The error matching the outcome, carrying its exit status.
     ///
     /// With `json` the error is [`Silent`], as the printed report already describes it.
     fn result(&self, json: bool) -> Result<()> {
-        let code = match self.outcome {
-            Outcome::Passed => return Ok(()),
-            Outcome::Failed => EXIT_TESTS_FAILED,
-            Outcome::Incomplete => EXIT_INCOMPLETE,
-        };
+        if self.outcome == Outcome::Passed {
+            return Ok(());
+        }
+
+        let code = self.exit_code();
 
         if json {
             return Err(Silent(code).into());
         }
 
-        let error: Result<(), BoxError> = match (&self.summary, &self.error) {
-            (Some(summary), _) => Err(summarize(summary).to_string().into()),
-            (None, Some(error)) => Err(error.clone())
-                .wrap_error("test suite run failed")
-                .map_err(Into::into),
-            (None, None) => Err("test suite did not run to completion".into()),
+        let message = match (&self.summary, &self.error) {
+            (Some(summary), _) => summarize(summary).to_string(),
+            (None, Some(error)) => format!("test suite run failed: {error}"),
+            (None, None) => "test suite did not run to completion".to_owned(),
         };
 
-        Ok(error.with_exit_code(code)?)
+        Ok(Err(message).with_exit_code(code)?)
     }
 }
 
@@ -213,10 +220,11 @@ impl Args {
         match (report.result(json), download) {
             (result, Ok(())) => result,
             (Ok(()), Err(error)) => Err(error),
-            // The outcome decides the exit status, so report the download error separately.
+            // Report the outcome before the download error, but exit with the outcome's status.
             (Err(outcome), Err(error)) => {
-                crate::error::report(&error);
-                Err(outcome)
+                error::report(&outcome);
+                error::report(&error);
+                Err(Silent(report.exit_code()).into())
             }
         }
     }
