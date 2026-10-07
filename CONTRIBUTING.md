@@ -21,6 +21,9 @@ If you use [`jj`](https://jj-vcs.github.io/jj/), `nix run .#setup-jj-fix` config
 
 ## Testing
 
+PRs that change behaviour should include tests covering that change.
+Bug fixes should include a regression test, ideally one that fails without the fix.
+
 The main test approach is fixture tests in `chiplab-cli/tests/cases/`, which run the real binary and snapshot its output.
 Each case is a directory, optionally nested in subdirectories to group related cases, containing:
 
