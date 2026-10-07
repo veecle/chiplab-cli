@@ -11,7 +11,7 @@ pub struct TestSuiteResult {
 }
 
 /// The pass/fail counts of a completed test suite run.
-#[derive(serde::Deserialize, Debug)]
+#[derive(serde::Deserialize, serde::Serialize, Debug)]
 pub struct Summary {
     /// Includes skipped tests, which are neither passed nor failed.
     pub planned: u64,

@@ -31,6 +31,9 @@ Options:
 
           The given directory is created if it does not already exist. Existing files with the same names are overwritten.
 
+      --json
+          Print the test suite result as a single JSON line
+
   -h, --help
           Print help (see a summary with '-h')
 --- stderr
