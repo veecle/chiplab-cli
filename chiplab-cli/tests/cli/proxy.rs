@@ -89,7 +89,7 @@ fn save(path: &Path, exchanges: &[Exchange]) -> Result<()> {
 /// How the proxy answers requests.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Mode {
-    /// Serve the recorded exchanges in order.
+    /// Serve the recorded exchanges.
     #[default]
     Replay,
 
@@ -132,7 +132,7 @@ impl FromStr for Mode {
 
 /// Where the proxy gets its responses from.
 enum Backend {
-    /// Serve these exchanges in order.
+    /// Serve these exchanges, removing each once it's served.
     Replay(Vec<Exchange>),
 
     /// Forward to a real Chiplab instance, recording the exchanges if `record` is set.
@@ -401,7 +401,6 @@ impl Proxy {
         let mut state = State {
             backend,
             base_url: base_url.clone(),
-            next: 0,
             recorded: Vec::new(),
             errors: Vec::new(),
         };
@@ -442,10 +441,10 @@ impl Proxy {
         }
         match state.backend {
             Backend::Replay(exchanges) => {
-                if let Some(exchange) = exchanges.get(state.next) {
+                if let Some(exchange) = exchanges.first() {
                     return Err(format!(
                         "{} recorded exchanges were not requested, starting with `{} {}`",
-                        exchanges.len() - state.next,
+                        exchanges.len(),
                         exchange.request.method,
                         exchange.request.path,
                     )
@@ -462,9 +461,6 @@ impl Proxy {
 struct State {
     backend: Backend,
     base_url: String,
-
-    /// The index of the next exchange to replay.
-    next: usize,
 
     recorded: Vec<Exchange>,
 
@@ -511,21 +507,23 @@ impl State {
 
         match &mut self.backend {
             Backend::Replay(exchanges) => {
-                let exchange = exchanges.get(self.next).ok_or_else(|| {
+                let next = exchanges.first().ok_or_else(|| {
                     format!(
                         "unexpected request `{} {}` after all recorded exchanges",
                         actual.method, actual.path
                     )
                 })?;
-                if exchange.request != actual {
-                    return Err(format!(
-                        "request {actual:?} doesn't match recorded request {:?}",
-                        exchange.request,
-                    )
-                    .into());
-                }
-                self.next += 1;
-                Ok(exchange.response.clone())
+                let index = exchanges
+                    .iter()
+                    .position(|exchange| exchange.request == actual)
+                    .ok_or_else(|| {
+                        format!(
+                            "request {actual:?} doesn't match any remaining recorded request, \
+                             the next is {:?}",
+                            next.request,
+                        )
+                    })?;
+                Ok(exchanges.remove(index).response)
             }
             Backend::Forward { upstream, record } => {
                 let response = upstream
