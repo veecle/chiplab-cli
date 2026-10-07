@@ -1,0 +1,8 @@
+$ chiplab-cli run-test-suite --project project --firmware firmware.elf --test-suite test-suite.ts --board unknown-model-board.json
+exit status: 2
+--- stdout
+--- stderr
+error: invalid value 'unknown-model-board.json' for '--board <MODEL|FILE>': failed to parse `unknown-model-board.json`:
+unknown variant `not_a_board`, expected one of `stm32f4_discovery`, `stm32f7_discovery`, `stm32f103_blue_pill`, `stm32wba52_nucleo`, `stm32l073_nucleo`, `stm32h745_nucleo`, `nrf52840_dk` at line 2 column 24
+
+For more information, try '--help'.

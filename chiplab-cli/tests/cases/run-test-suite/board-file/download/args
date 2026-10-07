@@ -1,0 +1,11 @@
+run-test-suite
+--project
+project_00000000000000000000000001
+--firmware
+hello-stm32f4-discovery.elf
+--test-suite
+firmware-greets.ts
+--board
+stm32f4-discovery-usart2.json
+--download-dir
+[TEMP]/out

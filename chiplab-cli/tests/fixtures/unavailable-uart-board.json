@@ -1,0 +1,4 @@
+{
+  "model": "stm32f4_discovery",
+  "uarts": ["sysbus.usart2"]
+}
