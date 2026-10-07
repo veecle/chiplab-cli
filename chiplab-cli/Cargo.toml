@@ -22,6 +22,7 @@ reqwest.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 tokio.workspace = true
+tokio-util.workspace = true
 
 [dev-dependencies]
 regex = { workspace = true, features = ["std", "unicode-perl"] }

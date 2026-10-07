@@ -27,9 +27,9 @@ Options:
           See <https://chiplab.veecle.ai/mcp/resources/docs/boards.md> for the available boards.
 
       --download-dir <DIR>
-          Directory to download the run's artifacts to, created if missing.
+          Directory to download the run's artifacts to. If missing, no artifacts are downloaded.
 
-          Existing files with the same names are overwritten.
+          The given directory is created if it does not already exist. Existing files with the same names are overwritten.
 
   -h, --help
           Print help (see a summary with '-h')

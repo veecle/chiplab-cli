@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-use anyhow::Context;
-use camino::Utf8PathBuf;
+use anyhow::{Context, bail};
+use camino::{Utf8Path, Utf8PathBuf};
 use chiplab_api::apis::default_api;
 use chiplab_api::models::{Board, BoardModel, RunTestSuiteRequest, WaitForJobResponse};
 
@@ -41,8 +41,9 @@ pub struct Args {
     #[arg(short, long, value_name = "MODEL", value_parser = parse_board_model)]
     board: BoardModel,
 
-    /// Directory to download the run's artifacts to, created if missing.
+    /// Directory to download the run's artifacts to. If missing, no artifacts are downloaded.
     ///
+    /// The given directory is created if it does not already exist.
     /// Existing files with the same names are overwritten.
     #[arg(long, value_name = "DIR")]
     download_dir: Option<Utf8PathBuf>,
@@ -101,32 +102,23 @@ impl Args {
                         .context("failed to parse the test suite result")?;
 
                     let exit_code = report(result.summary);
+                    let download = maybe_download_artifacts(
+                        app,
+                        &job_id,
+                        download_dir.as_deref(),
+                        &result.artifacts,
+                    )
+                    .await;
 
-                    let Some(dir) = &download_dir else {
-                        return Ok(exit_code);
-                    };
+                    if let Err(error) = download {
+                        if exit_code == ExitCode::SUCCESS {
+                            bail!(error);
+                        }
 
-                    if result.artifacts.is_empty() {
-                        eprintln!("no artifacts to download");
-                        return Ok(exit_code);
+                        eprintln!("error: {error:#}");
                     }
 
-                    match api::download_all(&app.api, &job_id, &result.artifacts, dir).await {
-                        Ok(paths) => {
-                            for path in paths {
-                                eprintln!("downloaded `{path}`");
-                            }
-                            return Ok(exit_code);
-                        }
-                        // Keep the test failure exit status so callers can still classify the run.
-                        Err(error) if exit_code != ExitCode::SUCCESS => {
-                            eprintln!("error: failed to download the artifacts: {error:#}");
-                            return Ok(exit_code);
-                        }
-                        Err(error) => {
-                            return Err(error.context("failed to download the artifacts"));
-                        }
-                    }
+                    return Ok(exit_code);
                 }
                 WaitForJobResponse::Failed(job) => {
                     eprintln!("error: test suite run failed: {}", job.error);
@@ -135,6 +127,30 @@ impl Args {
             }
         }
     }
+}
+
+async fn maybe_download_artifacts(
+    app: &App,
+    job_id: &str,
+    dir: Option<&Utf8Path>,
+    artifacts: &[String],
+) -> anyhow::Result<()> {
+    let Some(dir) = dir else {
+        return Ok(());
+    };
+
+    if artifacts.is_empty() {
+        eprintln!("no artifacts to download");
+        return Ok(());
+    }
+
+    api::download_all(&app.api, job_id, artifacts, dir)
+        .await
+        .context("failed to download the artifacts")?
+        .iter()
+        .for_each(|path| eprintln!("downloaded `{path}`"));
+
+    Ok(())
 }
 
 /// Prints the test suite outcome and returns the matching exit status.

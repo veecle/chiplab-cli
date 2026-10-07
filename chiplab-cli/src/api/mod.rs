@@ -7,6 +7,7 @@ use cap_std::ambient_authority;
 use cap_std::fs_utf8::Dir;
 use chiplab_api::apis::default_api;
 use chiplab_api::apis::{Error, configuration::Configuration};
+use futures_util::TryStreamExt;
 use tokio::io::AsyncWriteExt;
 
 pub mod models;
@@ -69,7 +70,7 @@ pub async fn download(
         .await
         .map_err(error)?;
 
-    let mut response = configuration
+    let response = configuration
         .client
         .get(&ticket.download_url)
         .send()
@@ -81,12 +82,12 @@ pub async fn download(
     let file = dir.create(artifact_name).with_context(write_context)?;
     let mut file = tokio::fs::File::from_std(file.into_std());
 
-    tokio::io::copy_buf(
-        &mut tokio_util::io::StreamReader::new(response.bytes_stream()),
-        &mut file,
-    ).await.with_context(write_context)?;
+    let stream = response.bytes_stream().map_err(std::io::Error::other);
+    tokio::io::copy_buf(&mut tokio_util::io::StreamReader::new(stream), &mut file)
+        .await
+        .with_context(write_context)?;
 
-    file.flush().await.with_context(write_context)?;
+    file.shutdown().await.with_context(write_context)?;
 
     Ok(())
 }
