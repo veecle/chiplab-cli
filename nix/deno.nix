@@ -1,9 +1,17 @@
 # Deno checks for the test suite fixtures.
 {root, ...}: {
   perSystem = {pkgs, ...}: let
-    src = root + /chiplab-cli/tests/fixtures;
+    fixtures = root + /chiplab-cli/tests/fixtures;
 
-    denoCheck = name: buildPhase:
+    src = pkgs.lib.fileset.toSource {
+      root = fixtures;
+      fileset = pkgs.lib.fileset.unions [
+        (fixtures + /deno.json)
+        (pkgs.lib.fileset.fileFilter (file: file.hasExt "ts") fixtures)
+      ];
+    };
+
+    denoCheck = name: command:
       pkgs.stdenvNoCC.mkDerivation {
         name = "fixtures-${name}";
         inherit src;
@@ -11,7 +19,7 @@
         buildPhase = ''
           # Deno writes its cache under `$HOME` by default, which is unwritable in the sandbox.
           export DENO_DIR="$NIX_BUILD_TOP/deno-cache"
-          ${buildPhase}
+          ${command}
         '';
         installPhase = "touch $out";
       };
