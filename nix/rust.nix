@@ -15,6 +15,7 @@
         [
           (root + /Cargo.toml)
           (root + /Cargo.lock)
+          (root + /.cargo/config.toml)
         ]
         ++ map (member: root + "/${member}") cargoToml.workspace.members
       );
