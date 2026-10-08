@@ -89,6 +89,7 @@
           "project_id": "project_00000000000000000000000001",
           "result": {
             "artifacts": [
+              "testsuite_report",
               "testsuite_stdout"
             ],
             "summary": {
