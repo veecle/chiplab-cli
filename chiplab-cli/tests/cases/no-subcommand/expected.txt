@@ -1,0 +1,30 @@
+$ chiplab-cli
+exit status: 2
+--- stdout
+--- stderr
+
+ $$$$$$/  $$/       $$/           $$/           $$/
+$$  __$$/ $$ |      /__|          $$ |          $$ |
+$$ /  /__|$$$$$$$/  $$/  $$$$$$/  $$ | $$$$$$/  $$$$$$$/
+$$ |      $$  __$$/ $$ |$$  __$$/ $$ | /____$$/ $$  __$$/
+$$ |      $$ |  $$ |$$ |$$ /  $$ |$$ | $$$$$$$ |$$ |  $$ |
+$$ |  $$/ $$ |  $$ |$$ |$$ |  $$ |$$ |$$  __$$ |$$ |  $$ |
+/$$$$$$  |$$ |  $$ |$$ |$$$$$$$  |$$ |/$$$$$$$ |$$$$$$$  |
+ /______/ /__|  /__|/__|$$  ____/ /__| /_______|/_______/
+                        $$ |
+                        $$ |
+                        /__|
+
+Command-line client for Chiplab
+
+Usage: chiplab-cli <COMMAND>
+
+Commands:
+  run-test-suite  Run a TypeScript test suite against a firmware binary on a simulated board
+  help            Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
+
+Authenticate by setting `CHIPLAB_TOKEN` to a Chiplab personal access token (`veecle_pat_…`).

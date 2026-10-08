@@ -118,7 +118,11 @@ fn test(args_path: &Path) -> Result<String> {
     let output = command.output()?;
 
     let mut rendered = String::new();
-    writeln!(rendered, "$ chiplab-cli {}", args.join(" "))?;
+    writeln!(
+        rendered,
+        "{}",
+        format!("$ chiplab-cli {}", args.join(" ")).trim_end()
+    )?;
     // `ExitStatus`'s `Display` is platform-specific, render the code explicitly instead.
     match output.status.code() {
         Some(code) => writeln!(rendered, "exit status: {code}")?,
