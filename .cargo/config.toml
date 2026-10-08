@@ -1,0 +1,3 @@
+# Drop unused libraries on macOS, so prebuilt binaries don't link ones like `libiconv` from `/nix/store`.
+[target.'cfg(target_os = "macos")']
+rustflags = ["-C", "link-arg=-Wl,-dead_strip_dylibs"]

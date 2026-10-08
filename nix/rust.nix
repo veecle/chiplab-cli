@@ -15,6 +15,7 @@
         [
           (root + /Cargo.toml)
           (root + /Cargo.lock)
+          (root + /.cargo/config.toml)
         ]
         ++ map (member: root + "/${member}") cargoToml.workspace.members
       );
@@ -28,10 +29,6 @@
       cargoBuildFlags = ["--package" "chiplab-cli"];
       # The HTTP client needs CA certificates to be created, even when only talking to the local test proxy.
       nativeCheckInputs = [pkgs.cacert];
-      # Drop unused libraries on macOS, so prebuilt binaries don't link ones like `libiconv` from `/nix/store`.
-      env = pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
-        RUSTFLAGS = "-C link-arg=-Wl,-dead_strip_dylibs";
-      };
     };
   in {
     _module.args = {
