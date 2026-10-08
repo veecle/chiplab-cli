@@ -1,5 +1,11 @@
 {
   "compilerOptions": {
     "types": ["https://chiplab.veecle.ai/mcp/resources/schemas/chiplab.d.ts"]
+  },
+  "lint": {
+    "include": ["*.ts"]
+  },
+  "fmt": {
+    "include": ["*.ts"]
   }
 }
