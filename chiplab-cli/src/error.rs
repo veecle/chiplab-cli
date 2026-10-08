@@ -139,8 +139,6 @@ impl Display for Chain<'_> {
         let mut source = self.0.source();
 
         if source.is_some() {
-            write!(f, "\nCaused by:")?;
-
             while let Some(cause) = source {
                 f.write_str("\n  - ")?;
                 write!(Indented::new(f), "{cause}")?;
