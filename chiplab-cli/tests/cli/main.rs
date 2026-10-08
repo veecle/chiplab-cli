@@ -118,11 +118,11 @@ fn test(args_path: &Path) -> Result<String> {
     let output = command.output()?;
 
     let mut rendered = String::new();
-    writeln!(
-        rendered,
-        "{}",
-        format!("$ chiplab-cli {}", args.join(" ")).trim_end()
-    )?;
+    let invocation = std::iter::once("chiplab-cli")
+        .chain(args.iter().map(String::as_str))
+        .collect::<Vec<_>>()
+        .join(" ");
+    writeln!(rendered, "$ {invocation}")?;
     // `ExitStatus`'s `Display` is platform-specific, render the code explicitly instead.
     match output.status.code() {
         Some(code) => writeln!(rendered, "exit status: {code}")?,
