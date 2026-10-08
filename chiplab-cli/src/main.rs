@@ -8,6 +8,7 @@ use crate::command::Command;
 
 mod api;
 mod app;
+mod banners;
 mod command;
 mod error;
 
@@ -28,7 +29,7 @@ async fn main() -> ExitCode {
         // A bare invocation gets the banner before the usual help; an explicit `--help` stays
         // plain and goes through clap's normal path.
         if error.kind() == ErrorKind::DisplayHelpOnMissingArgumentOrSubcommand {
-            eprintln!("{BANNER}");
+            banners::print();
         }
         error.exit()
     });
@@ -44,17 +45,3 @@ async fn main() -> ExitCode {
         Err(error) => error::report(&error),
     }
 }
-
-const BANNER: &str = r"
- $$$$$$\  $$\       $$\           $$\           $$\
-$$  __$$\ $$ |      \__|          $$ |          $$ |
-$$ /  \__|$$$$$$$\  $$\  $$$$$$\  $$ | $$$$$$\  $$$$$$$\
-$$ |      $$  __$$\ $$ |$$  __$$\ $$ | \____$$\ $$  __$$\
-$$ |      $$ |  $$ |$$ |$$ /  $$ |$$ | $$$$$$$ |$$ |  $$ |
-$$ |  $$\ $$ |  $$ |$$ |$$ |  $$ |$$ |$$  __$$ |$$ |  $$ |
-\$$$$$$  |$$ |  $$ |$$ |$$$$$$$  |$$ |\$$$$$$$ |$$$$$$$  |
- \______/ \__|  \__|\__|$$  ____/ \__| \_______|\_______/
-                        $$ |
-                        $$ |
-                        \__|
-";

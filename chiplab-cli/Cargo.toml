@@ -12,6 +12,7 @@ harness = false
 name = "cli"
 
 [dependencies]
+anstream.workspace = true
 camino.workspace = true
 cap-std.workspace = true
 chiplab-api.workspace = true
@@ -20,6 +21,7 @@ futures-util.workspace = true
 reqwest.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+terminal-colorsaurus.workspace = true
 thiserror.workspace = true
 tokio.workspace = true
 tokio-util.workspace = true

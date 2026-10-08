@@ -11,6 +11,7 @@ repository = "https://github.com/veecle/chiplab-cli"
 publish = false
 
 [workspace.dependencies]
+anstream = { version = "1.0.0", default-features = false, features = ["auto"] }
 camino = { version = "1.2.1", default-features = false }
 cap-std = { version = "4.0.3", default-features = false, features = ["fs_utf8"] }
 chiplab-api = { path = "chiplab-api" }
@@ -36,6 +37,7 @@ serde_json = { version = "1.0.151", default-features = false, features = ["std"]
 serde_repr = { version = "0.1.21", default-features = false }
 snapbox = { version = "1.2.2", default-features = false }
 tempfile = { version = "3.27.0", default-features = false }
+terminal-colorsaurus = { version = "1.0.3", default-features = false }
 thiserror = { version = "2.0.21", default-features = false, features = ["std"] }
 tiny_http = { version = "0.12.0", default-features = false }
 tokio = { version = "1.53.1", default-features = false, features = [
