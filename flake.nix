@@ -33,6 +33,7 @@
         ./nix/alejandra.nix
         ./nix/chiplab-api.nix
         ./nix/jj-fix.nix
+        ./nix/release.nix
         ./nix/rust.nix
         ./nix/tombi.nix
       ];
