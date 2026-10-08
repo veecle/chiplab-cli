@@ -9,6 +9,7 @@
         inherit src;
         nativeBuildInputs = [pkgs.deno];
         buildPhase = ''
+          # Deno writes its cache under `$HOME` by default, which is unwritable in the sandbox.
           export DENO_DIR="$NIX_BUILD_TOP/deno-cache"
           ${buildPhase}
         '';
