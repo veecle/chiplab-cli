@@ -234,6 +234,7 @@ dependencies = [
  "serde_json",
  "snapbox",
  "tempfile",
+ "thiserror",
  "tiny_http",
  "tokio",
  "tokio-util",

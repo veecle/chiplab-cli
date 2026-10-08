@@ -1,4 +1,4 @@
-//! Error handling, adapted from `vip-error`.
+//! Error handling.
 //!
 //! Errors are boxed trait objects, wrapped with ad-hoc messages via [`WrapError`] and tagged with
 //! an exit status via [`WithExitCode`]. [`report`] prints the error chain and picks the status.
@@ -28,22 +28,11 @@ pub trait WrapError<T> {
 }
 
 /// An ad-hoc message layered on top of a source error, see [`WrapError`].
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
+#[error("{message}")]
 pub struct WrappedError {
     message: String,
     source: BoxError,
-}
-
-impl Display for WrappedError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.message)
-    }
-}
-
-impl Error for WrappedError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        Some(&*self.source)
-    }
 }
 
 impl<T, E> WrapError<T> for Result<T, E>
@@ -80,6 +69,9 @@ where
 ///
 /// Transparent: displays as the wrapped error and forwards its source, so it adds no line to the
 /// reported chain. If the chain holds several, [`report`] uses the outermost.
+///
+/// Display and source are implemented by hand, as `#[error(transparent)]` only supports a single
+/// field.
 #[derive(Debug)]
 pub struct ExitCodeError {
     code: u8,
@@ -108,16 +100,9 @@ impl Error for ExitCodeError {
 }
 
 /// Exits with the given status without printing anything, for outcomes already reported.
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
+#[error("exiting with status {0}")]
 pub struct Silent(pub u8);
-
-impl Display for Silent {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "exiting with status {}", self.0)
-    }
-}
-
-impl Error for Silent {}
 
 /// Prints `error` with its chain to stderr, unless it is [`Silent`], and returns its exit status.
 pub fn report(error: &BoxError) -> ExitCode {
