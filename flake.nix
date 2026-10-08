@@ -32,6 +32,7 @@
         make-shell.flakeModules.default
         ./nix/alejandra.nix
         ./nix/chiplab-api.nix
+        ./nix/deno.nix
         ./nix/jj-fix.nix
         ./nix/release.nix
         ./nix/rust.nix
