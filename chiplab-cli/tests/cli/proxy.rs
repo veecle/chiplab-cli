@@ -74,13 +74,11 @@ fn load(path: &Path) -> Result<Vec<Exchange>> {
     let contents = match std::fs::read_to_string(path) {
         Ok(contents) => contents,
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(Vec::new()),
-        Err(error) => {
-            Err(error).wrap_error_with(|| format!("failed to read `{}`", path.display()))?
-        }
+        Err(error) => Err(error).wrap_error(format_args!("failed to read `{}`", path.display()))?,
     };
 
     Ok(serde_json::from_str(&contents)
-        .wrap_error_with(|| format!("failed to parse `{}`", path.display()))?)
+        .wrap_error(format_args!("failed to parse `{}`", path.display()))?)
 }
 
 /// Writes `exchanges` to `path`, removing the file instead if there are none.
@@ -88,7 +86,7 @@ fn save(path: &Path, exchanges: &[Exchange]) -> Result<()> {
     if exchanges.is_empty() {
         match std::fs::remove_file(path) {
             Err(error) if error.kind() != std::io::ErrorKind::NotFound => {
-                Err(error).wrap_error_with(|| format!("failed to remove `{}`", path.display()))?
+                Err(error).wrap_error(format_args!("failed to remove `{}`", path.display()))?
             }
             _ => {}
         }
@@ -97,7 +95,7 @@ fn save(path: &Path, exchanges: &[Exchange]) -> Result<()> {
     let mut contents = serde_json::to_string_pretty(exchanges)?;
     contents.push('\n');
     std::fs::write(path, contents)
-        .wrap_error_with(|| format!("failed to write `{}`", path.display()))?;
+        .wrap_error(format_args!("failed to write `{}`", path.display()))?;
     Ok(())
 }
 
@@ -543,9 +541,10 @@ impl State {
             Backend::Forward { upstream, record } => {
                 let response = upstream
                     .forward(&actual, content_type.as_deref(), body)
-                    .wrap_error_with(|| {
-                        format!("failed to forward `{} {}`", actual.method, actual.path)
-                    })?;
+                    .wrap_error(format_args!(
+                        "failed to forward `{} {}`",
+                        actual.method, actual.path
+                    ))?;
                 if *record {
                     self.recorded.push(Exchange {
                         request: actual,

@@ -38,7 +38,7 @@ pub async fn upload(
     path: &Path,
 ) -> Result<String> {
     let contents =
-        std::fs::read(path).wrap_error_with(|| format!("failed to read `{}`", path.display()))?;
+        std::fs::read(path).wrap_error(format_args!("failed to read `{}`", path.display()))?;
 
     let ticket = default_api::issue_upload_ticket(configuration, project_id)
         .await
@@ -78,17 +78,19 @@ pub async fn download(
         .await?
         .error_for_status()?;
 
-    let write_context = || format!("failed to write `{artifact_name}`");
-
-    let file = dir.create(artifact_name).wrap_error_with(write_context)?;
+    let file = dir
+        .create(artifact_name)
+        .wrap_error(format_args!("failed to write `{artifact_name}`"))?;
     let mut file = tokio::fs::File::from_std(file.into_std());
 
     let stream = response.bytes_stream().map_err(std::io::Error::other);
     tokio::io::copy_buf(&mut tokio_util::io::StreamReader::new(stream), &mut file)
         .await
-        .wrap_error_with(write_context)?;
+        .wrap_error(format_args!("failed to write `{artifact_name}`"))?;
 
-    file.shutdown().await.wrap_error_with(write_context)?;
+    file.shutdown()
+        .await
+        .wrap_error(format_args!("failed to write `{artifact_name}`"))?;
 
     Ok(())
 }
@@ -102,17 +104,17 @@ pub async fn download_all(
     artifact_names: &[String],
     dir: &Utf8Path,
 ) -> Result<Vec<Utf8PathBuf>> {
-    let open_context = || format!("failed to open `{dir}`");
-
-    Dir::create_ambient_dir_all(dir, ambient_authority()).wrap_error_with(open_context)?;
-    let handle = Dir::open_ambient_dir(dir, ambient_authority()).wrap_error_with(open_context)?;
+    Dir::create_ambient_dir_all(dir, ambient_authority())
+        .wrap_error(format_args!("failed to open `{dir}`"))?;
+    let handle = Dir::open_ambient_dir(dir, ambient_authority())
+        .wrap_error(format_args!("failed to open `{dir}`"))?;
 
     futures_util::future::try_join_all(artifact_names.iter().map(|name| {
         let handle = &handle;
         async move {
             download(configuration, job_id, name, handle)
                 .await
-                .wrap_error_with(|| format!("failed to download artifact `{name}`"))?;
+                .wrap_error(format_args!("failed to download artifact `{name}`"))?;
 
             Ok(dir.join(name))
         }

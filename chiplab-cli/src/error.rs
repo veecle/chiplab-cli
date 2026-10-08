@@ -23,10 +23,6 @@ pub trait ResultExt<T> {
     /// cheap on the success path.
     fn wrap_error(self, message: impl Display) -> Result<T, WrappedError>;
 
-    /// Like [`ResultExt::wrap_error`], but also defers producing the message until there is an
-    /// error to wrap.
-    fn wrap_error_with<D: Display>(self, message: impl FnOnce() -> D) -> Result<T, WrappedError>;
-
     /// Tags the error with the exit status to use if it ends the process, see [`ExitCodeError`].
     fn with_exit_code(self, code: u8) -> Result<T, ExitCodeError>;
 }
@@ -44,12 +40,8 @@ where
     E: Into<BoxError>,
 {
     fn wrap_error(self, message: impl Display) -> Result<T, WrappedError> {
-        self.wrap_error_with(|| message)
-    }
-
-    fn wrap_error_with<D: Display>(self, message: impl FnOnce() -> D) -> Result<T, WrappedError> {
         self.map_err(|error| WrappedError {
-            message: message().to_string(),
+            message: message.to_string(),
             source: error.into(),
         })
     }
@@ -208,7 +200,7 @@ mod tests {
         let error = boxed(Err::<(), _>(Chunked).wrap_error("outer"));
         assert_eq!(
             Chain(&*error).to_string(),
-            "outer\nCaused by:\n  - first\n    second\n    third",
+            "outer\n  - first\n    second\n    third",
         );
     }
 
@@ -220,10 +212,7 @@ mod tests {
                 .wrap_error("middle")
                 .wrap_error("outer"),
         );
-        assert_eq!(
-            Chain(&*error).to_string(),
-            "outer\nCaused by:\n  - middle\n  - inner",
-        );
+        assert_eq!(Chain(&*error).to_string(), "outer\n  - middle\n  - inner",);
     }
 
     #[test]
