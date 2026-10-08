@@ -8,8 +8,8 @@
       "status": 200,
       "body": {
         "json": {
-          "artifact_id": "artifact_00000000000000000000000001",
-          "upload_url": "{{base_url}}/external/0"
+          "artifact_id": "artifact_0929e23c4fd5a216a000000000",
+          "upload_url": "{{base_url}}/external/929e23c4fd5a216a/0"
         }
       }
     }
@@ -17,7 +17,7 @@
   {
     "request": {
       "method": "PUT",
-      "path": "/external/0"
+      "path": "/external/929e23c4fd5a216a/0"
     },
     "response": {
       "status": 200
@@ -32,8 +32,8 @@
       "status": 200,
       "body": {
         "json": {
-          "artifact_id": "artifact_00000000000000000000000002",
-          "upload_url": "{{base_url}}/external/1"
+          "artifact_id": "artifact_0929e23c4fd5a216a000000001",
+          "upload_url": "{{base_url}}/external/929e23c4fd5a216a/1"
         }
       }
     }
@@ -41,7 +41,7 @@
   {
     "request": {
       "method": "PUT",
-      "path": "/external/1"
+      "path": "/external/929e23c4fd5a216a/1"
     },
     "response": {
       "status": 200
@@ -55,15 +55,15 @@
         "board": {
           "model": "stm32f4_discovery"
         },
-        "firmware_artifact_id": "artifact_00000000000000000000000001",
-        "suite_artifact_id": "artifact_00000000000000000000000002"
+        "firmware_artifact_id": "artifact_0929e23c4fd5a216a000000000",
+        "suite_artifact_id": "artifact_0929e23c4fd5a216a000000001"
       }
     },
     "response": {
       "status": 200,
       "body": {
         "json": {
-          "run_test_suite_id": "run_test_suite_00000000000000000000000001"
+          "run_test_suite_id": "run_test_suite_069688381cc52df8b000000000"
         }
       }
     }
@@ -71,7 +71,7 @@
   {
     "request": {
       "method": "GET",
-      "path": "/api/stable/jobs/run_test_suite_00000000000000000000000001"
+      "path": "/api/stable/jobs/run_test_suite_069688381cc52df8b000000000"
     },
     "response": {
       "status": 200,
@@ -82,10 +82,10 @@
               "model": "stm32f4_discovery",
               "uarts": []
             },
-            "firmware_artifact_id": "artifact_00000000000000000000000001",
-            "suite_artifact_id": "artifact_00000000000000000000000002"
+            "firmware_artifact_id": "artifact_0929e23c4fd5a216a000000000",
+            "suite_artifact_id": "artifact_0929e23c4fd5a216a000000001"
           },
-          "job_id": "run_test_suite_00000000000000000000000001",
+          "job_id": "run_test_suite_069688381cc52df8b000000000",
           "project_id": "project_00000000000000000000000001",
           "result": {
             "artifacts": [

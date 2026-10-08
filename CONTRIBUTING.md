@@ -70,6 +70,7 @@ Cases refer to the project to run in as `project_00000000000000000000000001`; se
 
 Request headers are not recorded, so no credentials end up in the recordings.
 Absolute URLs to hosts other than `CHIPLAB_URL` in responses are rewritten to point at the proxy, so requests to them (such as uploads) are recorded and replayed too.
+Both the fake TypeIDs and the rewritten URLs are derived from a hash of the request whose response they first appeared in, so they don't depend on the order of concurrent requests, as long as those requests differ.
 
 ## Generated API client
 

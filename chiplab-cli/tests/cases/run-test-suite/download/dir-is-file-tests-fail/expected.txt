@@ -2,7 +2,7 @@ $ chiplab-cli run-test-suite --project project_00000000000000000000000001 --firm
 exit status: 4
 --- stdout
 --- stderr
-waiting for test suite run `run_test_suite_00000000000000000000000001`
+waiting for test suite run `run_test_suite_069688381cc52df8b000000000`
 error: test suite failed: 1 of 1 tests failed, 0 passed
 error: failed to download the artifacts
   - failed to open `[TEMP]/out`

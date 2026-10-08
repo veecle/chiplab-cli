@@ -3,6 +3,7 @@
 //! The modes and what is recorded are documented in the "Recording API exchanges" section of
 //! `CONTRIBUTING.md`; keep it up to date when changing them.
 
+use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
@@ -39,6 +40,62 @@ struct Request {
     /// The body, only recorded for JSON requests.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     body: Option<serde_json::Value>,
+}
+
+impl Request {
+    /// A representation of the request that is stable between runs, so that what is derived from
+    /// it doesn't depend on the order concurrent requests are made in.
+    fn stable_key(&self) -> (String, String, Option<String>) {
+        (
+            self.path.clone(),
+            self.method.clone(),
+            self.body.as_ref().map(ToString::to_string),
+        )
+    }
+
+    fn stable_hash(&self) -> RequestHash {
+        let data = serde_json::to_vec(&self.stable_key()).expect("keys can be serialized");
+        // 64-bit FNV-1a.
+        RequestHash(data.iter().fold(0xcbf2_9ce4_8422_2325, |hash, &byte| {
+            (hash ^ u64::from(byte)).wrapping_mul(0x0100_0000_01b3)
+        }))
+    }
+}
+
+/// A hash of a request's [`Request::stable_key`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+struct RequestHash(u64);
+
+impl std::fmt::Display for RequestHash {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:016x}", self.0)
+    }
+}
+
+/// Identifies an external URL by the request whose response contained it, and its index among the
+/// external URLs in the responses to that request.
+///
+/// The proxy serves the URL at [`EXTERNAL_PREFIX`] followed by the key.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+struct ExternalKey {
+    request: RequestHash,
+    index: u64,
+}
+
+impl ExternalKey {
+    fn parse(key: &str) -> Option<Self> {
+        let (request, index) = key.split_once('/')?;
+        Some(Self {
+            request: RequestHash(u64::from_str_radix(request, 16).ok()?),
+            index: index.parse().ok()?,
+        })
+    }
+}
+
+impl std::fmt::Display for ExternalKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}/{}", self.request, self.index)
+    }
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
@@ -148,8 +205,11 @@ struct Upstream {
     token: String,
     client: reqwest::blocking::Client,
 
-    /// The original URLs behind `/external/<index>`.
-    external: Vec<String>,
+    /// The original URLs behind the external URLs.
+    external: HashMap<ExternalKey, String>,
+
+    /// How many external URLs the responses to each request have contained so far.
+    external_counts: HashMap<RequestHash, u64>,
 
     ids: Ids,
 }
@@ -169,13 +229,16 @@ impl Upstream {
         let mut ids = Ids::default();
         match std::env::var("TEST_CHIPLAB_PROJECT_ID") {
             Ok(project_id) => {
-                let fake_id = ids.normalize(&project_id);
-                if fake_id != PROJECT_ID {
+                let is_project_id = TYPE_ID
+                    .captures(&project_id)
+                    .is_some_and(|captures| captures[0] == project_id && &captures[1] == "project");
+                if !is_project_id {
                     return Err(format!(
                         "`TEST_CHIPLAB_PROJECT_ID` must be a project TypeID, got `{project_id}`"
                     )
                     .into());
                 }
+                ids.insert(RealId(project_id), FakeId(PROJECT_ID.to_owned()));
             }
             Err(std::env::VarError::NotPresent) => {}
             Err(error) => Err(error).wrap_error("failed to read `TEST_CHIPLAB_PROJECT_ID`")?,
@@ -200,7 +263,8 @@ impl Upstream {
             url: url.trim_end_matches('/').to_owned(),
             token,
             client,
-            external: Vec::new(),
+            external: HashMap::new(),
+            external_counts: HashMap::new(),
             ids,
         })
     }
@@ -214,13 +278,12 @@ impl Upstream {
         content_type: Option<&str>,
         body: Vec<u8>,
     ) -> Result<Response> {
+        let hash = request.stable_hash();
         let method = reqwest::Method::from_bytes(request.method.as_bytes())?;
         let mut builder = match request.path.strip_prefix(EXTERNAL_PREFIX) {
-            Some(index) => {
-                let url = index
-                    .parse::<usize>()
-                    .ok()
-                    .and_then(|index| self.external.get(index))
+            Some(key) => {
+                let url = ExternalKey::parse(key)
+                    .and_then(|key| self.external.get(&key))
                     .ok_or_else(|| format!("unknown external URL `{}`", request.path))?;
                 self.client.request(method, url)
             }
@@ -265,20 +328,27 @@ impl Upstream {
                 // currently and it's not known whether these will be either requested or written to
                 // the output which would require different handling.
                 if is_url && !string.starts_with(&self.url) {
-                    let index = self.external.len();
+                    let count = self.external_counts.entry(hash).or_default();
+                    let key = ExternalKey {
+                        request: hash,
+                        index: *count,
+                    };
+                    *count += 1;
                     let url = std::mem::replace(
                         string,
-                        format!("{BASE_URL_PLACEHOLDER}{EXTERNAL_PREFIX}{index}"),
+                        format!("{BASE_URL_PLACEHOLDER}{EXTERNAL_PREFIX}{key}"),
                     );
-                    self.external.push(url);
+                    self.external.insert(key, url);
                 }
             });
             for_each_string(&mut value, &mut |string| {
-                *string = temp_dir::redact(&self.ids.normalize(string));
+                *string = temp_dir::redact(&self.ids.normalize(string, hash));
             });
             Some(Body::Json(value))
         } else {
-            Some(Body::Text(temp_dir::redact(&self.ids.normalize(&text))))
+            Some(Body::Text(temp_dir::redact(
+                &self.ids.normalize(&text, hash),
+            )))
         };
         Ok(Response { status, body })
     }
@@ -293,32 +363,64 @@ static TYPE_ID: LazyLock<Regex> = LazyLock::new(|| {
         .expect("the TypeID pattern is valid")
 });
 
-/// Maps the real TypeIDs seen while recording to fake ones, numbered per prefix in order of first
-/// appearance, so recordings don't depend on the ids a recording session happened to create.
+/// Maps the real TypeIDs seen while recording to fake ones, so recordings don't depend on the ids a
+/// recording session happened to create.
+///
+/// A fake id is made of a hash of the request whose response it first appeared in, and a count of
+/// the ids first appearing in responses to that request.
 ///
 /// The CLI only sees the fake ids, which are swapped back for the real ones in requests.
 #[derive(Default)]
 struct Ids {
-    to_fake: HashMap<String, String>,
-    to_real: HashMap<String, String>,
-    counts: HashMap<String, u64>,
+    to_fake: HashMap<RealId, FakeId>,
+    to_real: HashMap<FakeId, RealId>,
+
+    /// How many fake ids have been assigned for the responses to each request so far.
+    counts: HashMap<RequestHash, u64>,
+}
+
+/// A TypeID as Chiplab knows it.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct RealId(String);
+
+/// A TypeID standing in for a [`RealId`] in recordings and towards the CLI.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct FakeId(String);
+
+impl Borrow<str> for RealId {
+    fn borrow(&self) -> &str {
+        &self.0
+    }
+}
+
+impl Borrow<str> for FakeId {
+    fn borrow(&self) -> &str {
+        &self.0
+    }
 }
 
 impl Ids {
-    /// Replaces the real TypeIDs in `text` with fake ones, assigning new fake ids as needed.
-    fn normalize(&mut self, text: &str) -> String {
+    fn insert(&mut self, real: RealId, fake: FakeId) {
+        self.to_fake.insert(real.clone(), fake.clone());
+        self.to_real.insert(fake, real);
+    }
+
+    /// Replaces the real TypeIDs in `text` from the response to `request` with fake ones,
+    /// assigning new fake ids as needed.
+    fn normalize(&mut self, text: &str, request: RequestHash) -> String {
         TYPE_ID
             .replace_all(text, |captures: &regex::Captures<'_>| {
                 let real = &captures[0];
                 if let Some(fake) = self.to_fake.get(real) {
-                    return fake.clone();
+                    return fake.0.clone();
                 }
                 let prefix = &captures[1];
-                let count = self.counts.entry(prefix.to_owned()).or_default();
+                let count = self.counts.entry(request).or_default();
+                // The suffix must start with `0`-`7` to be valid, and hex digits are within the
+                // TypeID alphabet.
+                let fake = format!("{prefix}_0{request}{count:09}");
                 *count += 1;
-                let fake = format!("{prefix}_{count:026}");
-                self.to_fake.insert(real.to_owned(), fake.clone());
-                self.to_real.insert(fake.clone(), real.to_owned());
+                self.insert(RealId(real.to_owned()), FakeId(fake.clone()));
                 fake
             })
             .into_owned()
@@ -328,17 +430,15 @@ impl Ids {
     ///
     /// Unknown ids, such as ones a case passes in its arguments, are passed through unchanged and
     /// mapped to themselves, so they stay the same if the server echoes them back. Such ids must
-    /// not collide with the generated fakes, so use either the all-zero id or one that isn't a
-    /// small number.
+    /// not collide with the generated fakes or [`PROJECT_ID`], so don't copy them from recordings.
     fn denormalize(&mut self, text: &str) -> String {
         TYPE_ID
             .replace_all(text, |captures: &regex::Captures<'_>| {
                 let fake = &captures[0];
                 if let Some(real) = self.to_real.get(fake) {
-                    return real.clone();
+                    return real.0.clone();
                 }
-                self.to_fake.insert(fake.to_owned(), fake.to_owned());
-                self.to_real.insert(fake.to_owned(), fake.to_owned());
+                self.insert(RealId(fake.to_owned()), FakeId(fake.to_owned()));
                 fake.to_owned()
             })
             .into_owned()
