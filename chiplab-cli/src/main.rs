@@ -8,6 +8,7 @@ use crate::command::Command;
 mod api;
 mod app;
 mod command;
+mod error;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -21,9 +22,17 @@ struct Args {
 }
 
 #[tokio::main(flavor = "current_thread")]
-async fn main() -> anyhow::Result<ExitCode> {
+async fn main() -> ExitCode {
     let args = Args::parse();
-    let app = App::new()?;
 
-    args.command.run(&app).await
+    let result: error::Result<()> = async {
+        let app = App::new()?;
+        args.command.run(&app).await
+    }
+    .await;
+
+    match result {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(error) => error::report(&error),
+    }
 }

@@ -1,0 +1,251 @@
+//! Error handling.
+//!
+//! Errors are boxed trait objects, wrapped with ad-hoc messages and tagged with an exit status via
+//! [`ResultExt`]. [`report`] prints the error chain and picks the status.
+
+use std::error::Error;
+use std::fmt::{self, Display, Formatter, Write};
+use std::process::ExitCode;
+
+pub type BoxError = Box<dyn Error + Send + Sync>;
+
+pub type Result<T, E = BoxError> = std::result::Result<T, E>;
+
+/// Exit status for errors without an [`ExitCodeError`] in their chain.
+const DEFAULT_EXIT_CODE: u8 = 1;
+
+/// Extensions for adding context to the error of a [`Result`].
+pub trait ResultExt<T> {
+    /// Wraps the error in a [`WrappedError`] carrying `message`, keeping the original as its
+    /// source.
+    ///
+    /// `message` is only formatted if there is an error to wrap, so passing [`format_args!`] is
+    /// cheap on the success path.
+    fn wrap_error(self, message: impl Display) -> Result<T, WrappedError>;
+
+    /// Tags the error with the exit status to use if it ends the process, see [`ExitCodeError`].
+    fn with_exit_code(self, code: u8) -> Result<T, ExitCodeError>;
+}
+
+/// An ad-hoc message layered on top of a source error, see [`ResultExt::wrap_error`].
+#[derive(Debug, thiserror::Error)]
+#[error("{message}")]
+pub struct WrappedError {
+    message: String,
+    source: BoxError,
+}
+
+impl<T, E> ResultExt<T> for Result<T, E>
+where
+    E: Into<BoxError>,
+{
+    fn wrap_error(self, message: impl Display) -> Result<T, WrappedError> {
+        self.map_err(|error| WrappedError {
+            message: message.to_string(),
+            source: error.into(),
+        })
+    }
+
+    fn with_exit_code(self, code: u8) -> Result<T, ExitCodeError> {
+        self.map_err(|error| ExitCodeError::new(code, error))
+    }
+}
+
+/// An error tagged with an exit status.
+///
+/// Transparent: displays as the wrapped error and forwards its source, so it adds no line to the
+/// reported chain. If the chain holds several, [`report`] uses the outermost.
+///
+/// Display and source are implemented by hand, as `#[error(transparent)]` only supports a single
+/// field.
+#[derive(Debug)]
+pub struct ExitCodeError {
+    code: u8,
+    error: BoxError,
+}
+
+impl ExitCodeError {
+    pub fn new(code: u8, error: impl Into<BoxError>) -> Self {
+        Self {
+            code,
+            error: error.into(),
+        }
+    }
+}
+
+impl Display for ExitCodeError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        Display::fmt(&self.error, f)
+    }
+}
+
+impl Error for ExitCodeError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        self.error.source()
+    }
+}
+
+/// Exits with the given status without printing anything, for outcomes already reported.
+#[derive(Debug, thiserror::Error)]
+#[error("exiting with status {0}")]
+pub struct Silent(pub u8);
+
+/// Prints `error` with its chain to stderr, unless it is [`Silent`], and returns its exit status.
+///
+/// Returning this [`ExitCode`] instead of the error lets errors print with the same `error:` prefix
+/// as `clap` and exit with a status other than 1.
+pub fn report(error: &BoxError) -> ExitCode {
+    let error: &(dyn Error + 'static) = &**error;
+
+    if !error.is::<Silent>() {
+        eprintln!("error: {}", Chain(error));
+    }
+
+    ExitCode::from(exit_code(error))
+}
+
+/// The status of the outermost [`ExitCodeError`] or [`Silent`] in the chain.
+fn exit_code(error: &(dyn Error + 'static)) -> u8 {
+    let mut next = Some(error);
+
+    while let Some(error) = next {
+        if let Some(error) = error.downcast_ref::<ExitCodeError>() {
+            return error.code;
+        }
+        if let Some(Silent(code)) = error.downcast_ref::<Silent>() {
+            return *code;
+        }
+        next = error.source();
+    }
+
+    DEFAULT_EXIT_CODE
+}
+
+/// Formats an error followed by its full `source()` chain.
+pub struct Chain<'a>(pub &'a (dyn Error + 'static));
+
+impl Display for Chain<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)?;
+
+        let mut source = self.0.source();
+
+        if source.is_some() {
+            while let Some(cause) = source {
+                f.write_str("\n  - ")?;
+                write!(Indented::new(f), "{cause}")?;
+                source = cause.source();
+            }
+        }
+
+        Ok(())
+    }
+}
+
+/// Indents every line after the first to align under a `  - ` bullet.
+struct Indented<'a, 'b> {
+    f: &'a mut Formatter<'b>,
+    at_line_start: bool,
+}
+
+impl<'a, 'b> Indented<'a, 'b> {
+    fn new(f: &'a mut Formatter<'b>) -> Self {
+        Self {
+            f,
+            at_line_start: false,
+        }
+    }
+}
+
+impl Write for Indented<'_, '_> {
+    fn write_str(&mut self, chunk: &str) -> fmt::Result {
+        for line in chunk.split_inclusive('\n') {
+            if self.at_line_start {
+                self.f.write_str("    ")?;
+            }
+            self.f.write_str(line)?;
+            self.at_line_start = line.ends_with('\n');
+        }
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::error::Error;
+    use std::fmt::{self, Display, Formatter};
+
+    use super::{BoxError, Chain, ResultExt, Silent, exit_code};
+
+    /// Writes the newline and the following line as separate chunks.
+    #[derive(Debug)]
+    struct Chunked;
+
+    impl Display for Chunked {
+        fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+            f.write_str("first")?;
+            f.write_str("\n")?;
+            f.write_str("second\nthird")
+        }
+    }
+
+    impl Error for Chunked {}
+
+    fn boxed<E: Into<BoxError>>(result: Result<(), E>) -> BoxError {
+        result.unwrap_err().into()
+    }
+
+    #[test]
+    fn indents_multi_line_causes() {
+        let error = boxed(Err::<(), _>(Chunked).wrap_error("outer"));
+        assert_eq!(
+            Chain(&*error).to_string(),
+            "outer\n  - first\n    second\n    third",
+        );
+    }
+
+    #[test]
+    fn exit_code_is_transparent_in_chain() {
+        let error = boxed(
+            Err::<(), _>("inner")
+                .with_exit_code(4)
+                .wrap_error("middle")
+                .wrap_error("outer"),
+        );
+        assert_eq!(Chain(&*error).to_string(), "outer\n  - middle\n  - inner",);
+    }
+
+    #[test]
+    fn exit_code_found_under_wrapped_errors() {
+        let error = boxed(
+            Err::<(), _>("inner")
+                .with_exit_code(4)
+                .wrap_error("middle")
+                .wrap_error("outer"),
+        );
+        assert_eq!(exit_code(&*error), 4);
+    }
+
+    #[test]
+    fn outermost_exit_code_wins() {
+        let error = boxed(
+            Err::<(), _>("inner")
+                .with_exit_code(4)
+                .wrap_error("middle")
+                .with_exit_code(3),
+        );
+        assert_eq!(exit_code(&*error), 3);
+    }
+
+    #[test]
+    fn exit_code_defaults_to_1() {
+        let error = boxed(Err::<(), _>("inner").wrap_error("outer"));
+        assert_eq!(exit_code(&*error), 1);
+    }
+
+    #[test]
+    fn silent_exit_code() {
+        let error = boxed(Err::<(), _>(Silent(4)));
+        assert_eq!(exit_code(&*error), 4);
+    }
+}

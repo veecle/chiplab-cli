@@ -1,6 +1,5 @@
-use std::process::ExitCode;
-
 use crate::app::App;
+use crate::error::Result;
 
 mod run_test_suite;
 
@@ -10,7 +9,7 @@ pub enum Command {
 }
 
 impl Command {
-    pub async fn run(self, app: &App) -> anyhow::Result<ExitCode> {
+    pub async fn run(self, app: &App) -> Result<()> {
         match self {
             Self::RunTestSuite(args) => args.run(app).await,
         }

@@ -10,7 +10,14 @@ use std::fmt::Write;
 use std::ops::Not;
 use std::path::{Path, PathBuf};
 
+// Shared with the binary. Only part of it is used here, and its unit tests don't run under this
+// harness.
+#[allow(dead_code, unused_imports)]
+#[path = "../../src/error.rs"]
+mod error;
 mod proxy;
+
+use crate::error::{Chain, Result};
 
 const CASES: &str = "tests/cases";
 const FIXTURES: &str = "tests/fixtures";
@@ -51,7 +58,7 @@ fn case_name(case_directory: &Path) -> String {
         .replace('\\', "/")
 }
 
-fn test(args_path: &Path) -> anyhow::Result<String> {
+fn test(args_path: &Path) -> Result<String> {
     let case_directory = args_path
         .parent()
         .expect("`args` is always inside a case directory");
@@ -130,14 +137,14 @@ fn test(args_path: &Path) -> anyhow::Result<String> {
     if let Some(proxy) = proxy
         && let Err(error) = proxy.finish()
     {
-        anyhow::bail!("{error:#}\n\n{rendered}");
+        return Err(format!("{}\n\n{rendered}", Chain(&*error)).into());
     }
 
     Ok(rendered)
 }
 
 /// Copies every directory and file under `from` into `to`.
-fn copy_files(from: &Path, to: &Path) -> anyhow::Result<()> {
+fn copy_files(from: &Path, to: &Path) -> Result<()> {
     for entry in std::fs::read_dir(from)? {
         let entry = entry?;
         let target = to.join(entry.file_name());
@@ -153,7 +160,7 @@ fn copy_files(from: &Path, to: &Path) -> anyhow::Result<()> {
 }
 
 /// Appends every directory and file under `directory` with its contents, sorted by path.
-fn push_files(rendered: &mut String, root: &Path, directory: &Path) -> anyhow::Result<()> {
+fn push_files(rendered: &mut String, root: &Path, directory: &Path) -> Result<()> {
     let mut entries = std::fs::read_dir(directory)?.collect::<Result<Vec<_>, _>>()?;
     entries.sort_by_key(|entry| entry.path());
 

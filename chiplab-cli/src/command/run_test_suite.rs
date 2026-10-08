@@ -1,8 +1,6 @@
 use std::io::Write;
 use std::path::PathBuf;
-use std::process::ExitCode;
 
-use anyhow::{Context, bail};
 use camino::{Utf8Path, Utf8PathBuf};
 use chiplab_api::apis::default_api;
 use chiplab_api::models::{Board, BoardModel, RunTestSuiteRequest, WaitForJobResponse};
@@ -11,6 +9,7 @@ use crate::api;
 use crate::api::models::TestSuiteResult;
 use crate::api::models::test_suite_result::Summary;
 use crate::app::App;
+use crate::error::{self, Result, ResultExt, Silent};
 
 /// Run a TypeScript test suite against a firmware binary on a simulated board.
 ///
@@ -105,7 +104,7 @@ impl TestSuiteReport {
     }
 
     /// Prints the report as a JSON line, or as plain text.
-    fn print(&self, json: bool) -> anyhow::Result<()> {
+    fn print(&self, json: bool) -> Result<()> {
         if json {
             let mut stdout = std::io::stdout().lock();
             serde_json::to_writer(&mut stdout, self)?;
@@ -114,25 +113,45 @@ impl TestSuiteReport {
             return Ok(());
         }
 
-        match (&self.summary, &self.error) {
-            (Some(summary), _) if self.outcome == Outcome::Passed => {
-                println!("{}", summarize(summary));
-            }
-            (Some(summary), _) => eprintln!("error: {}", summarize(summary)),
-            (None, Some(error)) => eprintln!("error: test suite run failed: {error}"),
-            (None, None) => eprintln!("error: test suite did not run to completion"),
+        if let Some(summary) = &self.summary
+            && self.outcome == Outcome::Passed
+        {
+            println!("{}", summarize(summary));
         }
 
         Ok(())
     }
 
     /// The exit status matching the outcome.
-    fn exit_code(&self) -> ExitCode {
+    fn exit_code(&self) -> u8 {
         match self.outcome {
-            Outcome::Passed => ExitCode::SUCCESS,
-            Outcome::Failed => ExitCode::from(EXIT_TESTS_FAILED),
-            Outcome::Incomplete => ExitCode::from(EXIT_INCOMPLETE),
+            Outcome::Passed => 0,
+            Outcome::Failed => EXIT_TESTS_FAILED,
+            Outcome::Incomplete => EXIT_INCOMPLETE,
         }
+    }
+
+    /// The error matching the outcome, carrying its exit status.
+    ///
+    /// With `json` the error is [`Silent`], as the printed report already describes it.
+    fn result(&self, json: bool) -> Result<()> {
+        if self.outcome == Outcome::Passed {
+            return Ok(());
+        }
+
+        let code = self.exit_code();
+
+        if json {
+            return Err(Silent(code).into());
+        }
+
+        let message = match (&self.summary, &self.error) {
+            (Some(summary), _) => summarize(summary).to_string(),
+            (None, Some(error)) => format!("test suite run failed: {error}"),
+            (None, None) => "test suite did not run to completion".to_owned(),
+        };
+
+        Ok(Err(message).with_exit_code(code)?)
     }
 }
 
@@ -145,7 +164,7 @@ fn parse_board_model(model: &str) -> Result<BoardModel, serde_json::Error> {
 }
 
 impl Args {
-    pub async fn run(self, app: &App) -> anyhow::Result<ExitCode> {
+    pub async fn run(self, app: &App) -> Result<()> {
         let Self {
             project_id,
             firmware,
@@ -157,17 +176,17 @@ impl Args {
 
         let firmware_artifact_id = api::upload(&app.api, &project_id, &firmware)
             .await
-            .context("failed to upload the firmware")?;
+            .wrap_error("failed to upload the firmware")?;
         let suite_artifact_id = api::upload(&app.api, &project_id, &test_suite)
             .await
-            .context("failed to upload the test suite")?;
+            .wrap_error("failed to upload the test suite")?;
 
         let request =
             RunTestSuiteRequest::new(Board::new(board), firmware_artifact_id, suite_artifact_id);
         let job_id = default_api::run_test_suite(&app.api, &project_id, request)
             .await
             .map_err(api::error)
-            .context("failed to start the test suite run")?
+            .wrap_error("failed to start the test suite run")?
             .run_test_suite_id;
 
         eprintln!("waiting for test suite run `{job_id}`");
@@ -175,13 +194,13 @@ impl Args {
             let response = default_api::wait_for_job(&app.api, &job_id, None)
                 .await
                 .map_err(api::error)
-                .context("failed to wait for the test suite run")?;
+                .wrap_error("failed to wait for the test suite run")?;
 
             match response {
                 WaitForJobResponse::Running(_) => continue,
                 WaitForJobResponse::Succeeded(job) => {
                     let result: TestSuiteResult = serde_json::from_value(job.result)
-                        .context("failed to parse the test suite result")?;
+                        .wrap_error("failed to parse the test suite result")?;
 
                     let report = TestSuiteReport::new(job.job_id, result.summary, None);
                     break (report, result.artifacts);
@@ -197,17 +216,17 @@ impl Args {
             maybe_download_artifacts(app, &job_id, download_dir.as_deref(), &artifacts).await;
 
         report.print(json)?;
-        let exit_code = report.exit_code();
 
-        if let Err(error) = download {
-            if exit_code == ExitCode::SUCCESS {
-                bail!(error);
+        match (report.result(json), download) {
+            (result, Ok(())) => result,
+            (Ok(()), Err(error)) => Err(error),
+            // Report the outcome before the download error, but exit with the outcome's status.
+            (Err(outcome), Err(error)) => {
+                error::report(&outcome);
+                error::report(&error);
+                Err(Silent(report.exit_code()).into())
             }
-
-            eprintln!("error: {error:#}");
         }
-
-        Ok(exit_code)
     }
 }
 
@@ -216,7 +235,7 @@ async fn maybe_download_artifacts(
     job_id: &str,
     dir: Option<&Utf8Path>,
     artifacts: &[String],
-) -> anyhow::Result<()> {
+) -> Result<()> {
     let Some(dir) = dir else {
         return Ok(());
     };
@@ -228,7 +247,7 @@ async fn maybe_download_artifacts(
 
     api::download_all(&app.api, job_id, artifacts, dir)
         .await
-        .context("failed to download the artifacts")?
+        .wrap_error("failed to download the artifacts")?
         .iter()
         .for_each(|path| eprintln!("downloaded `{path}`"));
 

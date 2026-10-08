@@ -4,10 +4,8 @@ exit status: 1
 test suite passed: 1 of 1 tests passed
 --- stderr
 waiting for test suite run `run_test_suite_00000000000000000000000001`
-Error: failed to download the artifacts
-
-Caused by:
-    0: failed to open `[TEMP]/out`
-    1: [..]
+error: failed to download the artifacts
+  - failed to open `[TEMP]/out`
+  - [..]
 --- [TEMP]/out
 not a directory
