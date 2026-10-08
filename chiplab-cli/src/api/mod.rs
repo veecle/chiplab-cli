@@ -9,7 +9,7 @@ use chiplab_api::apis::{Error, configuration::Configuration};
 use futures_util::TryStreamExt;
 use tokio::io::AsyncWriteExt;
 
-use crate::error::{BoxError, Result, ResultExt};
+use crate::error::{BoxError, Result, ResultExt, WrappedError};
 
 pub mod models;
 
@@ -24,7 +24,11 @@ where
             if content.is_empty() {
                 format!("server responded with {}", response.status).into()
             } else {
-                format!("server responded with {}: {content}", response.status).into()
+                WrappedError::new(
+                    format_args!("server responded with {}", response.status),
+                    content,
+                )
+                .into()
             }
         }
         error => error.into(),

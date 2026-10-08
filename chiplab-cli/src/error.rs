@@ -35,15 +35,23 @@ pub struct WrappedError {
     source: BoxError,
 }
 
+impl WrappedError {
+    /// Layers `message` on top of `source`, prefer [`ResultExt::wrap_error`] when wrapping a
+    /// [`Result`].
+    pub fn new(message: impl Display, source: impl Into<BoxError>) -> Self {
+        Self {
+            message: message.to_string(),
+            source: source.into(),
+        }
+    }
+}
+
 impl<T, E> ResultExt<T> for Result<T, E>
 where
     E: Into<BoxError>,
 {
     fn wrap_error(self, message: impl Display) -> Result<T, WrappedError> {
-        self.map_err(|error| WrappedError {
-            message: message.to_string(),
-            source: error.into(),
-        })
+        self.map_err(|error| WrappedError::new(message, error))
     }
 
     fn with_exit_code(self, code: u8) -> Result<T, ExitCodeError> {
