@@ -25,7 +25,7 @@ use std::thread::JoinHandle;
 
 use regex::Regex;
 
-use crate::error::{BoxError, Chain, Result, WrapError};
+use crate::error::{BoxError, Chain, Result, ResultExt};
 
 /// Stands in for the proxy's own URL in recorded bodies, as its port differs between runs.
 const BASE_URL_PLACEHOLDER: &str = "{{base_url}}";

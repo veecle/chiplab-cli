@@ -9,7 +9,7 @@ use chiplab_api::apis::{Error, configuration::Configuration};
 use futures_util::TryStreamExt;
 use tokio::io::AsyncWriteExt;
 
-use crate::error::{BoxError, Result, WrapError};
+use crate::error::{BoxError, Result, ResultExt};
 
 pub mod models;
 

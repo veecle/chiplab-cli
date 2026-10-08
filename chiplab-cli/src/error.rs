@@ -1,7 +1,7 @@
 //! Error handling.
 //!
-//! Errors are boxed trait objects, wrapped with ad-hoc messages via [`WrapError`] and tagged with
-//! an exit status via [`WithExitCode`]. [`report`] prints the error chain and picks the status.
+//! Errors are boxed trait objects, wrapped with ad-hoc messages and tagged with an exit status via
+//! [`ResultExt`]. [`report`] prints the error chain and picks the status.
 
 use std::error::Error;
 use std::fmt::{self, Display, Formatter, Write};
@@ -14,20 +14,24 @@ pub type Result<T, E = BoxError> = std::result::Result<T, E>;
 /// Exit status for errors without an [`ExitCodeError`] in their chain.
 const DEFAULT_EXIT_CODE: u8 = 1;
 
-/// Wraps an error in a [`WrappedError`] carrying `message`, keeping the original as its source.
-pub trait WrapError<T> {
-    /// Wraps the error with `message`.
+/// Extensions for adding context to the error of a [`Result`].
+pub trait ResultExt<T> {
+    /// Wraps the error in a [`WrappedError`] carrying `message`, keeping the original as its
+    /// source.
     ///
     /// `message` is only formatted if there is an error to wrap, so passing [`format_args!`] is
     /// cheap on the success path.
     fn wrap_error(self, message: impl Display) -> Result<T, WrappedError>;
 
-    /// Like [`WrapError::wrap_error`], but also defers producing the message until there is an
+    /// Like [`ResultExt::wrap_error`], but also defers producing the message until there is an
     /// error to wrap.
     fn wrap_error_with<D: Display>(self, message: impl FnOnce() -> D) -> Result<T, WrappedError>;
+
+    /// Tags the error with the exit status to use if it ends the process, see [`ExitCodeError`].
+    fn with_exit_code(self, code: u8) -> Result<T, ExitCodeError>;
 }
 
-/// An ad-hoc message layered on top of a source error, see [`WrapError`].
+/// An ad-hoc message layered on top of a source error, see [`ResultExt::wrap_error`].
 #[derive(Debug, thiserror::Error)]
 #[error("{message}")]
 pub struct WrappedError {
@@ -35,7 +39,7 @@ pub struct WrappedError {
     source: BoxError,
 }
 
-impl<T, E> WrapError<T> for Result<T, E>
+impl<T, E> ResultExt<T> for Result<T, E>
 where
     E: Into<BoxError>,
 {
@@ -49,17 +53,7 @@ where
             source: error.into(),
         })
     }
-}
 
-/// Tags an error with the exit status to use if it ends the process, see [`ExitCodeError`].
-pub trait WithExitCode<T> {
-    fn with_exit_code(self, code: u8) -> Result<T, ExitCodeError>;
-}
-
-impl<T, E> WithExitCode<T> for Result<T, E>
-where
-    E: Into<BoxError>,
-{
     fn with_exit_code(self, code: u8) -> Result<T, ExitCodeError> {
         self.map_err(|error| ExitCodeError::new(code, error))
     }
@@ -188,7 +182,7 @@ mod tests {
     use std::error::Error;
     use std::fmt::{self, Display, Formatter};
 
-    use super::{BoxError, Chain, Silent, WithExitCode, WrapError, exit_code};
+    use super::{BoxError, Chain, ResultExt, Silent, exit_code};
 
     /// Writes the newline and the following line as separate chunks.
     #[derive(Debug)]

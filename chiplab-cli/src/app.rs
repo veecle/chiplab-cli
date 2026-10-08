@@ -1,6 +1,6 @@
 use chiplab_api::apis::configuration::Configuration;
 
-use crate::error::{Result, WrapError};
+use crate::error::{Result, ResultExt};
 
 const DEFAULT_URL: &str = "https://chiplab.veecle.ai";
 

@@ -9,7 +9,7 @@ use crate::api;
 use crate::api::models::TestSuiteResult;
 use crate::api::models::test_suite_result::Summary;
 use crate::app::App;
-use crate::error::{self, Result, Silent, WithExitCode, WrapError};
+use crate::error::{self, Result, ResultExt, Silent};
 
 /// Run a TypeScript test suite against a firmware binary on a simulated board.
 ///
