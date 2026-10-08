@@ -62,8 +62,13 @@ jobs:
       - name: Package
         env:
           TARGET: ${{ matrix.target }}
+        # Copied out of the read-only Nix store, so users can modify the extracted files (e.g. remove the macOS quarantine attribute).
+        # Archived by name, without a `./` entry that would change the permissions of the directory it is extracted into.
         run: |
-          tar --create --gzip --file "chiplab-cli-$TARGET.tar.gz" --directory result/bin .
+          mkdir dist
+          install -m 755 result/bin/* dist/
+          cd dist
+          tar --create --gzip --file "../chiplab-cli-$TARGET.tar.gz" -- *
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
