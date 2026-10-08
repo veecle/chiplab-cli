@@ -1,21 +1,7 @@
 //! A record/replay proxy standing in for the Chiplab API during fixture tests.
 //!
-//! The mode is selected by `TEST_CHIPLAB_PROXY`, see [`Mode`].
-//!
-//! In replay mode the proxy serves recorded exchanges in order, failing on any request that doesn't
-//! match the next recorded one. In record mode it forwards requests to a real Chiplab instance and
-//! records the exchanges. In bypass mode it forwards requests like in record mode, but neither
-//! replays nor records exchanges, for running the cases against a real Chiplab instance.
-//!
-//! Absolute URLs to other hosts in JSON responses are rewritten to point back at the proxy, so
-//! requests the CLI makes to them (such as uploads) are recorded and replayed too. Request headers
-//! are not recorded; the proxy authenticates to the real instance itself so no credentials end up
-//! in the recordings.
-//!
-//! While recording, the CLI only sees fake TypeIDs: the proxy swaps them for the real ones in
-//! requests, and back in responses. That keeps recordings and the CLI output stable across
-//! re-recordings, and lets cases refer to a project as [`PROJECT_ID`] whatever project is used to
-//! record them.
+//! The modes and what is recorded are documented in the "Recording API exchanges" section of
+//! `CONTRIBUTING.md`; keep it up to date when changing them.
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -26,6 +12,7 @@ use std::thread::JoinHandle;
 use regex::Regex;
 
 use crate::error::{BoxError, Chain, Result, ResultExt};
+use crate::temp_dir;
 
 /// Stands in for the proxy's own URL in recorded bodies, as its port differs between runs.
 const BASE_URL_PLACEHOLDER: &str = "{{base_url}}";
@@ -287,11 +274,11 @@ impl Upstream {
                 }
             });
             for_each_string(&mut value, &mut |string| {
-                *string = self.ids.normalize(string);
+                *string = temp_dir::redact(&self.ids.normalize(string));
             });
             Some(Body::Json(value))
         } else {
-            Some(Body::Text(self.ids.normalize(&text)))
+            Some(Body::Text(temp_dir::redact(&self.ids.normalize(&text))))
         };
         Ok(Response { status, body })
     }
@@ -308,6 +295,8 @@ static TYPE_ID: LazyLock<Regex> = LazyLock::new(|| {
 
 /// Maps the real TypeIDs seen while recording to fake ones, numbered per prefix in order of first
 /// appearance, so recordings don't depend on the ids a recording session happened to create.
+///
+/// The CLI only sees the fake ids, which are swapped back for the real ones in requests.
 #[derive(Default)]
 struct Ids {
     to_fake: HashMap<String, String>,

@@ -16,6 +16,7 @@ use std::path::{Path, PathBuf};
 #[path = "../../src/error.rs"]
 mod error;
 mod proxy;
+mod temp_dir;
 
 use crate::error::{Chain, Result};
 
