@@ -143,6 +143,12 @@ fn save(path: &Path, exchanges: &[Exchange]) -> Result<()> {
     Ok(())
 }
 
+/// Orders `exchanges` by request independently of the order the requests came in, as the CLI
+/// makes some concurrently, keeping identical requests in their recorded order.
+fn sort(exchanges: &mut [Exchange]) {
+    exchanges.sort_by_cached_key(|exchange| exchange.request.stable_key());
+}
+
 /// How the proxy answers requests.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Mode {
@@ -552,7 +558,11 @@ impl Proxy {
                 }
                 Ok(())
             }
-            Backend::Forward { record: true, .. } => save(&self.exchanges_path, &state.recorded),
+            Backend::Forward { record: true, .. } => {
+                let mut recorded = state.recorded;
+                sort(&mut recorded);
+                save(&self.exchanges_path, &recorded)
+            }
             Backend::Forward { record: false, .. } => Ok(()),
         }
     }
