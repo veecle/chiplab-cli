@@ -99,6 +99,9 @@ impl Error for ExitCodeError {
 pub struct Silent(pub u8);
 
 /// Prints `error` with its chain to stderr, unless it is [`Silent`], and returns its exit status.
+///
+/// Returning this [`ExitCode`] instead of the error lets errors print with the same `error:` prefix
+/// as `clap` and exit with a status other than 1.
 pub fn report(error: &BoxError) -> ExitCode {
     let error: &(dyn Error + 'static) = &**error;
 
