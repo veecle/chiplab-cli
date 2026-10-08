@@ -20,9 +20,15 @@
           "project_id": "project_00000000000000000000000001",
           "result": {
             "artifacts": [
-              "testsuite_stdout"
+              "testsuite_report",
+              "testsuite_stdout",
+              "testsuite_stderr"
             ],
-            "summary": null
+            "summary": {
+              "failed": 1,
+              "passed": 1,
+              "planned": 3
+            }
           },
           "status": "succeeded"
         }

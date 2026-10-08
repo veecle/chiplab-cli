@@ -21,7 +21,8 @@
           "result": {
             "artifacts": [
               "testsuite_report",
-              "testsuite_stdout"
+              "testsuite_stdout",
+              "testsuite_stderr"
             ],
             "summary": {
               "failed": 0,
