@@ -11,10 +11,9 @@
     ...
   }: let
     # The toolchain runs on the build platform, with the standard library added for the musl target.
-    staticRustToolchain = pkgs.pkgsStatic.pkgsBuildHost.rust-bin.fromRustupToolchain (
-      (builtins.fromTOML (builtins.readFile (root + /rust-toolchain.toml))).toolchain
-      // {targets = [pkgs.pkgsStatic.stdenv.hostPlatform.rust.rustcTarget];}
-    );
+    staticRustToolchain = (pkgs.pkgsStatic.pkgsBuildHost.rust-bin.fromRustupToolchainFile (root + /rust-toolchain.toml)).override {
+      targets = [pkgs.pkgsStatic.stdenv.hostPlatform.rust.rustcTarget];
+    };
 
     chiplab-cli-static =
       (pkgs.pkgsStatic.makeRustPlatform {

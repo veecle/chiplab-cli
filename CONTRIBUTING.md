@@ -93,7 +93,7 @@ nix run .#update-chiplab-api
 Releases are published by the [`release`](.github/workflows/release.yaml) workflow when a `v<version>` tag is pushed.
 It builds the binaries, attaches them to a GitHub release, and generates the release notes from the merged PRs.
 
-1. Bump `version` in the root `Cargo.toml` following [semver](https://semver.org) and merge the PR.
+1. Bump `version` in the root `Cargo.toml` following [semver](https://semver.org), run `cargo update --workspace` to update `Cargo.lock`, and merge the PR.
 2. Tag the merged commit and push the tag:
 
    ```sh
