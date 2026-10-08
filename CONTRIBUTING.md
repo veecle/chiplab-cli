@@ -35,6 +35,8 @@ Each case is a directory, optionally nested in subdirectories to group related c
 - `exchanges.json`: the API exchanges the case makes, replayed by a local proxy standing in for Chiplab.
   Cases making no API requests have none.
 - `no-proxy`: an empty marker file; if present, the binary runs without the proxy and without any Chiplab configuration in its environment, for testing how the CLI handles that.
+- `replay-only`: a marker file whose contents explain why the case's `exchanges.json` is hand-written; if present, the exchanges are always replayed, whatever the proxy mode.
+  Use this for scenarios that can't be reproduced against a real Chiplab instance.
 
 The binary runs within `chiplab-cli/tests/fixtures/`, so `args` can refer to the input files shared between cases stored there.
 
@@ -52,13 +54,15 @@ See [`snapbox::Assert`](https://docs.rs/snapbox/latest/snapbox/assert/struct.Ass
 
 By default the proxy replays `exchanges.json`, failing the case on any request that doesn't match the next recorded one, and on any recorded exchange that isn't requested.
 To record the exchanges against a real Chiplab instance instead, run with `TEST_CHIPLAB_PROXY=record`, configured by `CHIPLAB_URL` and `CHIPLAB_TOKEN` as for the CLI itself.
-Recording overwrites the exchanges of every case run, so limit it to the case being recorded to keep hand-written exchanges in other cases:
+Recording overwrites the exchanges of every case run, so limit it to the case being recorded to avoid re-recording unrelated cases:
 
 ```sh
 TEST_CHIPLAB_PROXY=record cargo test --test cli -- --exact <case name>
 ```
 
 To run the cases against a real Chiplab instance without replaying or recording the exchanges, run with `TEST_CHIPLAB_PROXY=bypass`, configured as for recording.
+
+Cases marked `replay-only` are replayed in every mode, so their exchanges are never overwritten and must be kept up to date by hand.
 
 TypeIDs are replaced with fake ones in recordings, and temporary directories that Chiplab creates on its side (such as `./tmp/foo-QHpLw0` in test suite artifacts) with `[CHIPLAB_TEMP_DIR]`.
 Cases refer to the project to run in as `project_00000000000000000000000001`; set the real project to record or bypass in with `TEST_CHIPLAB_PROJECT_ID`.
