@@ -38,13 +38,14 @@ jobs:
         include:
           - target: x86_64-unknown-linux-musl
             runs-on: ubuntu-latest
-            installables: .#static
+            package: .#static
           - target: aarch64-unknown-linux-musl
             runs-on: ubuntu-24.04-arm
-            installables: .#static
+            package: .#static
           - target: aarch64-apple-darwin
             runs-on: macos-latest
-            installables: .#default .#checks.aarch64-darwin.package-portable
+            package: .#default
+            checks: .#checks.aarch64-darwin.package-portable
     timeout-minutes: 30
 
     permissions:
@@ -56,7 +57,11 @@ jobs:
       - uses: cachix/install-nix-action@a49548c11d9846ad46ecc0115273879b045f001c  # v31.10.7
 
       - name: Build
-        run: nix build --print-build-logs --out-link result ${{ matrix.installables }}
+        run: nix build --print-build-logs --out-link result ${{ matrix.package }}
+
+      - name: Check
+        if: matrix.checks
+        run: nix build --print-build-logs --no-link ${{ matrix.checks }}
 
       # Named without the version, so `releases/latest/download/<name>` always points at the newest release.
       - name: Package
