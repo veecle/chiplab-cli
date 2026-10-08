@@ -36,8 +36,9 @@ pub struct WrappedError {
 }
 
 impl WrappedError {
-    /// Layers `message` on top of `source`, prefer [`ResultExt::wrap_error`] when wrapping a
-    /// [`Result`].
+    /// Layers `message` on top of `source`.
+    ///
+    /// Prefer [`ResultExt::wrap_error`] when wrapping a [`Result`].
     pub fn new(message: impl Display, source: impl Into<BoxError>) -> Self {
         Self {
             message: message.to_string(),
