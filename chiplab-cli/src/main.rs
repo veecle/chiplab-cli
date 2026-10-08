@@ -25,6 +25,8 @@ struct Args {
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> ExitCode {
     let args = Args::try_parse().unwrap_or_else(|error| {
+        // A bare invocation gets the banner before the usual help; an explicit `--help` stays
+        // plain and goes through clap's normal path.
         if error.kind() == ErrorKind::DisplayHelpOnMissingArgumentOrSubcommand {
             eprintln!("{BANNER}");
         }
