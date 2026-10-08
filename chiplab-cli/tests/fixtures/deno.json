@@ -2,6 +2,7 @@
   "compilerOptions": {
     "types": ["https://chiplab.veecle.ai/mcp/resources/schemas/chiplab.d.ts"]
   },
+  "lock": false,
   "lint": {
     "include": ["*.ts"]
   },
