@@ -28,9 +28,7 @@
       cargoBuildFlags = ["--package" "chiplab-cli"];
       # The HTTP client needs CA certificates to be created, even when only talking to the local test proxy.
       nativeCheckInputs = [pkgs.cacert];
-      # On macOS the `libc` crate links `libiconv`, which inside Nix resolves to a `/nix/store` copy,
-      # so the binary would not run on a Mac without Nix.
-      # Nothing uses it, so let the linker drop unused libraries.
+      # Drop unused libraries on macOS, so prebuilt binaries don't link ones like `libiconv` from `/nix/store`.
       env = pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
         RUSTFLAGS = "-C link-arg=-Wl,-dead_strip_dylibs";
       };
