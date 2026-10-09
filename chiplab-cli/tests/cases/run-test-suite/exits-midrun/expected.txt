@@ -1,6 +1,6 @@
 $ chiplab-cli run-test-suite --project project_00000000000000000000000001 --firmware hello-stm32f4-discovery.elf --test-suite exits-midrun.ts --board stm32f4_discovery
-exit status: 3
+exit status: 4
 --- stdout
 --- stderr
 waiting for test suite run `run_test_suite_069688381cc52df8b000000000`
-error: test suite did not run to completion
+error: test suite failed: 1 of 3 tests failed, 1 passed, 1 skipped

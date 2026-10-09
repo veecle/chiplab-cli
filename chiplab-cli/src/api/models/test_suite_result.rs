@@ -1,8 +1,7 @@
 /// The result of a completed test suite run.
 #[derive(serde::Deserialize, Debug)]
 pub struct TestSuiteResult {
-    /// Missing if the suite did not run to completion, e.g. because it did not compile or exited
-    /// early.
+    /// Missing if the suite did not run to completion, e.g. because it did not compile.
     pub summary: Option<Summary>,
 
     /// Names of the artifacts the run produced.

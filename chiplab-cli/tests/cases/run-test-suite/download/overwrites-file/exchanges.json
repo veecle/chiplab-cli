@@ -21,7 +21,8 @@
           "result": {
             "artifacts": [
               "testsuite_report",
-              "testsuite_stdout"
+              "testsuite_stdout",
+              "testsuite_stderr"
             ],
             "summary": {
               "failed": 0,
@@ -44,6 +45,20 @@
       "body": {
         "json": {
           "download_url": "{{base_url}}/external/c4b0078455716ae2/0"
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "POST",
+      "path": "/api/stable/jobs/run_test_suite_069688381cc52df8b000000000/artifacts/testsuite_stderr/download-tickets"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "json": {
+          "download_url": "{{base_url}}/external/a192b153e26f4718/0"
         }
       }
     }
@@ -134,12 +149,24 @@
   {
     "request": {
       "method": "GET",
+      "path": "/external/a192b153e26f4718/0"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "text": "Check [CHIPLAB_TEMP_DIR]/test.ts\n"
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "GET",
       "path": "/external/c4b0078455716ae2/0"
     },
     "response": {
       "status": 200,
       "body": {
-        "text": "{\"planned\":1,\"passed\":1,\"failed\":0,\"skipped\":0,\"todo\":0,\"bail_out\":false,\"tests\":[{\"number\":1,\"name\":\"always passes\",\"status\":\"passed\"}],\"diagnostics\":[\"# [CHIPLAB_TEMP_DIR]/test.ts\"]}"
+        "text": "{\"planned\":1,\"passed\":1,\"failed\":0,\"skipped\":0,\"tests\":[{\"name\":\"always passes\",\"status\":\"passed\",\"failure_message\":null}]}"
       }
     }
   },
@@ -151,7 +178,7 @@
     "response": {
       "status": 200,
       "body": {
-        "text": "TAP version 14\n# [CHIPLAB_TEMP_DIR]/test.ts\nok 1 - always passes\n1..1\n"
+        "text": "running 1 test from [CHIPLAB_TEMP_DIR]/test.ts\nalways passes ... ok (336ms)\n\nok | 1 passed | 0 failed (351ms)\n\n"
       }
     }
   }
