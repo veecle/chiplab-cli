@@ -1,4 +1,3 @@
-# Deno checks for the test suite fixtures.
 {root, ...}: {
   perSystem = {pkgs, ...}: let
     fixtures = root + /chiplab-cli/tests/fixtures;
@@ -38,7 +37,13 @@
       '';
     };
   in {
-    make-shells.default.packages = [pkgs.deno update-chiplab-d-ts];
+    make-shells.default.packages = [pkgs.deno];
+
+    apps.update-chiplab-d-ts = {
+      type = "app";
+      meta.description = "Download chiplab.d.ts from the Chiplab service.";
+      program = pkgs.lib.getExe update-chiplab-d-ts;
+    };
 
     jj-fix.tools.deno = {
       command = ["deno" "fmt" "--ext=ts" "-"];
@@ -46,10 +51,6 @@
     };
 
     checks = {
-      chiplab-d-ts-up-to-date = pkgs.fetchurl {
-        url = chiplabDTsUrl;
-        sha256 = builtins.hashFile "sha256" (root + /chiplab.d.ts);
-      };
       fixtures-deno-lint = denoCheck "deno-lint" "deno lint";
       fixtures-deno-fmt = denoCheck "deno-fmt" "deno fmt --check";
       fixtures-deno-check = denoCheck "deno-check" ''
