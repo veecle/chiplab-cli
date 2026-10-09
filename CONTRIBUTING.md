@@ -55,6 +55,7 @@ See [`snapbox::Assert`](https://docs.rs/snapbox/latest/snapbox/assert/struct.Ass
 By default the proxy replays `exchanges.json`, failing the case on any request that doesn't match a remaining recorded one, and on any recorded exchange that isn't requested.
 Requests may come in any order, as the CLI makes some concurrently; identical requests are answered in their recorded order.
 To record the exchanges against a real Chiplab instance instead, run with `TEST_CHIPLAB_PROXY=record`, configured by `CHIPLAB_URL` and `CHIPLAB_TOKEN` as for the CLI itself.
+Recorded exchanges are sorted by request so that re-recording doesn't reorder them in the case of concurrent requests.
 Recording overwrites the exchanges of every case run, so limit it to the case being recorded to avoid re-recording unrelated cases:
 
 ```sh
@@ -70,6 +71,7 @@ Cases refer to the project to run in as `project_00000000000000000000000001`; se
 
 Request headers are not recorded, so no credentials end up in the recordings.
 Absolute URLs to hosts other than `CHIPLAB_URL` in responses are rewritten to point at the proxy, so requests to them (such as uploads) are recorded and replayed too.
+Both the fake TypeIDs and the rewritten URLs are derived from a hash of the request whose response they first appeared in, so they don't depend on the order of concurrent requests, as long as those requests differ.
 
 ## Generated API client
 
