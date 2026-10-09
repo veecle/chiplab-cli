@@ -85,10 +85,13 @@ fn test(args_path: &Path) -> Result<String> {
         .exists()
         .not()
         .then(|| {
-            proxy::Proxy::start(
-                proxy::Mode::from_env()?,
-                &case_directory.join("exchanges.json"),
-            )
+            // Hand-written exchanges can't be reproduced by a real instance, so always replay them.
+            let mode = if case_directory.join("replay-only").exists() {
+                proxy::Mode::Replay
+            } else {
+                proxy::Mode::from_env()?
+            };
+            proxy::Proxy::start(mode, &case_directory.join("exchanges.json"))
         })
         .transpose()?;
 
