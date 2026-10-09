@@ -183,7 +183,16 @@ fn parse_board(value: &str) -> Result<Board, String> {
         Err(error) => return Err(format!("failed to read `{path}`:\n{error}")),
     };
 
-    serde_json::from_slice(&contents).map_err(|error| format!("failed to parse `{path}`:\n{error}"))
+    let mut deserializer = serde_json::Deserializer::from_slice(&contents);
+
+    let board = serde_ignored::deserialize(
+        &mut deserializer,
+        |key| eprintln!("warning: dropping unknown key `{key}` in `{path}`, this may be an error in future versions"),
+    )
+    .and_then(|board| deserializer.end().map(|()| board))
+    .map_err(|error| format!("failed to parse `{path}`:\n{error}"))?;
+
+    Ok(board)
 }
 
 impl Args {

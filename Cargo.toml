@@ -32,6 +32,7 @@ serde = { version = "1.0.229", default-features = false, features = [
   "derive",
   "std"
 ] }
+serde_ignored = { version = "0.1.14", default-features = false }
 serde_json = { version = "1.0.151", default-features = false, features = ["std"] }
 serde_repr = { version = "0.1.21", default-features = false }
 snapbox = { version = "1.2.2", default-features = false }
