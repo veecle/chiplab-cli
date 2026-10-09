@@ -88,6 +88,13 @@ After changing `chiplab-api.json` or `openapi-templates/`, regenerate the crate:
 nix run .#update-chiplab-api
 ```
 
+`chiplab.d.ts` types the test suite fixtures and, like `chiplab-api.json`, comes from the Chiplab service.
+To update it:
+
+```sh
+nix run .#update-chiplab-d-ts
+```
+
 ## Releasing
 
 Releases are published by the [`release`](.github/workflows/release.yaml) workflow when a `v<version>` tag is pushed.

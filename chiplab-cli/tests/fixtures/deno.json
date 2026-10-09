@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "types": ["../../../chiplab.d.ts"]
+  },
+  "lock": false,
+  "lint": {
+    "include": ["*.ts"]
+  },
+  "fmt": {
+    "include": ["*.ts"]
+  }
+}
