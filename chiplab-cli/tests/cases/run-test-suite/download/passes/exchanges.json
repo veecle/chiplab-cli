@@ -89,6 +89,7 @@
           "project_id": "project_00000000000000000000000001",
           "result": {
             "artifacts": [
+              "testsuite_report",
               "testsuite_stdout"
             ],
             "summary": {
@@ -105,7 +106,7 @@
   {
     "request": {
       "method": "POST",
-      "path": "/api/stable/jobs/run_test_suite_00000000000000000000000001/artifacts/testsuite_stdout/download-tickets"
+      "path": "/api/stable/jobs/run_test_suite_00000000000000000000000001/artifacts/testsuite_report/download-tickets"
     },
     "response": {
       "status": 200,
@@ -118,13 +119,39 @@
   },
   {
     "request": {
+      "method": "POST",
+      "path": "/api/stable/jobs/run_test_suite_00000000000000000000000001/artifacts/testsuite_stdout/download-tickets"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "json": {
+          "download_url": "{{base_url}}/external/3"
+        }
+      }
+    }
+  },
+  {
+    "request": {
       "method": "GET",
       "path": "/external/2"
     },
     "response": {
       "status": 200,
       "body": {
-        "text": "# Subtest: trivially passes\nok 1 - trivially passes\n"
+        "text": "{\"planned\":1,\"passed\":1,\"failed\":0,\"skipped\":0,\"todo\":0,\"bail_out\":false,\"tests\":[{\"number\":1,\"name\":\"always passes\",\"status\":\"passed\"}],\"diagnostics\":[\"# [CHIPLAB_TEMP_DIR]/test.ts\"]}"
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "GET",
+      "path": "/external/3"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "text": "TAP version 14\n# [CHIPLAB_TEMP_DIR]/test.ts\nok 1 - always passes\n1..1\n"
       }
     }
   }
