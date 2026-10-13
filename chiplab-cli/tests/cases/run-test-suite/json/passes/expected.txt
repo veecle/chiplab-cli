@@ -1,4 +1,4 @@
-$ chiplab-cli run-test-suite --project project_00000000000000000000000001 --firmware hello-stm32f4-discovery.elf --test-suite trivially-passes.ts --board stm32f4_discovery --json
+$ chiplab-cli run-test-suite --project project_00000000000000000000000001 --firmware hello-stm32f4-discovery.elf --test-suite trivially-passes.ts --board stm32f4-discovery.json --json
 exit status: 0
 --- stdout
 {"job_id":"run_test_suite_069688381cc52df8b000000000","outcome":"passed","summary":{"planned":1,"passed":1,"failed":0},"error":null}

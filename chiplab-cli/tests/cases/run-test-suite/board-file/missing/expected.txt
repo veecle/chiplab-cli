@@ -1,0 +1,8 @@
+$ chiplab-cli run-test-suite --project project --firmware firmware.elf --test-suite test-suite.ts --board missing-board.json
+exit status: 2
+--- stdout
+--- stderr
+error: invalid value 'missing-board.json' for '--board <FILE>': failed to read `missing-board.json`:
+No such file or directory (os error 2)
+
+For more information, try '--help'.

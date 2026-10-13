@@ -6,4 +6,4 @@ firmware.elf
 --test-suite
 test-suite.ts
 --board
-not_a_board
+missing-board.json

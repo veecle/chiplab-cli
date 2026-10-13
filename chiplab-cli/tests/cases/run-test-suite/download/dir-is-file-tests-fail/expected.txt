@@ -1,4 +1,4 @@
-$ chiplab-cli run-test-suite --project project_00000000000000000000000001 --firmware hello-stm32f4-discovery.elf --test-suite always-fails.ts --board stm32f4_discovery --download-dir [TEMP]/out
+$ chiplab-cli run-test-suite --project project_00000000000000000000000001 --firmware hello-stm32f4-discovery.elf --test-suite always-fails.ts --board stm32f4-discovery.json --download-dir [TEMP]/out
 exit status: 4
 --- stdout
 --- stderr

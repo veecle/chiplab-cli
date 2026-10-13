@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use camino::{Utf8Path, Utf8PathBuf};
 use chiplab_api::apis::default_api;
-use chiplab_api::models::{Board, BoardModel, RunTestSuiteRequest, WaitForJobResponse};
+use chiplab_api::models::{Board, RunTestSuiteRequest, WaitForJobResponse};
 
 use crate::api;
 use crate::api::models::TestSuiteResult;
@@ -35,12 +35,11 @@ pub struct Args {
     #[arg(short, long, value_name = "FILE")]
     test_suite: PathBuf,
 
-    /// The board model to simulate, e.g. `stm32f4_discovery`, or the path to a JSON file with the
-    /// full board definition.
+    /// The path to a JSON file with the board definition to run the firmware on.
     ///
     /// See <https://chiplab.veecle.ai/mcp/resources/docs/boards.md> for the available boards and
     /// the board definition format.
-    #[arg(short, long, value_name = "MODEL|FILE", value_parser = parse_board)]
+    #[arg(short, long, value_name = "FILE", value_parser = parse_board)]
     board: Board,
 
     /// Directory to download the run's artifacts to. If missing, no artifacts are downloaded.
@@ -157,31 +156,11 @@ impl TestSuiteReport {
     }
 }
 
-/// Parses a board model by its API name.
-///
-/// The generated `BoardModel` has no `FromStr`, so this goes through serde to reuse its renames,
-/// keeping the accepted names and the "expected one of" error in sync with the spec.
-fn parse_board_model(model: &str) -> Result<BoardModel, serde_json::Error> {
-    serde_json::from_value(serde_json::Value::String(model.to_owned()))
-}
-
-/// Parses a board either by its model's API name, or from a JSON file with the full definition.
+/// Parses a board from a JSON file with the full definition.
 fn parse_board(value: &str) -> Result<Board, String> {
-    let model_error = match parse_board_model(value) {
-        Ok(model) => return Ok(Board::new(model)),
-        Err(error) => error,
-    };
-
     let path = Utf8Path::new(value);
-    let contents = match std::fs::read(path) {
-        Ok(contents) => contents,
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
-            return Err(format!(
-                "{model_error}\nor a path to a board definition file, but failed to read `{path}`:\n{error}"
-            ));
-        }
-        Err(error) => return Err(format!("failed to read `{path}`:\n{error}")),
-    };
+    let contents =
+        std::fs::read(path).map_err(|error| format!("failed to read `{path}`:\n{error}"))?;
 
     let mut deserializer = serde_json::Deserializer::from_slice(&contents);
 
