@@ -1,4 +1,4 @@
-$ chiplab-cli run-test-suite --project project_00000000000000000000000001 --firmware hello-stm32f4-discovery.elf --test-suite trivially-passes.ts --board stm32f4_discovery
+$ chiplab-cli run-test-suite --project project_00000000000000000000000001 --firmware hello-stm32f4-discovery.elf --test-suite trivially-passes.ts --board stm32f4-discovery.json
 exit status: 0
 --- stdout
 test suite passed: 1 of 1 tests passed

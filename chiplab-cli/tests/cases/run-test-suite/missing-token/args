@@ -6,4 +6,4 @@ firmware.elf
 --test-suite
 test-suite.ts
 --board
-stm32f4_discovery
+stm32f4-discovery.json

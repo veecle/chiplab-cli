@@ -6,4 +6,4 @@ hello-stm32f4-discovery.elf
 --test-suite
 skips-test.ts
 --board
-stm32f4_discovery
+stm32f4-discovery.json

@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use camino::{Utf8Path, Utf8PathBuf};
 use chiplab_api::apis::default_api;
-use chiplab_api::models::{Board, BoardModel, RunTestSuiteRequest, WaitForJobResponse};
+use chiplab_api::models::{Board, RunTestSuiteRequest, WaitForJobResponse};
 
 use crate::api;
 use crate::api::models::TestSuiteResult;
@@ -35,11 +35,12 @@ pub struct Args {
     #[arg(short, long, value_name = "FILE")]
     test_suite: PathBuf,
 
-    /// The board model to simulate, e.g. `stm32f4_discovery`.
+    /// The path to a JSON file with the board definition to run the firmware on.
     ///
-    /// See <https://chiplab.veecle.ai/mcp/resources/docs/boards.md> for the available boards.
-    #[arg(short, long, value_name = "MODEL", value_parser = parse_board_model)]
-    board: BoardModel,
+    /// See <https://chiplab.veecle.ai/mcp/resources/docs/boards.md> for the available boards and
+    /// the board definition format.
+    #[arg(short, long, value_name = "FILE", value_parser = parse_board)]
+    board: Board,
 
     /// Directory to download the run's artifacts to. If missing, no artifacts are downloaded.
     ///
@@ -155,12 +156,22 @@ impl TestSuiteReport {
     }
 }
 
-/// Parses a board model by its API name.
-///
-/// The generated `BoardModel` has no `FromStr`, so this goes through serde to reuse its renames,
-/// keeping the accepted names and the "expected one of" error in sync with the spec.
-fn parse_board_model(model: &str) -> Result<BoardModel, serde_json::Error> {
-    serde_json::from_value(serde_json::Value::String(model.to_owned()))
+/// Parses a board from a JSON file with the full definition.
+fn parse_board(value: &str) -> Result<Board, String> {
+    let path = Utf8Path::new(value);
+    let contents =
+        std::fs::read(path).map_err(|error| format!("failed to read `{path}`:\n{error}"))?;
+
+    let mut deserializer = serde_json::Deserializer::from_slice(&contents);
+
+    let board = serde_ignored::deserialize(
+        &mut deserializer,
+        |key| eprintln!("warning: dropping unknown key `{key}` in `{path}`, this may be an error in future versions"),
+    )
+    .and_then(|board| deserializer.end().map(|()| board))
+    .map_err(|error| format!("failed to parse `{path}`:\n{error}"))?;
+
+    Ok(board)
 }
 
 impl Args {
@@ -181,8 +192,7 @@ impl Args {
             .await
             .wrap_error("failed to upload the test suite")?;
 
-        let request =
-            RunTestSuiteRequest::new(Board::new(board), firmware_artifact_id, suite_artifact_id);
+        let request = RunTestSuiteRequest::new(board, firmware_artifact_id, suite_artifact_id);
         let job_id = default_api::run_test_suite(&app.api, &project_id, request)
             .await
             .map_err(api::error)

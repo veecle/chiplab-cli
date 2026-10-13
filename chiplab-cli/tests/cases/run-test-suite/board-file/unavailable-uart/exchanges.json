@@ -1,0 +1,72 @@
+[
+  {
+    "request": {
+      "method": "POST",
+      "path": "/api/stable/projects/project_00000000000000000000000001/test-suite-runs",
+      "body": {
+        "board": {
+          "model": "stm32f4_discovery",
+          "uarts": [
+            "sysbus.usart2"
+          ]
+        },
+        "firmware_artifact_id": "artifact_0929e23c4fd5a216a000000000",
+        "suite_artifact_id": "artifact_0929e23c4fd5a216a000000001"
+      }
+    },
+    "response": {
+      "status": 422,
+      "body": {
+        "text": "Failed to deserialize the JSON body into the target type: board: UART `sysbus.usart2` is not available on board `stm32f4_discovery`; available UARTs: usart1, usart2, usart3, uart4, uart5 at line 1 column 64"
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "POST",
+      "path": "/api/stable/projects/project_00000000000000000000000001/upload-tickets"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "json": {
+          "artifact_id": "artifact_0929e23c4fd5a216a000000000",
+          "upload_url": "{{base_url}}/external/929e23c4fd5a216a/0"
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "POST",
+      "path": "/api/stable/projects/project_00000000000000000000000001/upload-tickets"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "json": {
+          "artifact_id": "artifact_0929e23c4fd5a216a000000001",
+          "upload_url": "{{base_url}}/external/929e23c4fd5a216a/1"
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "PUT",
+      "path": "/external/929e23c4fd5a216a/0"
+    },
+    "response": {
+      "status": 200
+    }
+  },
+  {
+    "request": {
+      "method": "PUT",
+      "path": "/external/929e23c4fd5a216a/1"
+    },
+    "response": {
+      "status": 200
+    }
+  }
+]

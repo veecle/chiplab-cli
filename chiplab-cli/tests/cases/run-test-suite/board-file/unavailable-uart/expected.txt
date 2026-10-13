@@ -1,0 +1,7 @@
+$ chiplab-cli run-test-suite --project project_00000000000000000000000001 --firmware hello-stm32f4-discovery.elf --test-suite trivially-passes.ts --board unavailable-uart-board.json
+exit status: 1
+--- stdout
+--- stderr
+error: failed to start the test suite run
+  - server responded with 422 Unprocessable Entity
+  - Failed to deserialize the JSON body into the target type: board: UART `sysbus.usart2` is not available on board `stm32f4_discovery`; available UARTs: usart1, usart2, usart3, uart4, uart5 at line 1 column 64

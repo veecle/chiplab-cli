@@ -1,0 +1,9 @@
+run-test-suite
+--project
+project_00000000000000000000000001
+--firmware
+hello-stm32f4-discovery.elf
+--test-suite
+trivially-passes.ts
+--board
+unavailable-uart-board.json

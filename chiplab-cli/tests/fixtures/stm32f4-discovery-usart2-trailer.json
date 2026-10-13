@@ -1,0 +1,5 @@
+{
+  "model": "stm32f4_discovery",
+  "uarts": ["usart2"]
+}
+oh no

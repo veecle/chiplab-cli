@@ -1,0 +1,217 @@
+[
+  {
+    "request": {
+      "method": "GET",
+      "path": "/api/stable/jobs/run_test_suite_08689e8cd70728e79000000000"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "json": {
+          "input": {
+            "board": {
+              "model": "stm32f4_discovery",
+              "uarts": [
+                "usart2"
+              ]
+            },
+            "firmware_artifact_id": "artifact_0929e23c4fd5a216a000000000",
+            "suite_artifact_id": "artifact_0929e23c4fd5a216a000000001"
+          },
+          "job_id": "run_test_suite_08689e8cd70728e79000000000",
+          "project_id": "project_00000000000000000000000001",
+          "result": {
+            "artifacts": [
+              "testsuite_report",
+              "testsuite_stdout",
+              "testsuite_stderr",
+              "firmware_uart"
+            ],
+            "summary": {
+              "failed": 0,
+              "passed": 1,
+              "planned": 1
+            }
+          },
+          "status": "succeeded"
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "POST",
+      "path": "/api/stable/jobs/run_test_suite_08689e8cd70728e79000000000/artifacts/firmware_uart/download-tickets"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "json": {
+          "download_url": "{{base_url}}/external/f70e946ea157604f/0"
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "POST",
+      "path": "/api/stable/jobs/run_test_suite_08689e8cd70728e79000000000/artifacts/testsuite_report/download-tickets"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "json": {
+          "download_url": "{{base_url}}/external/efbcc4ee90a0364c/0"
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "POST",
+      "path": "/api/stable/jobs/run_test_suite_08689e8cd70728e79000000000/artifacts/testsuite_stderr/download-tickets"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "json": {
+          "download_url": "{{base_url}}/external/e937526d216a59fa/0"
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "POST",
+      "path": "/api/stable/jobs/run_test_suite_08689e8cd70728e79000000000/artifacts/testsuite_stdout/download-tickets"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "json": {
+          "download_url": "{{base_url}}/external/7a9c59b1cdaa81ab/0"
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "POST",
+      "path": "/api/stable/projects/project_00000000000000000000000001/test-suite-runs",
+      "body": {
+        "board": {
+          "model": "stm32f4_discovery",
+          "uarts": [
+            "usart2"
+          ]
+        },
+        "firmware_artifact_id": "artifact_0929e23c4fd5a216a000000000",
+        "suite_artifact_id": "artifact_0929e23c4fd5a216a000000001"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "json": {
+          "run_test_suite_id": "run_test_suite_08689e8cd70728e79000000000"
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "POST",
+      "path": "/api/stable/projects/project_00000000000000000000000001/upload-tickets"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "json": {
+          "artifact_id": "artifact_0929e23c4fd5a216a000000000",
+          "upload_url": "{{base_url}}/external/929e23c4fd5a216a/0"
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "POST",
+      "path": "/api/stable/projects/project_00000000000000000000000001/upload-tickets"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "json": {
+          "artifact_id": "artifact_0929e23c4fd5a216a000000001",
+          "upload_url": "{{base_url}}/external/929e23c4fd5a216a/1"
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "GET",
+      "path": "/external/7a9c59b1cdaa81ab/0"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "text": "running 1 test from [CHIPLAB_TEMP_DIR]/test.ts\nfirmware greets ... ok (292ms)\n\nok | 1 passed | 0 failed (309ms)\n\n"
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "PUT",
+      "path": "/external/929e23c4fd5a216a/0"
+    },
+    "response": {
+      "status": 200
+    }
+  },
+  {
+    "request": {
+      "method": "PUT",
+      "path": "/external/929e23c4fd5a216a/1"
+    },
+    "response": {
+      "status": 200
+    }
+  },
+  {
+    "request": {
+      "method": "GET",
+      "path": "/external/e937526d216a59fa/0"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "text": "Check [CHIPLAB_TEMP_DIR]/test.ts\n"
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "GET",
+      "path": "/external/efbcc4ee90a0364c/0"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "text": "{\"planned\":1,\"passed\":1,\"failed\":0,\"skipped\":0,\"tests\":[{\"name\":\"firmware greets\",\"status\":\"passed\",\"failure_message\":null}]}"
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "GET",
+      "path": "/external/f70e946ea157604f/0"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "text": "Hello world!\n"
+      }
+    }
+  }
+]
