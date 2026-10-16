@@ -2,7 +2,26 @@
 
 Command-line client for [Chiplab](https://chiplab.veecle.ai).
 
-The intended use case is hooking Chiplab into a CI pipeline, so the CLI is the stable interface to interact with it.
+Chiplab by Veecle is an MCP platform that lets AI agents compile, simulate, and validate firmware on the actual target chip without physical hardware.
+`chiplab-cli` lets you run Chiplab firmware tests from your CI pipeline, the same way your agent runs them during development.
+
+## What it does
+
+- **Runs test suites in CI.**
+  It runs your TypeScript test suite against a firmware build on a simulated board and reports whether the tests passed.
+- **Fits into pipelines.**
+  Each outcome (passed, test failures, or a run that didn't complete) has its own exit code.
+  There's optional JSON output for other tools, and the run's artifacts can be downloaded for your CI to keep.
+- **Runs almost anywhere.**
+  It's a single prebuilt binary for Linux (x86_64 and aarch64) and macOS (Apple Silicon).
+  You can also build it with `cargo` or run it with Nix.
+
+## Getting started
+
+Ask your agent to add Chiplab to your CI.
+Through the Chiplab MCP server, it can find out how to install the CLI, write the pipeline step, and set up the access token.
+
+To explore the CLI yourself, run `chiplab-cli --help`.
 
 ## Installation
 
