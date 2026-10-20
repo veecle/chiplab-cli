@@ -1,5 +1,12 @@
 name: claude-review
 
+# Shared template maintained at https://github.com/veecle/style-guide/blob/main/.github/workflows/claude-review.yaml,
+# copy it unmodified.
+#
+# All filtering and the review itself live in the reusable workflow, see there for details.
+# Keep referencing it from `veecle/style-guide` at `main`: the Anthropic federation rule only trusts that exact
+# workflow ref, any other ref (or a local copy) fails to authenticate.
+
 on:
   pull_request:
     types: [opened, ready_for_review]
@@ -9,44 +16,12 @@ on:
     types: [created]
 
 jobs:
-  review:
-    runs-on: ubuntu-latest
+  claude-review:
+    uses: veecle/style-guide/.github/workflows/reusable-claude-review.yaml@main
 
-    if: |
-      (
-        github.event_name == 'pull_request'
-        && !github.event.pull_request.draft
-        && github.event.pull_request.head.repo.full_name == github.repository
-        && github.actor != 'dependabot[bot]'
-      )
-      || (
-        github.event_name == 'issue_comment'
-        && github.event.issue.pull_request
-        && contains(github.event.comment.body, '/claude-review')
-        && github.event.comment.user.type != 'Bot'
-      )
-
+    # Upper bound for the jobs in the reusable workflow, which narrow them down per job.
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write
       id-token: write
       actions: read
-
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-
-      - uses: veecle/style-guide/.github/actions/claude-review@main
-        with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          allowed_bots: veecle-renovate-bot
-
-  minimize-old-claude-comments:
-    runs-on: ubuntu-latest
-    needs: review
-    if: always() && needs.review.result == 'success'
-
-    permissions:
-      pull-requests: write
-
-    steps:
-      - uses: veecle/style-guide/.github/actions/minimize-old-claude-comments@main
