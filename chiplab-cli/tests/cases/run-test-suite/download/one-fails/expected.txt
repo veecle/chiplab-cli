@@ -1,0 +1,21 @@
+$ chiplab-cli run-test-suite --project project_00000000000000000000000001 --firmware hello-stm32f4-discovery.elf --test-suite trivially-passes.ts --board stm32f4-discovery.json --download-dir [TEMP]/out
+exit status: 1
+--- stdout
+test suite passed: 1 of 1 tests passed
+--- stderr
+waiting for test suite run `run_test_suite_069688381cc52df8b000000000`
+error: failed to download `[TEMP]/out/testsuite_report`
+  - server responded with 404 Not Found
+  - artifact not found
+downloaded `[TEMP]/out/testsuite_stdout`
+downloaded `[TEMP]/out/testsuite_stderr`
+error: 1 of 3 artifacts failed to download
+--- [TEMP]/out/
+--- [TEMP]/out/testsuite_stderr
+Check [CHIPLAB_TEMP_DIR]/test.ts
+--- [TEMP]/out/testsuite_stdout
+running 1 test from [CHIPLAB_TEMP_DIR]/test.ts
+always passes ... ok ([..]ms)
+
+ok | 1 passed | 0 failed ([..]ms)
+
