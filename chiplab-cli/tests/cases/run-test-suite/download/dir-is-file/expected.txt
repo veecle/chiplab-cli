@@ -3,7 +3,10 @@ exit status: 1
 --- stdout
 test suite passed: 1 of 1 tests passed
 --- stderr
-waiting for test suite run `run_test_suite_069688381cc52df8b000000000`
+     Uploaded firmware `hello-stm32f4-discovery.elf`
+     Uploaded test suite `trivially-passes.ts`
+      Waiting for test suite run `run_test_suite_069688381cc52df8b000000000`
+     Finished test suite run `run_test_suite_069688381cc52df8b000000000`
 error: failed to download the artifacts
   - failed to open `[TEMP]/out`
   - [..]

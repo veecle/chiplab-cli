@@ -1,0 +1,90 @@
+<svg width="1539px" height="332px" style="background: #1E1E1E" xmlns="http://www.w3.org/2000/svg">
+<style>
+  .label { fill: #DDDDDD; font: bold 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace; }
+</style>
+<g transform="translate(20 20)">
+<svg x="0px" y="0px" width="1499px" height="146px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+    <tspan x="10px" y="28px"><tspan>$ chiplab-cli run-test-suite --project project_00000000000000000000000000 --firmware hello-stm32f4-discovery.elf --test-suite trivially-passes.ts --board stm32f4-discovery.json</tspan>
+</tspan>
+    <tspan x="10px" y="46px"><tspan>exit status: 1</tspan>
+</tspan>
+    <tspan x="10px" y="64px"><tspan>--- stdout</tspan>
+</tspan>
+    <tspan x="10px" y="82px"><tspan>--- stderr</tspan>
+</tspan>
+    <tspan x="10px" y="100px"><tspan>error: failed to upload the firmware</tspan>
+</tspan>
+    <tspan x="10px" y="118px"><tspan>  - server responded with 404 Not Found</tspan>
+</tspan>
+    <tspan x="10px" y="136px"><tspan>  - project not found</tspan>
+</tspan>
+  </text>
+
+</svg>
+<text x="0px" y="182px" class="label">stderr frame 1</text>
+<svg x="0px" y="190px" width="1499px" height="38px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .fg-cyan { fill: #00AAAA }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    .bold { font-weight: bold; }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+    <tspan x="10px" y="28px"><tspan class="fg-cyan">⠙</tspan><tspan> </tspan><tspan class="fg-cyan bold">  Uploading</tspan><tspan> [                    ] 0/2 firmware `hello-stm32f4-discovery.elf`</tspan>
+</tspan>
+  </text>
+
+</svg>
+<text x="0px" y="264px" class="label">stderr frame 2</text>
+<svg x="0px" y="272px" width="1499px" height="20px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+  </text>
+
+</svg>
+</g>
+</svg>

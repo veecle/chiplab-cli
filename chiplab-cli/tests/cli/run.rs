@@ -6,30 +6,45 @@ use std::path::Path;
 use std::process::ExitStatus;
 
 use crate::error::{Chain, Result};
-use crate::{TEMP, proxy, push_trimmed};
+use crate::{TEMP, proxy, push_trimmed, terminal};
 
 const FIXTURES: &str = "tests/fixtures";
 
 /// Stands in for the proxy's URL in `expected.txt`.
 const CHIPLAB_URL: &str = "[CHIPLAB_URL]";
 
+/// Where the binary's stderr goes.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Stderr {
+    /// A pipe, rendered as is.
+    Pipe,
+
+    /// A terminal, rendered as the frames shown on it.
+    Terminal,
+}
+
 /// What a run of the binary did.
 #[derive(Debug, Clone)]
 pub struct Run {
     /// The command line the binary was run with.
-    invocation: String,
+    pub invocation: String,
 
     /// The exit status the binary finished with.
-    exit_status: ExitStatus,
+    pub exit_status: ExitStatus,
 
     /// What the binary wrote to stdout, as whole lines each ending in a newline.
-    stdout: String,
+    pub stdout: String,
 
-    /// What the binary wrote to stderr, as whole lines each ending in a newline.
-    stderr: String,
+    /// The screens drawn on stderr before the final one, for a terminal, each as whole lines
+    /// ending in a newline.
+    pub frames: Vec<String>,
+
+    /// What stderr finally showed: its output as is for a pipe, or the final screen for a terminal,
+    /// as whole lines each ending in a newline.
+    pub stderr: String,
 
     /// The directories and files left in the temporary directory, sorted by path.
-    files: Vec<Entry>,
+    pub files: Vec<Entry>,
 }
 
 /// A directory or file left in the temporary directory.
@@ -73,6 +88,7 @@ impl fmt::Display for Run {
             invocation,
             exit_status,
             stdout,
+            frames,
             stderr,
             files,
         } = self;
@@ -83,7 +99,11 @@ impl fmt::Display for Run {
             Some(code) => writeln!(f, "exit status: {code}")?,
             None => writeln!(f, "exit status: none ({exit_status})")?,
         }
-        write!(f, "--- stdout\n{stdout}--- stderr\n{stderr}")?;
+        write!(f, "--- stdout\n{stdout}")?;
+        for (frame, contents) in std::iter::zip(1.., frames) {
+            write!(f, "--- stderr frame {frame}\n{contents}")?;
+        }
+        write!(f, "--- stderr\n{stderr}")?;
         for entry in files {
             write!(f, "{entry}")?;
         }
@@ -98,11 +118,12 @@ impl Run {
             invocation,
             exit_status: _,
             stdout,
+            frames,
             stderr,
             files,
         } = self;
 
-        for text in [invocation, stdout, stderr] {
+        for text in [invocation, stdout, stderr].into_iter().chain(frames) {
             *text = text.replace(from, to);
         }
         for entry in files {
@@ -112,7 +133,12 @@ impl Run {
 }
 
 /// Runs the binary with `args` for the case in `case_directory`, recording what it did.
-pub fn run(case_directory: &Path, args: &[String]) -> Result<Run> {
+pub fn run(
+    case_directory: &Path,
+    args: &[String],
+    mode: proxy::Mode,
+    stderr: Stderr,
+) -> Result<Run> {
     let temp = tempfile::tempdir()?;
     let temp_path = temp.path().to_str().expect("temporary paths are UTF-8");
     let seed = case_directory.join("temp");
@@ -124,15 +150,7 @@ pub fn run(case_directory: &Path, args: &[String]) -> Result<Run> {
         .join("no-proxy")
         .exists()
         .not()
-        .then(|| {
-            // Hand-written exchanges can't be reproduced by a real instance, so always replay them.
-            let mode = if case_directory.join("replay-only").exists() {
-                proxy::Mode::Replay
-            } else {
-                proxy::Mode::from_env()?
-            };
-            proxy::Proxy::start(mode, &case_directory.join("exchanges.json"))
-        })
+        .then(|| proxy::Proxy::start(mode, &case_directory.join("exchanges.json")))
         .transpose()?;
 
     let forwarded_environment = [
@@ -158,6 +176,10 @@ pub fn run(case_directory: &Path, args: &[String]) -> Result<Run> {
             .env("CHIPLAB_TOKEN", "veecle_pat_test");
     }
 
+    if stderr == Stderr::Terminal {
+        command = command.env(terminal::ENV, terminal::env_value());
+    }
+
     let output = command.output()?;
 
     let invocation = std::iter::once("chiplab-cli")
@@ -168,8 +190,14 @@ pub fn run(case_directory: &Path, args: &[String]) -> Result<Run> {
     let mut stdout = String::new();
     push_trimmed(&mut stdout, &output.stdout);
 
-    let mut stderr = String::new();
-    push_trimmed(&mut stderr, &output.stderr);
+    let (frames, stderr) = match stderr {
+        Stderr::Pipe => {
+            let mut contents = String::new();
+            push_trimmed(&mut contents, &output.stderr);
+            (Vec::new(), contents)
+        }
+        Stderr::Terminal => terminal::screens(&output.stderr),
+    };
 
     let mut files = Vec::new();
     collect_files(&mut files, temp.path(), temp.path())?;
@@ -178,6 +206,7 @@ pub fn run(case_directory: &Path, args: &[String]) -> Result<Run> {
         invocation,
         exit_status: output.status,
         stdout,
+        frames,
         stderr,
         files,
     };
