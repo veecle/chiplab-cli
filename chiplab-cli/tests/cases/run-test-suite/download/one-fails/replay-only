@@ -1,0 +1,1 @@
+Chiplab can't be made to fail a download on demand, so the failing download ticket response is hand-written.

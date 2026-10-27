@@ -1,12 +1,13 @@
 use std::fmt::Debug;
 use std::path::Path;
+use std::sync::Arc;
 
 use camino::{Utf8Path, Utf8PathBuf};
 use cap_std::ambient_authority;
 use cap_std::fs_utf8::Dir;
 use chiplab_api::apis::default_api;
 use chiplab_api::apis::{Error, configuration::Configuration};
-use futures_util::TryStreamExt;
+use futures_util::stream::{FuturesOrdered, Stream, TryStreamExt};
 use tokio::io::AsyncWriteExt;
 
 use crate::error::{BoxError, Result, ResultExt, WrappedError};
@@ -99,29 +100,35 @@ pub async fn download(
     Ok(())
 }
 
-/// Downloads all the artifacts the job produced into `dir` concurrently, creating `dir` if missing.
+/// Prepares `dir` and returns a stream that downloads all the artifacts the job produced into it
+/// concurrently.
 ///
-/// Returns the paths of the downloaded files, in the same order as `artifact_names`.
+/// The stream performs the downloads as it is polled, yielding the path of each file
+/// along with whether it was downloaded, in the same order as `artifact_names`. Because multiple
+/// downloads run at once, later files may finish downloading before earlier ones are yielded.
 pub async fn download_all(
     configuration: &Configuration,
     job_id: &str,
     artifact_names: &[String],
     dir: &Utf8Path,
-) -> Result<Vec<Utf8PathBuf>> {
+) -> Result<impl Stream<Item = (Utf8PathBuf, Result<()>)>> {
     Dir::create_ambient_dir_all(dir, ambient_authority())
         .wrap_error(format_args!("failed to open `{dir}`"))?;
-    let handle = Dir::open_ambient_dir(dir, ambient_authority())
-        .wrap_error(format_args!("failed to open `{dir}`"))?;
+    let handle = Arc::new(
+        Dir::open_ambient_dir(dir, ambient_authority())
+            .wrap_error(format_args!("failed to open `{dir}`"))?,
+    );
 
-    futures_util::future::try_join_all(artifact_names.iter().map(|name| {
-        let handle = &handle;
-        async move {
-            download(configuration, job_id, name, handle)
-                .await
-                .wrap_error(format_args!("failed to download artifact `{name}`"))?;
+    let stream = artifact_names
+        .iter()
+        .map(move |name| {
+            let handle = handle.clone();
+            async move {
+                let result = download(configuration, job_id, name, &handle).await;
+                (dir.join(name), result)
+            }
+        })
+        .collect::<FuturesOrdered<_>>();
 
-            Ok(dir.join(name))
-        }
-    }))
-    .await
+    Ok(stream)
 }

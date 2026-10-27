@@ -1,15 +1,17 @@
 use std::io::Write;
 use std::path::PathBuf;
+use std::pin::pin;
 
 use camino::{Utf8Path, Utf8PathBuf};
 use chiplab_api::apis::default_api;
 use chiplab_api::models::{Board, RunTestSuiteRequest, WaitForJobResponse};
+use futures_util::stream::StreamExt;
 
 use crate::api;
 use crate::api::models::TestSuiteResult;
 use crate::api::models::test_suite_result::Summary;
 use crate::app::App;
-use crate::error::{self, Result, ResultExt, Silent};
+use crate::error::{self, Result, ResultExt, Silent, WrappedError};
 
 /// Run a TypeScript test suite against a firmware binary on a simulated board.
 ///
@@ -255,11 +257,33 @@ async fn maybe_download_artifacts(
         return Ok(());
     }
 
-    api::download_all(&app.api, job_id, artifacts, dir)
-        .await
-        .wrap_error("failed to download the artifacts")?
-        .iter()
-        .for_each(|path| eprintln!("downloaded `{path}`"));
+    // Report each failure in turn and keep going, so one failure doesn't stop the other artifacts
+    // from downloading.
+    let mut failed = 0;
+    let mut downloads = pin!(
+        api::download_all(&app.api, job_id, artifacts, dir)
+            .await
+            .wrap_error("failed to download the artifacts")?
+    );
+    while let Some((path, result)) = downloads.next().await {
+        match result {
+            Ok(()) => eprintln!("downloaded `{path}`"),
+            Err(error) => {
+                error::report(
+                    &WrappedError::new(format_args!("failed to download `{path}`"), error).into(),
+                );
+                failed += 1;
+            }
+        }
+    }
+
+    if failed > 0 {
+        return Err(format!(
+            "{failed} of {} artifacts failed to download",
+            artifacts.len()
+        )
+        .into());
+    }
 
     Ok(())
 }

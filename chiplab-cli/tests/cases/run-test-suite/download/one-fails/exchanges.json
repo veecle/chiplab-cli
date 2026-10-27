@@ -1,0 +1,171 @@
+[
+  {
+    "request": {
+      "method": "GET",
+      "path": "/api/stable/jobs/run_test_suite_069688381cc52df8b000000000"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "json": {
+          "input": {
+            "board": {
+              "model": "stm32f4_discovery",
+              "uarts": []
+            },
+            "firmware_artifact_id": "artifact_0929e23c4fd5a216a000000000",
+            "suite_artifact_id": "artifact_0929e23c4fd5a216a000000001"
+          },
+          "job_id": "run_test_suite_069688381cc52df8b000000000",
+          "project_id": "project_00000000000000000000000001",
+          "result": {
+            "artifacts": [
+              "testsuite_report",
+              "testsuite_stdout",
+              "testsuite_stderr"
+            ],
+            "summary": {
+              "failed": 0,
+              "passed": 1,
+              "planned": 1
+            }
+          },
+          "status": "succeeded"
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "POST",
+      "path": "/api/stable/jobs/run_test_suite_069688381cc52df8b000000000/artifacts/testsuite_report/download-tickets"
+    },
+    "response": {
+      "status": 404,
+      "body": {
+        "text": "artifact not found"
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "POST",
+      "path": "/api/stable/jobs/run_test_suite_069688381cc52df8b000000000/artifacts/testsuite_stderr/download-tickets"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "json": {
+          "download_url": "{{base_url}}/external/a192b153e26f4718/0"
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "POST",
+      "path": "/api/stable/jobs/run_test_suite_069688381cc52df8b000000000/artifacts/testsuite_stdout/download-tickets"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "json": {
+          "download_url": "{{base_url}}/external/ef3e0b85f94beeed/0"
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "POST",
+      "path": "/api/stable/projects/project_00000000000000000000000001/test-suite-runs",
+      "body": {
+        "board": {
+          "model": "stm32f4_discovery"
+        },
+        "firmware_artifact_id": "artifact_0929e23c4fd5a216a000000000",
+        "suite_artifact_id": "artifact_0929e23c4fd5a216a000000001"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "json": {
+          "run_test_suite_id": "run_test_suite_069688381cc52df8b000000000"
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "POST",
+      "path": "/api/stable/projects/project_00000000000000000000000001/upload-tickets"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "json": {
+          "artifact_id": "artifact_0929e23c4fd5a216a000000000",
+          "upload_url": "{{base_url}}/external/929e23c4fd5a216a/0"
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "POST",
+      "path": "/api/stable/projects/project_00000000000000000000000001/upload-tickets"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "json": {
+          "artifact_id": "artifact_0929e23c4fd5a216a000000001",
+          "upload_url": "{{base_url}}/external/929e23c4fd5a216a/1"
+        }
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "PUT",
+      "path": "/external/929e23c4fd5a216a/0"
+    },
+    "response": {
+      "status": 200
+    }
+  },
+  {
+    "request": {
+      "method": "PUT",
+      "path": "/external/929e23c4fd5a216a/1"
+    },
+    "response": {
+      "status": 200
+    }
+  },
+  {
+    "request": {
+      "method": "GET",
+      "path": "/external/a192b153e26f4718/0"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "text": "Check [CHIPLAB_TEMP_DIR]/test.ts\n"
+      }
+    }
+  },
+  {
+    "request": {
+      "method": "GET",
+      "path": "/external/ef3e0b85f94beeed/0"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "text": "running 1 test from [CHIPLAB_TEMP_DIR]/test.ts\nalways passes ... ok (269ms)\n\nok | 1 passed | 0 failed (286ms)\n\n"
+      }
+    }
+  }
+]
