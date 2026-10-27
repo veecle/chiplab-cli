@@ -57,3 +57,7 @@ nix run github:veecle/chiplab-cli/v0.1.0 -- --help
 ## Development
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for setting up a development environment and other contribution guidelines.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).

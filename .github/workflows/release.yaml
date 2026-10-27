@@ -72,6 +72,7 @@ jobs:
         run: |
           mkdir dist
           install -m 755 result/bin/* dist/
+          install -m 644 LICENSE dist/
           cd dist
           tar --create --gzip --file "../chiplab-cli-$TARGET.tar.gz" -- *
 
