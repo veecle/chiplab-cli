@@ -8,6 +8,7 @@ edition = "2024"
 description = "Command-line client for Chiplab"
 homepage = "https://chiplab.veecle.ai"
 repository = "https://github.com/veecle/chiplab-cli"
+license = "MIT"
 publish = false
 
 [workspace.dependencies]
