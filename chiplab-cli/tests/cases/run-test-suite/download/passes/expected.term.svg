@@ -59,11 +59,11 @@
 </tspan>
     <tspan x="10px" y="334px"><tspan>running 1 test from [CHIPLAB_TEMP_DIR]/test.ts</tspan>
 </tspan>
-    <tspan x="10px" y="352px"><tspan>always passes ... ok ([..]ms)</tspan>
+    <tspan x="10px" y="352px"><tspan>always passes ... ok ([..]s)</tspan>
 </tspan>
     <tspan x="10px" y="370px">
 </tspan>
-    <tspan x="10px" y="388px"><tspan>ok | 1 passed | 0 failed ([..]ms)</tspan>
+    <tspan x="10px" y="388px"><tspan>ok | 1 passed | 0 failed ([..]s)</tspan>
 </tspan>
     <tspan x="10px" y="406px">
 </tspan>
