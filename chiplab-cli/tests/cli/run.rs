@@ -2,16 +2,30 @@
 
 use std::fmt;
 use std::ops::Not;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::ExitStatus;
+use std::sync::LazyLock;
 
 use crate::error::{Chain, Result};
-use crate::{TEMP, proxy, push_trimmed, terminal};
-
-const FIXTURES: &str = "tests/fixtures";
+use crate::{TEMP, TESTS_DIRECTORY, proxy, push_trimmed, terminal};
 
 /// Stands in for the proxy's URL in `expected.txt`.
 const CHIPLAB_URL: &str = "[CHIPLAB_URL]";
+
+/// The binary to run, from `TEST_CHIPLAB_CLI` if set, otherwise the one built alongside the tests.
+///
+/// Made absolute, as the binary is run from within the fixtures directory.
+pub static CLI_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
+    let Some(path) = std::env::var_os("TEST_CHIPLAB_CLI") else {
+        return snapbox::cmd::cargo_bin!("chiplab-cli").to_owned();
+    };
+    std::fs::canonicalize(&path).unwrap_or_else(|error| {
+        panic!(
+            "failed to resolve `TEST_CHIPLAB_CLI` (`{}`): {error}",
+            path.display()
+        )
+    })
+});
 
 /// Where the binary's stderr goes.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -162,11 +176,11 @@ pub fn run(
     .into_iter()
     .filter_map(|key| std::env::var_os(key).map(|value| (key, value)));
 
-    let mut command = snapbox::cmd::Command::new(snapbox::cmd::cargo_bin!("chiplab-cli"))
+    let mut command = snapbox::cmd::Command::new(&*CLI_PATH)
         // A clear environment keeps a developer's `.env` from leaking into the results.
         .env_clear()
         .envs(forwarded_environment)
-        .current_dir(FIXTURES)
+        .current_dir(TESTS_DIRECTORY.join("fixtures"))
         .args(args.iter().map(|arg| arg.replace(TEMP, temp_path)));
 
     if let Some(proxy) = &proxy {
