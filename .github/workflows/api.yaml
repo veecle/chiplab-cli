@@ -1,0 +1,71 @@
+name: api
+
+# Runs the cases against the Chiplab testing instance to detect breakage in the API.
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Runs share one project on the server, so run them one at a time, without cancelling.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  bypass:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    permissions:
+      contents: read
+      issues: write
+
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      ISSUE_LABEL: api-breakage
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - uses: cachix/install-nix-action@a49548c11d9846ad46ecc0115273879b045f001c  # v31.10.7
+
+      - name: Build test harness
+        run: nix build .#test-harness --print-build-logs
+
+      - name: Cases against chiplab.testing.carml.de
+        run: ./result/bin/chiplab-cli-test-harness
+        env:
+          TEST_CHIPLAB_PROXY: bypass
+          CHIPLAB_URL: https://chiplab.testing.carml.de
+          CHIPLAB_TOKEN: ${{ secrets.CHIPLAB_TESTING_TOKEN }}
+          TEST_CHIPLAB_PROJECT_ID: ${{ vars.CHIPLAB_TESTING_PROJECT_ID }}
+
+      # A single open issue tracks failures on `main`, its body pointing at the latest failing run.
+      # It's the only notification of failures, so any failure opens it, whichever step failed.
+      # Manual runs on other branches don't affect it.
+      - name: Open or update the failure issue
+        if: failure() && github.ref == 'refs/heads/main'
+        run: |
+          gh label create "$ISSUE_LABEL" --force \
+            --color d73a4a --description "The api workflow fails on main"
+          body="The \`api\` workflow failed in $RUN_URL (\`${GITHUB_SHA::12}\`)."
+          issue=$(gh issue list --label "$ISSUE_LABEL" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$issue" ]; then
+            gh issue edit "$issue" --body "$body"
+          else
+            gh issue create --label "$ISSUE_LABEL" \
+              --title "The api workflow fails on main" --body "$body"
+          fi
+
+      - name: Close the failure issue
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          issue=$(gh issue list --label "$ISSUE_LABEL" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$issue" ]; then
+            gh issue close "$issue" --comment "Passing again in $RUN_URL (\`${GITHUB_SHA::12}\`)."
+          fi
