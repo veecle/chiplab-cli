@@ -29,7 +29,10 @@
       cargoBuildFlags = ["--package" "chiplab-cli"];
       # The HTTP client needs CA certificates to be created, even when only talking to the local test proxy.
       nativeCheckInputs = [pkgs.cacert];
-      meta.license = pkgs.lib.licenses.mit;
+      meta = {
+        license = pkgs.lib.licenses.mit;
+        mainProgram = "chiplab-cli";
+      };
     };
 
     chiplab-cli = rustPlatform.buildRustPackage chiplabCliArgs;
