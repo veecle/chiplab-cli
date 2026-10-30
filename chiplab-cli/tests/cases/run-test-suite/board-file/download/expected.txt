@@ -3,11 +3,14 @@ exit status: 0
 --- stdout
 test suite passed: 1 of 1 tests passed
 --- stderr
-waiting for test suite run `run_test_suite_08689e8cd70728e79000000000`
-downloaded `[TEMP]/out/testsuite_report`
-downloaded `[TEMP]/out/testsuite_stdout`
-downloaded `[TEMP]/out/testsuite_stderr`
-downloaded `[TEMP]/out/firmware_uart`
+     Uploaded firmware `hello-stm32f4-discovery.elf`
+     Uploaded test suite `firmware-greets.ts`
+      Waiting for test suite run `run_test_suite_08689e8cd70728e79000000000`
+     Finished test suite run `run_test_suite_08689e8cd70728e79000000000`
+   Downloaded `[TEMP]/out/testsuite_report`
+   Downloaded `[TEMP]/out/testsuite_stdout`
+   Downloaded `[TEMP]/out/testsuite_stderr`
+   Downloaded `[TEMP]/out/firmware_uart`
 --- [TEMP]/out/
 --- [TEMP]/out/firmware_uart
 Hello world!

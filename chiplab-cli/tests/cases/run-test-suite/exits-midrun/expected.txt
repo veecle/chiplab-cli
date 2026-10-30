@@ -2,5 +2,8 @@ $ chiplab-cli run-test-suite --project project_00000000000000000000000001 --firm
 exit status: 4
 --- stdout
 --- stderr
-waiting for test suite run `run_test_suite_069688381cc52df8b000000000`
+     Uploaded firmware `hello-stm32f4-discovery.elf`
+     Uploaded test suite `exits-midrun.ts`
+      Waiting for test suite run `run_test_suite_069688381cc52df8b000000000`
+     Finished test suite run `run_test_suite_069688381cc52df8b000000000` (with suite failure)
 error: test suite failed: 1 of 3 tests failed, 1 passed, 1 skipped

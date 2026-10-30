@@ -1,0 +1,425 @@
+<svg width="1757px" height="1978px" style="background: #1E1E1E" xmlns="http://www.w3.org/2000/svg">
+<style>
+  .label { fill: #DDDDDD; font: bold 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace; }
+</style>
+<g transform="translate(20 20)">
+<svg x="0px" y="0px" width="1717px" height="434px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .fg-green { fill: #00AA00 }
+    .fg-red { fill: #AA0000 }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    .bold { font-weight: bold; }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+    <tspan x="10px" y="28px"><tspan>$ chiplab-cli run-test-suite --project project_00000000000000000000000001 --firmware hello-stm32f4-discovery.elf --test-suite trivially-passes.ts --board stm32f4-discovery.json --download-dir [TEMP]/out</tspan>
+</tspan>
+    <tspan x="10px" y="46px"><tspan>exit status: 1</tspan>
+</tspan>
+    <tspan x="10px" y="64px"><tspan>--- stdout</tspan>
+</tspan>
+    <tspan x="10px" y="82px"><tspan>test suite passed: 1 of 1 tests passed</tspan>
+</tspan>
+    <tspan x="10px" y="100px"><tspan>--- stderr</tspan>
+</tspan>
+    <tspan x="10px" y="118px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> firmware `hello-stm32f4-discovery.elf`</tspan>
+</tspan>
+    <tspan x="10px" y="136px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> test suite `trivially-passes.ts`</tspan>
+</tspan>
+    <tspan x="10px" y="154px"><tspan>  </tspan><tspan class="fg-green bold">   Finished</tspan><tspan> test suite run `run_test_suite_069688381cc52df8b000000000`</tspan>
+</tspan>
+    <tspan x="10px" y="172px"><tspan>  </tspan><tspan class="fg-red bold">     Failed</tspan><tspan> `[TEMP]/out/testsuite_report`</tspan>
+</tspan>
+    <tspan x="10px" y="190px"><tspan>                - server responded with 404 Not Found</tspan>
+</tspan>
+    <tspan x="10px" y="208px"><tspan>                - artifact not found</tspan>
+</tspan>
+    <tspan x="10px" y="226px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/testsuite_stdout`</tspan>
+</tspan>
+    <tspan x="10px" y="244px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/testsuite_stderr`</tspan>
+</tspan>
+    <tspan x="10px" y="262px"><tspan>error: 1 of 3 artifacts failed to download</tspan>
+</tspan>
+    <tspan x="10px" y="280px"><tspan>--- [TEMP]/out/</tspan>
+</tspan>
+    <tspan x="10px" y="298px"><tspan>--- [TEMP]/out/testsuite_stderr</tspan>
+</tspan>
+    <tspan x="10px" y="316px"><tspan>Check [CHIPLAB_TEMP_DIR]/test.ts</tspan>
+</tspan>
+    <tspan x="10px" y="334px"><tspan>--- [TEMP]/out/testsuite_stdout</tspan>
+</tspan>
+    <tspan x="10px" y="352px"><tspan>running 1 test from [CHIPLAB_TEMP_DIR]/test.ts</tspan>
+</tspan>
+    <tspan x="10px" y="370px"><tspan>always passes ... ok ([..]ms)</tspan>
+</tspan>
+    <tspan x="10px" y="388px">
+</tspan>
+    <tspan x="10px" y="406px"><tspan>ok | 1 passed | 0 failed ([..]ms)</tspan>
+</tspan>
+    <tspan x="10px" y="424px">
+</tspan>
+  </text>
+
+</svg>
+<text x="0px" y="470px" class="label">stderr frame 1</text>
+<svg x="0px" y="478px" width="1717px" height="38px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .fg-cyan { fill: #00AAAA }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    .bold { font-weight: bold; }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+    <tspan x="10px" y="28px"><tspan class="fg-cyan">⠙</tspan><tspan> </tspan><tspan class="fg-cyan bold">  Uploading</tspan><tspan> [                    ] 0/2 firmware `hello-stm32f4-discovery.elf`</tspan>
+</tspan>
+  </text>
+
+</svg>
+<text x="0px" y="552px" class="label">stderr frame 2</text>
+<svg x="0px" y="560px" width="1717px" height="56px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .fg-cyan { fill: #00AAAA }
+    .fg-green { fill: #00AA00 }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    .bold { font-weight: bold; }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+    <tspan x="10px" y="28px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> firmware `hello-stm32f4-discovery.elf`</tspan>
+</tspan>
+    <tspan x="10px" y="46px"><tspan class="fg-cyan">⠙</tspan><tspan> </tspan><tspan class="fg-cyan bold">  Uploading</tspan><tspan> [==========          ] 1/2 test suite `trivially-passes.ts`</tspan>
+</tspan>
+  </text>
+
+</svg>
+<text x="0px" y="652px" class="label">stderr frame 3</text>
+<svg x="0px" y="660px" width="1717px" height="74px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .fg-cyan { fill: #00AAAA }
+    .fg-green { fill: #00AA00 }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    .bold { font-weight: bold; }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+    <tspan x="10px" y="28px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> firmware `hello-stm32f4-discovery.elf`</tspan>
+</tspan>
+    <tspan x="10px" y="46px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> test suite `trivially-passes.ts`</tspan>
+</tspan>
+    <tspan x="10px" y="64px"><tspan class="fg-cyan">⠙</tspan><tspan> </tspan><tspan class="fg-cyan bold">  Uploading</tspan><tspan> [====================] 2/2 test suite `trivially-passes.ts`</tspan>
+</tspan>
+  </text>
+
+</svg>
+<text x="0px" y="770px" class="label">stderr frame 4</text>
+<svg x="0px" y="778px" width="1717px" height="74px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .fg-cyan { fill: #00AAAA }
+    .fg-green { fill: #00AA00 }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    .bold { font-weight: bold; }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+    <tspan x="10px" y="28px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> firmware `hello-stm32f4-discovery.elf`</tspan>
+</tspan>
+    <tspan x="10px" y="46px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> test suite `trivially-passes.ts`</tspan>
+</tspan>
+    <tspan x="10px" y="64px"><tspan class="fg-cyan">⠹</tspan><tspan> </tspan><tspan class="fg-cyan bold">   Starting</tspan><tspan> test suite run</tspan>
+</tspan>
+  </text>
+
+</svg>
+<text x="0px" y="888px" class="label">stderr frame 5</text>
+<svg x="0px" y="896px" width="1717px" height="74px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .fg-cyan { fill: #00AAAA }
+    .fg-green { fill: #00AA00 }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    .bold { font-weight: bold; }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+    <tspan x="10px" y="28px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> firmware `hello-stm32f4-discovery.elf`</tspan>
+</tspan>
+    <tspan x="10px" y="46px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> test suite `trivially-passes.ts`</tspan>
+</tspan>
+    <tspan x="10px" y="64px"><tspan class="fg-cyan">⠸</tspan><tspan> </tspan><tspan class="fg-cyan bold">    Waiting</tspan><tspan> for test suite run `run_test_suite_069688381cc52df8b000000000`</tspan>
+</tspan>
+  </text>
+
+</svg>
+<text x="0px" y="1006px" class="label">stderr frame 6</text>
+<svg x="0px" y="1014px" width="1717px" height="92px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .fg-cyan { fill: #00AAAA }
+    .fg-green { fill: #00AA00 }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    .bold { font-weight: bold; }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+    <tspan x="10px" y="28px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> firmware `hello-stm32f4-discovery.elf`</tspan>
+</tspan>
+    <tspan x="10px" y="46px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> test suite `trivially-passes.ts`</tspan>
+</tspan>
+    <tspan x="10px" y="64px"><tspan>  </tspan><tspan class="fg-green bold">   Finished</tspan><tspan> test suite run `run_test_suite_069688381cc52df8b000000000`</tspan>
+</tspan>
+    <tspan x="10px" y="82px"><tspan class="fg-cyan">⠸</tspan><tspan> </tspan><tspan class="fg-cyan bold">Downloading</tspan><tspan> [                    ] 0/3 artifacts</tspan>
+</tspan>
+  </text>
+
+</svg>
+<text x="0px" y="1142px" class="label">stderr frame 7</text>
+<svg x="0px" y="1150px" width="1717px" height="146px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .fg-cyan { fill: #00AAAA }
+    .fg-green { fill: #00AA00 }
+    .fg-red { fill: #AA0000 }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    .bold { font-weight: bold; }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+    <tspan x="10px" y="28px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> firmware `hello-stm32f4-discovery.elf`</tspan>
+</tspan>
+    <tspan x="10px" y="46px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> test suite `trivially-passes.ts`</tspan>
+</tspan>
+    <tspan x="10px" y="64px"><tspan>  </tspan><tspan class="fg-green bold">   Finished</tspan><tspan> test suite run `run_test_suite_069688381cc52df8b000000000`</tspan>
+</tspan>
+    <tspan x="10px" y="82px"><tspan>  </tspan><tspan class="fg-red bold">     Failed</tspan><tspan> `[TEMP]/out/testsuite_report`</tspan>
+</tspan>
+    <tspan x="10px" y="100px"><tspan>                - server responded with 404 Not Found</tspan>
+</tspan>
+    <tspan x="10px" y="118px"><tspan>                - artifact not found</tspan>
+</tspan>
+    <tspan x="10px" y="136px"><tspan class="fg-cyan">⠸</tspan><tspan> </tspan><tspan class="fg-cyan bold">Downloading</tspan><tspan> [======              ] 1/3 artifacts</tspan>
+</tspan>
+  </text>
+
+</svg>
+<text x="0px" y="1332px" class="label">stderr frame 8</text>
+<svg x="0px" y="1340px" width="1717px" height="164px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .fg-cyan { fill: #00AAAA }
+    .fg-green { fill: #00AA00 }
+    .fg-red { fill: #AA0000 }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    .bold { font-weight: bold; }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+    <tspan x="10px" y="28px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> firmware `hello-stm32f4-discovery.elf`</tspan>
+</tspan>
+    <tspan x="10px" y="46px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> test suite `trivially-passes.ts`</tspan>
+</tspan>
+    <tspan x="10px" y="64px"><tspan>  </tspan><tspan class="fg-green bold">   Finished</tspan><tspan> test suite run `run_test_suite_069688381cc52df8b000000000`</tspan>
+</tspan>
+    <tspan x="10px" y="82px"><tspan>  </tspan><tspan class="fg-red bold">     Failed</tspan><tspan> `[TEMP]/out/testsuite_report`</tspan>
+</tspan>
+    <tspan x="10px" y="100px"><tspan>                - server responded with 404 Not Found</tspan>
+</tspan>
+    <tspan x="10px" y="118px"><tspan>                - artifact not found</tspan>
+</tspan>
+    <tspan x="10px" y="136px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/testsuite_stdout`</tspan>
+</tspan>
+    <tspan x="10px" y="154px"><tspan class="fg-cyan">⠸</tspan><tspan> </tspan><tspan class="fg-cyan bold">Downloading</tspan><tspan> [=============       ] 2/3 artifacts</tspan>
+</tspan>
+  </text>
+
+</svg>
+<text x="0px" y="1540px" class="label">stderr frame 9</text>
+<svg x="0px" y="1548px" width="1717px" height="182px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .fg-cyan { fill: #00AAAA }
+    .fg-green { fill: #00AA00 }
+    .fg-red { fill: #AA0000 }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    .bold { font-weight: bold; }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+    <tspan x="10px" y="28px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> firmware `hello-stm32f4-discovery.elf`</tspan>
+</tspan>
+    <tspan x="10px" y="46px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> test suite `trivially-passes.ts`</tspan>
+</tspan>
+    <tspan x="10px" y="64px"><tspan>  </tspan><tspan class="fg-green bold">   Finished</tspan><tspan> test suite run `run_test_suite_069688381cc52df8b000000000`</tspan>
+</tspan>
+    <tspan x="10px" y="82px"><tspan>  </tspan><tspan class="fg-red bold">     Failed</tspan><tspan> `[TEMP]/out/testsuite_report`</tspan>
+</tspan>
+    <tspan x="10px" y="100px"><tspan>                - server responded with 404 Not Found</tspan>
+</tspan>
+    <tspan x="10px" y="118px"><tspan>                - artifact not found</tspan>
+</tspan>
+    <tspan x="10px" y="136px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/testsuite_stdout`</tspan>
+</tspan>
+    <tspan x="10px" y="154px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/testsuite_stderr`</tspan>
+</tspan>
+    <tspan x="10px" y="172px"><tspan class="fg-cyan">⠸</tspan><tspan> </tspan><tspan class="fg-cyan bold">Downloading</tspan><tspan> [====================] 3/3 artifacts</tspan>
+</tspan>
+  </text>
+
+</svg>
+<text x="0px" y="1766px" class="label">stderr frame 10</text>
+<svg x="0px" y="1774px" width="1717px" height="164px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .fg-green { fill: #00AA00 }
+    .fg-red { fill: #AA0000 }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    .bold { font-weight: bold; }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+    <tspan x="10px" y="28px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> firmware `hello-stm32f4-discovery.elf`</tspan>
+</tspan>
+    <tspan x="10px" y="46px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> test suite `trivially-passes.ts`</tspan>
+</tspan>
+    <tspan x="10px" y="64px"><tspan>  </tspan><tspan class="fg-green bold">   Finished</tspan><tspan> test suite run `run_test_suite_069688381cc52df8b000000000`</tspan>
+</tspan>
+    <tspan x="10px" y="82px"><tspan>  </tspan><tspan class="fg-red bold">     Failed</tspan><tspan> `[TEMP]/out/testsuite_report`</tspan>
+</tspan>
+    <tspan x="10px" y="100px"><tspan>                - server responded with 404 Not Found</tspan>
+</tspan>
+    <tspan x="10px" y="118px"><tspan>                - artifact not found</tspan>
+</tspan>
+    <tspan x="10px" y="136px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/testsuite_stdout`</tspan>
+</tspan>
+    <tspan x="10px" y="154px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/testsuite_stderr`</tspan>
+</tspan>
+  </text>
+
+</svg>
+</g>
+</svg>

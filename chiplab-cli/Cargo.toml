@@ -16,19 +16,29 @@ camino.workspace = true
 cap-std.workspace = true
 chiplab-api.workspace = true
 clap.workspace = true
+console.workspace = true
 futures-util.workspace = true
+indicatif.workspace = true
 reqwest.workspace = true
 serde.workspace = true
 serde_ignored.workspace = true
 serde_json.workspace = true
+strum.workspace = true
 thiserror.workspace = true
 tokio.workspace = true
 tokio-util.workspace = true
 
 [dev-dependencies]
+anstyle-svg = { workspace = true }
 regex = { workspace = true, features = ["std", "unicode-perl"] }
 reqwest = { workspace = true, features = ["blocking", "rustls"] }
-snapbox = { workspace = true, features = ["cmd", "color-auto", "diff"] }
+snapbox = { workspace = true, features = [
+  "cmd",
+  "color-auto",
+  "diff",
+  "term-svg"
+] }
 tempfile = { workspace = true }
 tiny_http = { workspace = true }
 tryfn = { workspace = true, features = ["color-auto", "diff"] }
+vt100 = { workspace = true }

@@ -12,6 +12,7 @@ use crate::api::models::TestSuiteResult;
 use crate::api::models::test_suite_result::Summary;
 use crate::app::App;
 use crate::error::{self, Result, ResultExt, Silent, WrappedError};
+use crate::progress::{Action, Progress};
 
 /// Run a TypeScript test suite against a firmware binary on a simulated board.
 ///
@@ -187,21 +188,35 @@ impl Args {
             json,
         } = self;
 
+        let progress = Progress::new()?;
+
+        let firmware_name = format!("firmware `{}`", firmware.display());
+        let test_suite_name = format!("test suite `{}`", test_suite.display());
+
+        let upload = progress.start_transfer(Action::Uploading, firmware_name.clone(), 2);
         let firmware_artifact_id = api::upload(&app.api, &project_id, &firmware)
             .await
             .wrap_error("failed to upload the firmware")?;
+        upload.complete(
+            Action::Uploaded,
+            &firmware_name,
+            Some(test_suite_name.clone()),
+        );
+
         let suite_artifact_id = api::upload(&app.api, &project_id, &test_suite)
             .await
             .wrap_error("failed to upload the test suite")?;
+        upload.complete(Action::Uploaded, &test_suite_name, None);
 
+        progress.start(Action::Starting, "test suite run");
         let request = RunTestSuiteRequest::new(board, firmware_artifact_id, suite_artifact_id);
         let job_id = default_api::run_test_suite(&app.api, &project_id, request)
             .await
             .map_err(api::error)
             .wrap_error("failed to start the test suite run")?
             .run_test_suite_id;
-
-        eprintln!("waiting for test suite run `{job_id}`");
+        let run_name = format!("test suite run `{job_id}`");
+        progress.start_or_print(Action::Waiting, format!("for {run_name}"));
         let (report, artifacts) = loop {
             let response = default_api::wait_for_job(&app.api, &job_id, None)
                 .await
@@ -209,7 +224,10 @@ impl Args {
                 .wrap_error("failed to wait for the test suite run")?;
 
             match response {
-                WaitForJobResponse::Running(_) => continue,
+                WaitForJobResponse::Running(_) => {
+                    progress.tick();
+                    continue;
+                }
                 WaitForJobResponse::Succeeded(job) => {
                     let result: TestSuiteResult = serde_json::from_value(job.result)
                         .wrap_error("failed to parse the test suite result")?;
@@ -224,9 +242,19 @@ impl Args {
             }
         };
 
-        let download =
-            maybe_download_artifacts(app, &job_id, download_dir.as_deref(), &artifacts).await;
+        if report.outcome == Outcome::Passed {
+            progress.complete(Action::Finished, run_name);
+        } else if report.error.is_some() {
+            progress.fail(Action::Failed, run_name);
+        } else {
+            progress.warn(Action::Finished, format!("{run_name} (with suite failure)"));
+        }
 
+        let download =
+            maybe_download_artifacts(app, &progress, &job_id, download_dir.as_deref(), &artifacts)
+                .await;
+
+        progress.finish();
         report.print(json)?;
 
         match (report.result(json), download) {
@@ -244,6 +272,7 @@ impl Args {
 
 async fn maybe_download_artifacts(
     app: &App,
+    progress: &Progress,
     job_id: &str,
     dir: Option<&Utf8Path>,
     artifacts: &[String],
@@ -253,13 +282,15 @@ async fn maybe_download_artifacts(
     };
 
     if artifacts.is_empty() {
-        eprintln!("no artifacts to download");
+        progress.println("no artifacts to download");
         return Ok(());
     }
 
     // Report each failure in turn and keep going, so one failure doesn't stop the other artifacts
     // from downloading.
     let mut failed = 0;
+    let total = u64::try_from(artifacts.len()).expect("the artifact count fits in a `u64`");
+    let download = progress.start_transfer(Action::Downloading, "artifacts", total);
     let mut downloads = pin!(
         api::download_all(&app.api, job_id, artifacts, dir)
             .await
@@ -267,11 +298,10 @@ async fn maybe_download_artifacts(
     );
     while let Some((path, result)) = downloads.next().await {
         match result {
-            Ok(()) => eprintln!("downloaded `{path}`"),
+            Ok(()) => download.complete(Action::Downloaded, format_args!("`{path}`"), None),
             Err(error) => {
-                error::report(
-                    &WrappedError::new(format_args!("failed to download `{path}`"), error).into(),
-                );
+                let error = WrappedError::new(format_args!("`{path}`"), error);
+                download.fail(Action::Failed, error::Chain(&error));
                 failed += 1;
             }
         }

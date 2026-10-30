@@ -16,14 +16,19 @@ mod error;
 mod proxy;
 mod run;
 mod temp_dir;
+mod terminal;
+mod terminal_svg;
 
 use crate::error::Result;
-use crate::run::run;
+use crate::run::{Stderr, run};
 
 const CASES: &str = "tests/cases";
 
 /// Stands in for the path of the case's temporary directory in `args` and `expected.txt`.
 const TEMP: &str = "[TEMP]";
+
+/// The expected output when stderr is a terminal, checked for the cases that have this file.
+const TERMINAL_EXPECTED: &str = "expected.term.svg";
 
 fn main() {
     tryfn::Harness::new(CASES, setup, test)
@@ -65,7 +70,35 @@ fn test(args_path: &Path) -> Result<String> {
         .map(str::to_owned)
         .collect();
 
-    Ok(run(case_directory, &args)?.to_string())
+    // Hand-written exchanges can't be reproduced by a real instance, so always replay them.
+    let mode = if case_directory.join("replay-only").exists() {
+        proxy::Mode::Replay
+    } else {
+        proxy::Mode::from_env()?
+    };
+
+    let rendered = run(case_directory, &args, mode, Stderr::Pipe)?.to_string();
+
+    let terminal_expected = case_directory.join(TERMINAL_EXPECTED);
+    if terminal_expected.exists() {
+        // Only how the output is shown differs, so replaying the exchanges just used, or recorded,
+        // is enough.
+        let terminal_run = run(case_directory, &args, proxy::Mode::Replay, Stderr::Terminal)?;
+        snapbox::Assert::new()
+            .action_env(snapbox::assert::DEFAULT_ACTION_ENV)
+            .try_eq(
+                Some(&format!(
+                    "{} ({TERMINAL_EXPECTED})",
+                    case_name(case_directory)
+                )),
+                snapbox::Data::text(terminal_svg::render(&terminal_run))
+                    .is(snapbox::data::DataFormat::TermSvg),
+                snapbox::Data::read_from(&terminal_expected, None),
+            )
+            .map_err(|error| error.to_string())?;
+    }
+
+    Ok(rendered)
 }
 
 /// Appends `output` with trailing whitespace stripped from each line.

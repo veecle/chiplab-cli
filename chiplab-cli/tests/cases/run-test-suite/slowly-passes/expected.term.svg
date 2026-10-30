@@ -1,0 +1,255 @@
+<svg width="1514px" height="976px" style="background: #1E1E1E" xmlns="http://www.w3.org/2000/svg">
+<style>
+  .label { fill: #DDDDDD; font: bold 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace; }
+</style>
+<g transform="translate(20 20)">
+<svg x="0px" y="0px" width="1474px" height="164px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .fg-green { fill: #00AA00 }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    .bold { font-weight: bold; }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+    <tspan x="10px" y="28px"><tspan>$ chiplab-cli run-test-suite --project project_00000000000000000000000001 --firmware hello-stm32f4-discovery.elf --test-suite slowly-passes.ts --board stm32f4-discovery.json</tspan>
+</tspan>
+    <tspan x="10px" y="46px"><tspan>exit status: 0</tspan>
+</tspan>
+    <tspan x="10px" y="64px"><tspan>--- stdout</tspan>
+</tspan>
+    <tspan x="10px" y="82px"><tspan>test suite passed: 1 of 1 tests passed</tspan>
+</tspan>
+    <tspan x="10px" y="100px"><tspan>--- stderr</tspan>
+</tspan>
+    <tspan x="10px" y="118px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> firmware `hello-stm32f4-discovery.elf`</tspan>
+</tspan>
+    <tspan x="10px" y="136px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> test suite `slowly-passes.ts`</tspan>
+</tspan>
+    <tspan x="10px" y="154px"><tspan>  </tspan><tspan class="fg-green bold">   Finished</tspan><tspan> test suite run `run_test_suite_069688381cc52df8b000000000`</tspan>
+</tspan>
+  </text>
+
+</svg>
+<text x="0px" y="200px" class="label">stderr frame 1</text>
+<svg x="0px" y="208px" width="1474px" height="38px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .fg-cyan { fill: #00AAAA }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    .bold { font-weight: bold; }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+    <tspan x="10px" y="28px"><tspan class="fg-cyan">⠙</tspan><tspan> </tspan><tspan class="fg-cyan bold">  Uploading</tspan><tspan> [                    ] 0/2 firmware `hello-stm32f4-discovery.elf`</tspan>
+</tspan>
+  </text>
+
+</svg>
+<text x="0px" y="282px" class="label">stderr frame 2</text>
+<svg x="0px" y="290px" width="1474px" height="56px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .fg-cyan { fill: #00AAAA }
+    .fg-green { fill: #00AA00 }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    .bold { font-weight: bold; }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+    <tspan x="10px" y="28px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> firmware `hello-stm32f4-discovery.elf`</tspan>
+</tspan>
+    <tspan x="10px" y="46px"><tspan class="fg-cyan">⠙</tspan><tspan> </tspan><tspan class="fg-cyan bold">  Uploading</tspan><tspan> [==========          ] 1/2 test suite `slowly-passes.ts`</tspan>
+</tspan>
+  </text>
+
+</svg>
+<text x="0px" y="382px" class="label">stderr frame 3</text>
+<svg x="0px" y="390px" width="1474px" height="74px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .fg-cyan { fill: #00AAAA }
+    .fg-green { fill: #00AA00 }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    .bold { font-weight: bold; }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+    <tspan x="10px" y="28px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> firmware `hello-stm32f4-discovery.elf`</tspan>
+</tspan>
+    <tspan x="10px" y="46px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> test suite `slowly-passes.ts`</tspan>
+</tspan>
+    <tspan x="10px" y="64px"><tspan class="fg-cyan">⠙</tspan><tspan> </tspan><tspan class="fg-cyan bold">  Uploading</tspan><tspan> [====================] 2/2 test suite `slowly-passes.ts`</tspan>
+</tspan>
+  </text>
+
+</svg>
+<text x="0px" y="500px" class="label">stderr frame 4</text>
+<svg x="0px" y="508px" width="1474px" height="74px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .fg-cyan { fill: #00AAAA }
+    .fg-green { fill: #00AA00 }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    .bold { font-weight: bold; }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+    <tspan x="10px" y="28px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> firmware `hello-stm32f4-discovery.elf`</tspan>
+</tspan>
+    <tspan x="10px" y="46px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> test suite `slowly-passes.ts`</tspan>
+</tspan>
+    <tspan x="10px" y="64px"><tspan class="fg-cyan">⠹</tspan><tspan> </tspan><tspan class="fg-cyan bold">   Starting</tspan><tspan> test suite run</tspan>
+</tspan>
+  </text>
+
+</svg>
+<text x="0px" y="618px" class="label">stderr frame 5</text>
+<svg x="0px" y="626px" width="1474px" height="74px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .fg-cyan { fill: #00AAAA }
+    .fg-green { fill: #00AA00 }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    .bold { font-weight: bold; }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+    <tspan x="10px" y="28px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> firmware `hello-stm32f4-discovery.elf`</tspan>
+</tspan>
+    <tspan x="10px" y="46px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> test suite `slowly-passes.ts`</tspan>
+</tspan>
+    <tspan x="10px" y="64px"><tspan class="fg-cyan">⠸</tspan><tspan> </tspan><tspan class="fg-cyan bold">    Waiting</tspan><tspan> for test suite run `run_test_suite_069688381cc52df8b000000000`</tspan>
+</tspan>
+  </text>
+
+</svg>
+<text x="0px" y="736px" class="label">stderr frame 6</text>
+<svg x="0px" y="744px" width="1474px" height="74px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .fg-cyan { fill: #00AAAA }
+    .fg-green { fill: #00AA00 }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    .bold { font-weight: bold; }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+    <tspan x="10px" y="28px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> firmware `hello-stm32f4-discovery.elf`</tspan>
+</tspan>
+    <tspan x="10px" y="46px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> test suite `slowly-passes.ts`</tspan>
+</tspan>
+    <tspan x="10px" y="64px"><tspan class="fg-cyan">⠼</tspan><tspan> </tspan><tspan class="fg-cyan bold">    Waiting</tspan><tspan> for test suite run `run_test_suite_069688381cc52df8b000000000`</tspan>
+</tspan>
+  </text>
+
+</svg>
+<text x="0px" y="854px" class="label">stderr frame 7</text>
+<svg x="0px" y="862px" width="1474px" height="74px" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .fg { fill: #AAAAAA }
+    .bg { fill: #000000 }
+    .fg-green { fill: #00AA00 }
+    .container {
+      padding: 0 10px;
+      line-height: 18px;
+    }
+    .bold { font-weight: bold; }
+    tspan {
+      font: 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      white-space: pre;
+      line-height: 18px;
+    }
+  </style>
+
+  <rect width="100%" height="100%" y="0" rx="4.5" class="bg" />
+
+  <text xml:space="preserve" class="container fg">
+    <tspan x="10px" y="28px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> firmware `hello-stm32f4-discovery.elf`</tspan>
+</tspan>
+    <tspan x="10px" y="46px"><tspan>  </tspan><tspan class="fg-green bold">   Uploaded</tspan><tspan> test suite `slowly-passes.ts`</tspan>
+</tspan>
+    <tspan x="10px" y="64px"><tspan>  </tspan><tspan class="fg-green bold">   Finished</tspan><tspan> test suite run `run_test_suite_069688381cc52df8b000000000`</tspan>
+</tspan>
+  </text>
+
+</svg>
+</g>
+</svg>

@@ -38,6 +38,10 @@ Each case is a directory, optionally nested in subdirectories to group related c
 - `no-proxy`: an empty marker file; if present, the binary runs without the proxy and without any Chiplab configuration in its environment, for testing how the CLI handles that.
 - `replay-only`: a marker file whose contents explain why the case's `exchanges.json` is hand-written; if present, the exchanges are always replayed, whatever the proxy mode.
   Use this for scenarios that can't be reproduced against a real Chiplab instance.
+- `expected.term.svg`: if present, the case is run a second time with the binary drawing its progress output as if stderr were a terminal, and this is the expected output of that run.
+  It's laid out like `expected.txt`, with stderr showing what's finally left on the terminal, followed by the terminal's screen after each frame that changes it.
+  The second run always replays the exchanges, including ones just recorded by the first run, so the frames are deterministic, but may change when the exchanges are re-recorded.
+  To add one to a case, create an empty file and re-snapshot.
 
 The binary runs within `chiplab-cli/tests/fixtures/`, so `args` can refer to the input files shared between cases stored there.
 

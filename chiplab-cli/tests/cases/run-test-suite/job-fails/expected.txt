@@ -2,5 +2,8 @@ $ chiplab-cli run-test-suite --project project_00000000000000000000000001 --firm
 exit status: 3
 --- stdout
 --- stderr
-waiting for test suite run `run_test_suite_00000000000000000000000001`
+     Uploaded firmware `hello-stm32f4-discovery.elf`
+     Uploaded test suite `always-fails.ts`
+      Waiting for test suite run `run_test_suite_00000000000000000000000001`
+       Failed test suite run `run_test_suite_00000000000000000000000001`
 error: test suite run failed: simulation crashed

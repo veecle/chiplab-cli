@@ -10,6 +10,7 @@ mod api;
 mod app;
 mod command;
 mod error;
+mod progress;
 
 #[derive(Parser, Debug)]
 #[command(
