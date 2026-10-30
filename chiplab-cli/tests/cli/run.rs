@@ -226,6 +226,9 @@ pub fn run(
 }
 
 /// Copies every directory and file under `from` into `to`.
+///
+/// The copies are created with default permissions rather than the source's, so they stay
+/// writable when `from` is read-only (e.g. in the Nix store).
 fn copy_files(from: &Path, to: &Path) -> Result<()> {
     for entry in std::fs::read_dir(from)? {
         let entry = entry?;
@@ -234,7 +237,7 @@ fn copy_files(from: &Path, to: &Path) -> Result<()> {
             std::fs::create_dir(&target)?;
             copy_files(&entry.path(), &target)?;
         } else {
-            std::fs::copy(entry.path(), target)?;
+            std::fs::write(target, std::fs::read(entry.path())?)?;
         }
     }
 
