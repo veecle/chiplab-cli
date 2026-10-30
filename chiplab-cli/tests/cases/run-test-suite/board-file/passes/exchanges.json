@@ -23,6 +23,7 @@
           "result": {
             "artifacts": [
               "testsuite_report",
+              "junit.xml",
               "testsuite_stdout",
               "testsuite_stderr",
               "firmware_uart"
@@ -30,7 +31,8 @@
             "summary": {
               "failed": 0,
               "passed": 1,
-              "planned": 1
+              "planned": 1,
+              "skipped": 0
             }
           },
           "status": "succeeded"

@@ -21,13 +21,15 @@
           "result": {
             "artifacts": [
               "testsuite_report",
+              "junit.xml",
               "testsuite_stdout",
               "testsuite_stderr"
             ],
             "summary": {
               "failed": 1,
               "passed": 0,
-              "planned": 1
+              "planned": 1,
+              "skipped": 0
             }
           },
           "status": "succeeded"
