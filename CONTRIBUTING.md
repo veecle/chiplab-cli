@@ -52,6 +52,17 @@ When the output changes intentionally, re-snapshot and review the diff before co
 SNAPSHOTS=overwrite cargo test --test cli
 ```
 
+The cases and fixtures are read from `tests/` in the working directory (`chiplab-cli/` under `cargo test`), or from the directory set in `TEST_CHIPLAB_TESTS`.
+The binary run is the one built alongside the tests, or the one at the path set in `TEST_CHIPLAB_CLI`.
+The `test-harness` package bundles the harness with the `chiplab-cli` package's binary and a copy of the cases and fixtures, for running the cases outside of `cargo test`, e.g. against a real Chiplab instance; it defaults both variables to the packaged binary and cases.
+It takes the same arguments and environment variables as `cargo test --test cli -- ...`, described below, e.g.:
+
+```sh
+TEST_CHIPLAB_PROXY=bypass CHIPLAB_URL=... CHIPLAB_TOKEN=... TEST_CHIPLAB_PROJECT_ID=... nix run .#test-harness -- --exact <case name>
+```
+
+Its copy of the cases is read-only, so to re-snapshot or record with it, copy its `share/chiplab-cli/tests` somewhere writable and point `TEST_CHIPLAB_TESTS` at that.
+
 In `expected.txt`, `[..]` matches any text within a line and `...` on a line by itself matches any number of lines.
 See [`snapbox::Assert`](https://docs.rs/snapbox/latest/snapbox/assert/struct.Assert.html) for the full wildcard details.
 

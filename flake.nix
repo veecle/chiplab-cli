@@ -36,6 +36,7 @@
         ./nix/jj-fix.nix
         ./nix/release.nix
         ./nix/rust.nix
+        ./nix/test-harness.nix
         ./nix/tombi.nix
       ];
 
