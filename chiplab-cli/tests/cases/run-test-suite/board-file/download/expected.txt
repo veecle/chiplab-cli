@@ -20,7 +20,7 @@ Hello world!
 Check [CHIPLAB_TEMP_DIR]/test.ts
 --- [TEMP]/out/testsuite_stdout
 running 1 test from [CHIPLAB_TEMP_DIR]/test.ts
-firmware greets ... ok ([..]ms)
+firmware greets ... ok ([..]s)
 
-ok | 1 passed | 0 failed ([..]ms)
+ok | 1 passed | 0 failed ([..]s)
 

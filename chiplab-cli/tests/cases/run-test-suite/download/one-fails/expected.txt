@@ -18,7 +18,7 @@ error: 1 of 3 artifacts failed to download
 Check [CHIPLAB_TEMP_DIR]/test.ts
 --- [TEMP]/out/testsuite_stdout
 running 1 test from [CHIPLAB_TEMP_DIR]/test.ts
-always passes ... ok ([..]ms)
+always passes ... ok ([..]s)
 
-ok | 1 passed | 0 failed ([..]ms)
+ok | 1 passed | 0 failed ([..]s)
 

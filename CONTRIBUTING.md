@@ -55,6 +55,8 @@ SNAPSHOTS=overwrite cargo test --test cli
 In `expected.txt`, `[..]` matches any text within a line and `...` on a line by itself matches any number of lines.
 See [`snapbox::Assert`](https://docs.rs/snapbox/latest/snapbox/assert/struct.Assert.html) for the full wildcard details.
 
+Durations in the output should be matched with `[..]s` rather than `[..]ms`, as slower environments such as VMs can take over a second; keep the trailing `s` to make it clear what's being matched.
+
 ### Recording API exchanges
 
 By default the proxy replays `exchanges.json`, failing the case on any request that doesn't match a remaining recorded one, and on any recorded exchange that isn't requested.
