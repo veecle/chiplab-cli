@@ -1,0 +1,20 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "schedule": ["* * * * 3"],
+  "minimumReleaseAge": "2 days",
+  "automerge": true,
+  "nix": {
+    "enabled": true
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["* * * * 4"]
+  },
+  "packageRules": [
+    { "matchManagers": ["cargo"], "rangeStrategy": "pin" },
+
+    { "matchManagers": ["cargo"], "matchUpdateTypes": ["lockFileMaintenance"], "groupName": "cargo lockfile", "commitMessageExtra": "(cargo)" },
+    { "matchManagers": ["nix"], "matchUpdateTypes": ["lockFileMaintenance"], "groupName": "flake lockfile", "commitMessageExtra": "(flake)" }
+  ]
+}

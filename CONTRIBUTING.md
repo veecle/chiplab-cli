@@ -91,6 +91,16 @@ Request headers are not recorded, so no credentials end up in the recordings.
 Absolute URLs to hosts other than `CHIPLAB_URL` in responses are rewritten to point at the proxy, so requests to them (such as uploads) are recorded and replayed too.
 Both the fake TypeIDs and the rewritten URLs are derived from a hash of the request whose response they first appeared in, so they don't depend on the order of concurrent requests, as long as those requests differ.
 
+## Dependencies
+
+Dependencies are kept up to date by [Renovate](https://docs.renovatebot.com), configured in [`renovate.json`](renovate.json).
+It opens a PR for each update of a direct dependency, and separate weekly PRs refreshing the lockfiles.
+Updates wait two days after their release, and PRs are merged automatically once they pass CI and are approved.
+
+Direct Cargo dependencies are declared in the root `Cargo.toml` with exact (`=`) versions.
+This limits Renovate's `Cargo.lock` updates to transitive dependencies, so every update of a direct dependency comes through its own PR, where its changes can be reviewed.
+When adding a dependency, use an exact version as well, e.g. `version = "=1.2.3"` (or `cargo add foo@=1.2.3`).
+
 ## Generated API client
 
 The `chiplab-api/` crate is generated from the OpenAPI spec in `chiplab-api.json`, using the templates in `openapi-templates/`.
