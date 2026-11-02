@@ -120,12 +120,22 @@ To update it:
 nix run .#update-chiplab-d-ts
 ```
 
+## Changelog
+
+PRs that change user-facing behaviour should describe the change in the `## Next` section at the top of [`CHANGELOG.md`](CHANGELOG.md).
+It becomes the release notes of the next release, so write for users of the CLI rather than reviewers of the PR.
+GitHub renders newlines in release notes as line breaks, so unlike other Markdown files, write each paragraph and list item of the changelog on a single line rather than one sentence per line.
+
 ## Releasing
 
 Releases are published by the [`release`](.github/workflows/release.yaml) workflow when a `v<version>` tag is pushed.
-It builds the binaries, attaches them to a GitHub release, and generates the release notes from the merged PRs.
+It builds the binaries and attaches them to a GitHub release, using the version's section of [`CHANGELOG.md`](CHANGELOG.md) as the release notes followed by links to the full changelog and the release's commits.
 
-1. Bump `version` in the root `Cargo.toml` following [semver](https://semver.org), run `cargo update --workspace` to update `Cargo.lock`, and merge the PR.
+1. Make and merge a version bump PR, which:
+   - bumps `version` in the root `Cargo.toml` following [semver](https://semver.org);
+   - updates `Cargo.lock` to the new version by running `cargo metadata`, which leaves the dependency versions as they are;
+   - renames the `## Next` section of `CHANGELOG.md` to `## v<version>`, editing its text into release notes as needed;
+   - adds a new empty `## Next` section above it.
 2. Tag the merged commit and push the tag:
 
    ```sh
