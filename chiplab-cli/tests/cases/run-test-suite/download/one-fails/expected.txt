@@ -10,14 +10,23 @@ test suite passed: 1 of 1 tests passed
        Failed `[TEMP]/out/testsuite_report`
                 - server responded with 404 Not Found
                 - artifact not found
+   Downloaded `[TEMP]/out/junit.xml`
    Downloaded `[TEMP]/out/testsuite_stdout`
    Downloaded `[TEMP]/out/testsuite_stderr`
-error: 1 of 3 artifacts failed to download
+error: 1 of 4 artifacts failed to download
 --- [TEMP]/out/
+--- [TEMP]/out/junit.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="deno test" tests="1" failures="0" errors="0" time="[..]">
+    <testsuite name="./suite.ts" tests="1" disabled="0" errors="0" failures="0">
+        <testcase name="always passes" classname="./suite.ts" time="[..]" line="1" col="6">
+        </testcase>
+    </testsuite>
+</testsuites>
 --- [TEMP]/out/testsuite_stderr
-Check [CHIPLAB_TEMP_DIR]/test.ts
+Check test.ts
 --- [TEMP]/out/testsuite_stdout
-running 1 test from [CHIPLAB_TEMP_DIR]/test.ts
+running 1 test from ./test.ts
 always passes ... ok ([..]s)
 
 ok | 1 passed | 0 failed ([..]s)
