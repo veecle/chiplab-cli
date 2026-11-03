@@ -82,6 +82,11 @@ TEST_CHIPLAB_PROXY=record cargo test --test cli -- --exact <case name>
 
 To run the cases against a real Chiplab instance without replaying or recording the exchanges, run with `TEST_CHIPLAB_PROXY=bypass`, configured as for recording.
 
+The [`api`](.github/workflows/api.yaml) workflow runs the `test-harness` package in bypass mode against `chiplab.testing.carml.de` daily and on `main`, to detect breakage in the API.
+When it fails on `main`, for whatever reason, it opens an issue labelled `api-breakage`, or updates the open one to point at the latest failing run, and closes it once it passes again.
+It can also be run manually on other branches, which leaves the issue alone.
+When an API change is intentional, re-record the affected cases.
+
 Cases marked `replay-only` are replayed in every mode, so their exchanges are never overwritten and must be kept up to date by hand.
 
 TypeIDs are replaced with fake ones in recordings, and temporary directories that Chiplab creates on its side (such as `./tmp/foo-QHpLw0` in test suite artifacts) with `[CHIPLAB_TEMP_DIR]`.
