@@ -30,8 +30,10 @@ tokio-util.workspace = true
 
 [dev-dependencies]
 anstyle-svg = { workspace = true }
+http-body-util = { workspace = true }
+hyper = { workspace = true, features = ["http1", "server"] }
+hyper-util = { workspace = true, features = ["tokio"] }
 regex = { workspace = true, features = ["std", "unicode-perl"] }
-reqwest = { workspace = true, features = ["blocking", "rustls"] }
 snapbox = { workspace = true, features = [
   "cmd",
   "color-auto",
@@ -39,6 +41,6 @@ snapbox = { workspace = true, features = [
   "term-svg"
 ] }
 tempfile = { workspace = true }
-tiny_http = { workspace = true }
+tokio = { workspace = true, features = ["net", "sync"] }
 tryfn = { workspace = true, features = ["color-auto", "diff"] }
 vt100 = { workspace = true }
