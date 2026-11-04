@@ -55,7 +55,7 @@ jobs:
           printf '\n---\n\n**Full Changelog**: %s\n\n**Commits**: %s\n' \
             "$REPO_URL/blob/$TAG/CHANGELOG.md" "$commits" >> release-notes.md
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: release-notes
           path: release-notes.md
@@ -108,7 +108,7 @@ jobs:
           cd dist
           tar --create --gzip --file "../chiplab-cli-$TARGET.tar.gz" -- *
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: binary-${{ matrix.target }}
           path: chiplab-cli-${{ matrix.target }}.tar.gz
