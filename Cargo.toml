@@ -40,7 +40,7 @@ serde = { version = "=1.0.229", default-features = false, features = [
   "std"
 ] }
 serde_ignored = { version = "=0.1.14", default-features = false }
-serde_json = { version = "=1.0.151", default-features = false, features = [
+serde_json = { version = "=1.0.154", default-features = false, features = [
   "std"
 ] }
 serde_repr = { version = "=0.1.21", default-features = false }
