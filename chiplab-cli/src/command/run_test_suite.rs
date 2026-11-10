@@ -233,11 +233,11 @@ impl Args {
                         .wrap_error("failed to parse the test suite result")?;
 
                     let report = TestSuiteReport::new(job.job_id, result.summary, None);
-                    break (report, result.artifacts);
+                    break (report, job.artifacts.unwrap_or_default());
                 }
                 WaitForJobResponse::Failed(job) => {
                     let report = TestSuiteReport::new(job.job_id, None, Some(job.error));
-                    break (report, Vec::default());
+                    break (report, job.artifacts.unwrap_or_default());
                 }
             }
         };

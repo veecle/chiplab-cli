@@ -13,6 +13,9 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct SucceededJob {
+    /// Names of the artifacts stored for the job, which may be empty.
+    #[serde(rename = "artifacts", skip_serializing_if = "Option::is_none")]
+    pub artifacts: Option<Vec<String>>,
     /// What the job was started with, its shape depends on the kind of job.
     #[serde(rename = "input")]
     pub input: serde_json::Value,
@@ -34,6 +37,7 @@ impl SucceededJob {
         result: serde_json::Value,
     ) -> SucceededJob {
         SucceededJob {
+            artifacts: None,
             input,
             job_id,
             project_id,

@@ -1,0 +1,13 @@
+$ chiplab-cli run-test-suite --project project_00000000000000000000000001 --firmware hello-stm32f4-discovery.elf --test-suite always-fails.ts --board stm32f4-discovery.json --download-dir [TEMP]/out
+exit status: 3
+--- stdout
+--- stderr
+     Uploaded firmware `hello-stm32f4-discovery.elf`
+     Uploaded test suite `always-fails.ts`
+      Waiting for test suite run `run_test_suite_00000000000000000000000001`
+       Failed test suite run `run_test_suite_00000000000000000000000001`
+   Downloaded `[TEMP]/out/testsuite_stderr`
+error: test suite run failed: simulation crashed
+--- [TEMP]/out/
+--- [TEMP]/out/testsuite_stderr
+error: the simulation crashed

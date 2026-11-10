@@ -385,6 +385,13 @@
           "error"
         ],
         "properties": {
+          "artifacts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Names of the artifacts stored for the job, which may be empty."
+          },
           "error": {
             "type": "string"
           },
@@ -518,6 +525,13 @@
           "result"
         ],
         "properties": {
+          "artifacts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Names of the artifacts stored for the job, which may be empty."
+          },
           "input": {
             "type": "object",
             "description": "What the job was started with, its shape depends on the kind of job."
