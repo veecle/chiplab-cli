@@ -9,7 +9,7 @@ Unlike other Markdown files, write each paragraph and list item on a single line
 
 - **Shows progress while running.** `run-test-suite` reports each step as it happens. In a terminal, the current step is shown with a spinner or progress bar. In CI logs, each step is printed as a line once it's done.
 - **Keeps downloading artifacts when one fails.** Each artifact is reported as soon as it's downloaded. A failed download no longer stops the remaining artifacts from being downloaded; all failures are reported before the run exits with an error.
-- **Downloads the artifacts of failed runs.** When a run fails, the output it captured up to the failure is downloaded too, which is where to look for the cause.
+- **Downloads the artifacts of runs that didn't complete.** When the run itself fails rather than the tests, the output captured up to the failure is downloaded too, which is where to look for the cause.
 - **Is MIT licensed.** The license is included in the release archives.
 
 ## v0.1.0
