@@ -1,4 +1,4 @@
-<svg width="1757px" height="2402px" style="background: #1E1E1E" xmlns="http://www.w3.org/2000/svg">
+<svg width="1757px" height="2366px" style="background: #1E1E1E" xmlns="http://www.w3.org/2000/svg">
 <style>
   .label { fill: #DDDDDD; font: bold 14px SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace; }
 </style>
@@ -40,17 +40,17 @@
 </tspan>
     <tspan x="10px" y="154px"><tspan>  </tspan><tspan class="fg-green bold">   Finished</tspan><tspan> test suite run `run_test_suite_069688381cc52df8b000000000`</tspan>
 </tspan>
-    <tspan x="10px" y="172px"><tspan>  </tspan><tspan class="fg-red bold">     Failed</tspan><tspan> `[TEMP]/out/testsuite_report`</tspan>
+    <tspan x="10px" y="172px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/junit.xml`</tspan>
 </tspan>
-    <tspan x="10px" y="190px"><tspan>                - server responded with 404 Not Found</tspan>
+    <tspan x="10px" y="190px"><tspan>  </tspan><tspan class="fg-red bold">     Failed</tspan><tspan> `[TEMP]/out/testsuite_report`</tspan>
 </tspan>
-    <tspan x="10px" y="208px"><tspan>                - artifact not found</tspan>
+    <tspan x="10px" y="208px"><tspan>                - server responded with 404 Not Found</tspan>
 </tspan>
-    <tspan x="10px" y="226px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/junit.xml`</tspan>
+    <tspan x="10px" y="226px"><tspan>                - artifact not found</tspan>
 </tspan>
-    <tspan x="10px" y="244px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/testsuite_stdout`</tspan>
+    <tspan x="10px" y="244px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/testsuite_stderr`</tspan>
 </tspan>
-    <tspan x="10px" y="262px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/testsuite_stderr`</tspan>
+    <tspan x="10px" y="262px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/testsuite_stdout`</tspan>
 </tspan>
     <tspan x="10px" y="280px"><tspan>error: 1 of 4 artifacts failed to download</tspan>
 </tspan>
@@ -273,13 +273,12 @@
 
 </svg>
 <text x="0px" y="1304px" class="label">stderr frame 7</text>
-<svg x="0px" y="1312px" width="1717px" height="146px" xmlns="http://www.w3.org/2000/svg">
+<svg x="0px" y="1312px" width="1717px" height="110px" xmlns="http://www.w3.org/2000/svg">
   <style>
     .fg { fill: #AAAAAA }
     .bg { fill: #000000 }
     .fg-cyan { fill: #00AAAA }
     .fg-green { fill: #00AA00 }
-    .fg-red { fill: #AA0000 }
     .container {
       padding: 0 10px;
       line-height: 18px;
@@ -301,19 +300,15 @@
 </tspan>
     <tspan x="10px" y="64px"><tspan>  </tspan><tspan class="fg-green bold">   Finished</tspan><tspan> test suite run `run_test_suite_069688381cc52df8b000000000`</tspan>
 </tspan>
-    <tspan x="10px" y="82px"><tspan>  </tspan><tspan class="fg-red bold">     Failed</tspan><tspan> `[TEMP]/out/testsuite_report`</tspan>
+    <tspan x="10px" y="82px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/junit.xml`</tspan>
 </tspan>
-    <tspan x="10px" y="100px"><tspan>                - server responded with 404 Not Found</tspan>
-</tspan>
-    <tspan x="10px" y="118px"><tspan>                - artifact not found</tspan>
-</tspan>
-    <tspan x="10px" y="136px"><tspan class="fg-cyan">⠸</tspan><tspan> </tspan><tspan class="fg-cyan bold">Downloading</tspan><tspan> [=====               ] 1/4 artifacts</tspan>
+    <tspan x="10px" y="100px"><tspan class="fg-cyan">⠸</tspan><tspan> </tspan><tspan class="fg-cyan bold">Downloading</tspan><tspan> [=====               ] 1/4 artifacts</tspan>
 </tspan>
   </text>
 
 </svg>
-<text x="0px" y="1494px" class="label">stderr frame 8</text>
-<svg x="0px" y="1502px" width="1717px" height="164px" xmlns="http://www.w3.org/2000/svg">
+<text x="0px" y="1458px" class="label">stderr frame 8</text>
+<svg x="0px" y="1466px" width="1717px" height="164px" xmlns="http://www.w3.org/2000/svg">
   <style>
     .fg { fill: #AAAAAA }
     .bg { fill: #000000 }
@@ -341,21 +336,21 @@
 </tspan>
     <tspan x="10px" y="64px"><tspan>  </tspan><tspan class="fg-green bold">   Finished</tspan><tspan> test suite run `run_test_suite_069688381cc52df8b000000000`</tspan>
 </tspan>
-    <tspan x="10px" y="82px"><tspan>  </tspan><tspan class="fg-red bold">     Failed</tspan><tspan> `[TEMP]/out/testsuite_report`</tspan>
+    <tspan x="10px" y="82px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/junit.xml`</tspan>
 </tspan>
-    <tspan x="10px" y="100px"><tspan>                - server responded with 404 Not Found</tspan>
+    <tspan x="10px" y="100px"><tspan>  </tspan><tspan class="fg-red bold">     Failed</tspan><tspan> `[TEMP]/out/testsuite_report`</tspan>
 </tspan>
-    <tspan x="10px" y="118px"><tspan>                - artifact not found</tspan>
+    <tspan x="10px" y="118px"><tspan>                - server responded with 404 Not Found</tspan>
 </tspan>
-    <tspan x="10px" y="136px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/junit.xml`</tspan>
+    <tspan x="10px" y="136px"><tspan>                - artifact not found</tspan>
 </tspan>
     <tspan x="10px" y="154px"><tspan class="fg-cyan">⠸</tspan><tspan> </tspan><tspan class="fg-cyan bold">Downloading</tspan><tspan> [==========          ] 2/4 artifacts</tspan>
 </tspan>
   </text>
 
 </svg>
-<text x="0px" y="1702px" class="label">stderr frame 9</text>
-<svg x="0px" y="1710px" width="1717px" height="182px" xmlns="http://www.w3.org/2000/svg">
+<text x="0px" y="1666px" class="label">stderr frame 9</text>
+<svg x="0px" y="1674px" width="1717px" height="182px" xmlns="http://www.w3.org/2000/svg">
   <style>
     .fg { fill: #AAAAAA }
     .bg { fill: #000000 }
@@ -383,23 +378,23 @@
 </tspan>
     <tspan x="10px" y="64px"><tspan>  </tspan><tspan class="fg-green bold">   Finished</tspan><tspan> test suite run `run_test_suite_069688381cc52df8b000000000`</tspan>
 </tspan>
-    <tspan x="10px" y="82px"><tspan>  </tspan><tspan class="fg-red bold">     Failed</tspan><tspan> `[TEMP]/out/testsuite_report`</tspan>
+    <tspan x="10px" y="82px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/junit.xml`</tspan>
 </tspan>
-    <tspan x="10px" y="100px"><tspan>                - server responded with 404 Not Found</tspan>
+    <tspan x="10px" y="100px"><tspan>  </tspan><tspan class="fg-red bold">     Failed</tspan><tspan> `[TEMP]/out/testsuite_report`</tspan>
 </tspan>
-    <tspan x="10px" y="118px"><tspan>                - artifact not found</tspan>
+    <tspan x="10px" y="118px"><tspan>                - server responded with 404 Not Found</tspan>
 </tspan>
-    <tspan x="10px" y="136px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/junit.xml`</tspan>
+    <tspan x="10px" y="136px"><tspan>                - artifact not found</tspan>
 </tspan>
-    <tspan x="10px" y="154px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/testsuite_stdout`</tspan>
+    <tspan x="10px" y="154px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/testsuite_stderr`</tspan>
 </tspan>
     <tspan x="10px" y="172px"><tspan class="fg-cyan">⠸</tspan><tspan> </tspan><tspan class="fg-cyan bold">Downloading</tspan><tspan> [===============     ] 3/4 artifacts</tspan>
 </tspan>
   </text>
 
 </svg>
-<text x="0px" y="1928px" class="label">stderr frame 10</text>
-<svg x="0px" y="1936px" width="1717px" height="200px" xmlns="http://www.w3.org/2000/svg">
+<text x="0px" y="1892px" class="label">stderr frame 10</text>
+<svg x="0px" y="1900px" width="1717px" height="200px" xmlns="http://www.w3.org/2000/svg">
   <style>
     .fg { fill: #AAAAAA }
     .bg { fill: #000000 }
@@ -427,25 +422,25 @@
 </tspan>
     <tspan x="10px" y="64px"><tspan>  </tspan><tspan class="fg-green bold">   Finished</tspan><tspan> test suite run `run_test_suite_069688381cc52df8b000000000`</tspan>
 </tspan>
-    <tspan x="10px" y="82px"><tspan>  </tspan><tspan class="fg-red bold">     Failed</tspan><tspan> `[TEMP]/out/testsuite_report`</tspan>
+    <tspan x="10px" y="82px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/junit.xml`</tspan>
 </tspan>
-    <tspan x="10px" y="100px"><tspan>                - server responded with 404 Not Found</tspan>
+    <tspan x="10px" y="100px"><tspan>  </tspan><tspan class="fg-red bold">     Failed</tspan><tspan> `[TEMP]/out/testsuite_report`</tspan>
 </tspan>
-    <tspan x="10px" y="118px"><tspan>                - artifact not found</tspan>
+    <tspan x="10px" y="118px"><tspan>                - server responded with 404 Not Found</tspan>
 </tspan>
-    <tspan x="10px" y="136px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/junit.xml`</tspan>
+    <tspan x="10px" y="136px"><tspan>                - artifact not found</tspan>
 </tspan>
-    <tspan x="10px" y="154px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/testsuite_stdout`</tspan>
+    <tspan x="10px" y="154px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/testsuite_stderr`</tspan>
 </tspan>
-    <tspan x="10px" y="172px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/testsuite_stderr`</tspan>
+    <tspan x="10px" y="172px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/testsuite_stdout`</tspan>
 </tspan>
     <tspan x="10px" y="190px"><tspan class="fg-cyan">⠸</tspan><tspan> </tspan><tspan class="fg-cyan bold">Downloading</tspan><tspan> [====================] 4/4 artifacts</tspan>
 </tspan>
   </text>
 
 </svg>
-<text x="0px" y="2172px" class="label">stderr frame 11</text>
-<svg x="0px" y="2180px" width="1717px" height="182px" xmlns="http://www.w3.org/2000/svg">
+<text x="0px" y="2136px" class="label">stderr frame 11</text>
+<svg x="0px" y="2144px" width="1717px" height="182px" xmlns="http://www.w3.org/2000/svg">
   <style>
     .fg { fill: #AAAAAA }
     .bg { fill: #000000 }
@@ -472,17 +467,17 @@
 </tspan>
     <tspan x="10px" y="64px"><tspan>  </tspan><tspan class="fg-green bold">   Finished</tspan><tspan> test suite run `run_test_suite_069688381cc52df8b000000000`</tspan>
 </tspan>
-    <tspan x="10px" y="82px"><tspan>  </tspan><tspan class="fg-red bold">     Failed</tspan><tspan> `[TEMP]/out/testsuite_report`</tspan>
+    <tspan x="10px" y="82px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/junit.xml`</tspan>
 </tspan>
-    <tspan x="10px" y="100px"><tspan>                - server responded with 404 Not Found</tspan>
+    <tspan x="10px" y="100px"><tspan>  </tspan><tspan class="fg-red bold">     Failed</tspan><tspan> `[TEMP]/out/testsuite_report`</tspan>
 </tspan>
-    <tspan x="10px" y="118px"><tspan>                - artifact not found</tspan>
+    <tspan x="10px" y="118px"><tspan>                - server responded with 404 Not Found</tspan>
 </tspan>
-    <tspan x="10px" y="136px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/junit.xml`</tspan>
+    <tspan x="10px" y="136px"><tspan>                - artifact not found</tspan>
 </tspan>
-    <tspan x="10px" y="154px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/testsuite_stdout`</tspan>
+    <tspan x="10px" y="154px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/testsuite_stderr`</tspan>
 </tspan>
-    <tspan x="10px" y="172px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/testsuite_stderr`</tspan>
+    <tspan x="10px" y="172px"><tspan>  </tspan><tspan class="fg-green bold"> Downloaded</tspan><tspan> `[TEMP]/out/testsuite_stdout`</tspan>
 </tspan>
   </text>
 

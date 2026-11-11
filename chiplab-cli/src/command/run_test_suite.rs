@@ -217,7 +217,7 @@ impl Args {
             .run_test_suite_id;
         let run_name = format!("test suite run `{job_id}`");
         progress.start_or_print(Action::Waiting, format!("for {run_name}"));
-        let (report, artifacts) = loop {
+        let (report, mut artifacts) = loop {
             let response = default_api::wait_for_job(&app.api, &job_id, None)
                 .await
                 .map_err(api::error)
@@ -241,6 +241,9 @@ impl Args {
                 }
             }
         };
+
+        // The server doesn't guarantee an order, so sort them for stable output.
+        artifacts.sort();
 
         if report.outcome == Outcome::Passed {
             progress.complete(Action::Finished, run_name);
