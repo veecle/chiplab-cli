@@ -5,12 +5,17 @@
 
 use std::borrow::Borrow;
 use std::collections::HashMap;
+use std::convert::Infallible;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use std::sync::{Arc, LazyLock};
 use std::thread::JoinHandle;
 
+use http_body_util::{BodyExt, Full};
+use hyper::body::{Bytes, Incoming};
+use hyper_util::rt::TokioIo;
 use regex::Regex;
+use tokio::sync::{Mutex, oneshot};
 
 use crate::error::{BoxError, Chain, Result, ResultExt};
 use crate::temp_dir;
@@ -209,7 +214,7 @@ enum Backend {
 struct Upstream {
     url: String,
     token: String,
-    client: reqwest::blocking::Client,
+    client: reqwest::Client,
 
     /// The original URLs behind the external URLs.
     external: HashMap<ExternalKey, String>,
@@ -260,7 +265,7 @@ impl Upstream {
             ")",
         );
         // Waiting for jobs uses long-polling, so there must be a generous request timeout.
-        let client = reqwest::blocking::Client::builder()
+        let client = reqwest::Client::builder()
             .user_agent(user_agent)
             .timeout(std::time::Duration::from_secs(5 * 60))
             .build()
@@ -278,7 +283,7 @@ impl Upstream {
     /// Forwards `request` with fake ids replaced by the real ones, and returns the response with
     /// real ids replaced by fake ones and absolute URLs to other hosts rewritten to point back at
     /// the proxy.
-    fn forward(
+    async fn forward(
         &mut self,
         request: &Request,
         content_type: Option<&str>,
@@ -314,14 +319,14 @@ impl Upstream {
             None => body,
         };
 
-        let response = builder.body(body).send()?;
+        let response = builder.body(body).send().await?;
         let status = response.status().as_u16();
         let is_json = response
             .headers()
             .get(reqwest::header::CONTENT_TYPE)
             .and_then(|value| value.to_str().ok())
             .is_some_and(is_json);
-        let text = response.text()?;
+        let text = response.text().await?;
 
         let body = if text.is_empty() {
             None
@@ -475,9 +480,15 @@ fn is_json(content_type: &str) -> bool {
 
 /// A running proxy, listening on a local port.
 pub struct Proxy {
-    server: Arc<tiny_http::Server>,
     base_url: String,
-    thread: JoinHandle<State>,
+
+    /// Stops the server when sent to, or dropped.
+    shutdown: oneshot::Sender<()>,
+
+    /// Runs the server, finishing once it has stopped and dropped its connections.
+    thread: JoinHandle<Result<()>>,
+
+    state: Arc<Mutex<State>>,
 
     /// Where the exchanges are recorded.
     exchanges_path: PathBuf,
@@ -494,36 +505,45 @@ impl Proxy {
             },
         };
 
-        let server =
-            tiny_http::Server::http("127.0.0.1:0").wrap_error("failed to start the proxy")?;
-        let server = Arc::new(server);
-        let port = server
-            .server_addr()
-            .to_ip()
-            .ok_or("the proxy doesn't listen on an IP address")?
+        let listener =
+            std::net::TcpListener::bind("127.0.0.1:0").wrap_error("failed to start the proxy")?;
+        listener
+            .set_nonblocking(true)
+            .wrap_error("failed to start the proxy")?;
+        let port = listener
+            .local_addr()
+            .wrap_error("failed to start the proxy")?
             .port();
         let base_url = format!("http://127.0.0.1:{port}");
 
-        let mut state = State {
+        let state = Arc::new(Mutex::new(State {
             backend,
             base_url: base_url.clone(),
             recorded: Vec::new(),
             errors: Vec::new(),
-        };
+        }));
+
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .wrap_error("failed to start the proxy")?;
+        let (shutdown, shutdown_received) = oneshot::channel();
         let thread = std::thread::spawn({
-            let server = server.clone();
+            let state = state.clone();
             move || {
-                for request in server.incoming_requests() {
-                    state.handle(request);
-                }
-                state
+                let result = runtime.block_on(serve(listener, state, shutdown_received));
+                // Drops the connections that are still open, along with their references to the
+                // state.
+                drop(runtime);
+                result
             }
         });
 
         Ok(Self {
-            server,
             base_url,
+            shutdown,
             thread,
+            state,
             exchanges_path: exchanges_path.to_owned(),
         })
     }
@@ -536,11 +556,15 @@ impl Proxy {
     ///
     /// Fails if any request didn't match the recording, or if recorded exchanges weren't requested.
     pub fn finish(self) -> Result<()> {
-        self.server.unblock();
-        let state = self
-            .thread
+        // The server only stops early on an error, which joining reports.
+        let _ = self.shutdown.send(());
+        self.thread
             .join()
-            .map_err(|_| "the proxy thread panicked")?;
+            .map_err(|_| "the proxy thread panicked")?
+            .wrap_error("the proxy failed")?;
+        let state = Arc::into_inner(self.state)
+            .ok_or("the proxy state is still in use after stopping")?
+            .into_inner();
 
         if !state.errors.is_empty() {
             return Err(format!("proxy errors:\n{}", state.errors.join("\n")).into());
@@ -568,6 +592,80 @@ impl Proxy {
     }
 }
 
+/// Accepts connections on `listener` and serves the requests on them until `shutdown` resolves.
+///
+/// Each connection is served concurrently, so connections a client keeps open can't hold up
+/// others.
+async fn serve(
+    listener: std::net::TcpListener,
+    state: Arc<Mutex<State>>,
+    mut shutdown: oneshot::Receiver<()>,
+) -> Result<()> {
+    let listener =
+        tokio::net::TcpListener::from_std(listener).wrap_error("failed to start the proxy")?;
+    loop {
+        let stream = tokio::select! {
+            accepted = listener.accept() => {
+                accepted.wrap_error("failed to accept a connection")?.0
+            }
+            _ = &mut shutdown => return Ok(()),
+        };
+        let state = state.clone();
+        tokio::spawn(async move {
+            let service = hyper::service::service_fn(move |request| handle(state.clone(), request));
+            // The CLI hanging up early shows up in its own output.
+            let _ = hyper::server::conn::http1::Builder::new()
+                .serve_connection(TokioIo::new(stream), service)
+                .await;
+        });
+    }
+}
+
+/// Answers `request` from `state`.
+///
+/// Requests are answered one at a time, in the order they finish arriving.
+async fn handle(
+    state: Arc<Mutex<State>>,
+    request: hyper::Request<Incoming>,
+) -> Result<hyper::Response<Full<Bytes>>, Infallible> {
+    let (parts, body) = request.into_parts();
+    let body = body
+        .collect()
+        .await
+        .map(|body| body.to_bytes().to_vec())
+        .wrap_error("failed to read the request body")
+        .map_err(BoxError::from);
+    let request = IncomingRequest {
+        method: parts.method.as_str().to_owned(),
+        path: parts
+            .uri
+            .path_and_query()
+            .map_or("/", |path| path.as_str())
+            .to_owned(),
+        content_type: parts
+            .headers
+            .get(hyper::header::CONTENT_TYPE)
+            .and_then(|value| value.to_str().ok())
+            .map(str::to_owned),
+        body,
+    };
+
+    Ok(state.lock().await.handle(request).await)
+}
+
+/// A request as received by the proxy.
+struct IncomingRequest {
+    method: String,
+
+    /// The path including any query string.
+    path: String,
+
+    content_type: Option<String>,
+
+    /// The body, or why it couldn't be read.
+    body: Result<Vec<u8>>,
+}
+
 struct State {
     backend: Backend,
     base_url: String,
@@ -578,30 +676,30 @@ struct State {
 }
 
 impl State {
-    fn handle(&mut self, mut request: tiny_http::Request) {
-        let response = self.exchange(&mut request).unwrap_or_else(|error| {
-            let message = Chain(&*error).to_string();
-            self.errors.push(message.clone());
-            Response {
-                status: 500,
-                body: Some(Body::Text(message)),
-            }
-        });
-        // The CLI hanging up early shows up in its own output.
-        let _ = request.respond(self.http_response(&response));
+    async fn handle(&mut self, request: IncomingRequest) -> hyper::Response<Full<Bytes>> {
+        self.exchange(request)
+            .await
+            .and_then(|response| self.http_response(&response))
+            .unwrap_or_else(|error| {
+                let message = Chain(&*error).to_string();
+                self.errors.push(message.clone());
+                let response = Response {
+                    status: 500,
+                    body: Some(Body::Text(message)),
+                };
+                self.http_response(&response)
+                    .expect("an error response is valid")
+            })
     }
 
-    fn exchange(&mut self, request: &mut tiny_http::Request) -> Result<Response> {
-        let mut body = Vec::new();
-        request
-            .as_reader()
-            .read_to_end(&mut body)
-            .wrap_error("failed to read the request body")?;
-        let content_type = request
-            .headers()
-            .iter()
-            .find(|header| header.field.equiv("Content-Type"))
-            .map(|header| header.value.as_str().to_owned());
+    async fn exchange(&mut self, request: IncomingRequest) -> Result<Response> {
+        let IncomingRequest {
+            method,
+            path,
+            content_type,
+            body,
+        } = request;
+        let body = body?;
         let json_body = match content_type.as_deref() {
             Some(content_type) if is_json(content_type) => Some(
                 serde_json::from_slice(&body)
@@ -610,8 +708,8 @@ impl State {
             _ => None,
         };
         let actual = Request {
-            method: request.method().as_str().to_owned(),
-            path: request.url().to_owned(),
+            method,
+            path,
             body: json_body,
         };
 
@@ -638,6 +736,7 @@ impl State {
             Backend::Forward { upstream, record } => {
                 let response = upstream
                     .forward(&actual, content_type.as_deref(), body)
+                    .await
                     .wrap_error(format_args!(
                         "failed to forward `{} {}`",
                         actual.method, actual.path
@@ -653,7 +752,7 @@ impl State {
         }
     }
 
-    fn http_response(&self, response: &Response) -> tiny_http::Response<std::io::Cursor<Vec<u8>>> {
+    fn http_response(&self, response: &Response) -> Result<hyper::Response<Full<Bytes>>> {
         let (content_type, data) = match &response.body {
             None => (None, String::new()),
             Some(Body::Json(value)) => (Some("application/json"), value.to_string()),
@@ -661,13 +760,12 @@ impl State {
         };
         let data = data.replace(BASE_URL_PLACEHOLDER, &self.base_url);
 
-        let mut http_response =
-            tiny_http::Response::from_data(data.into_bytes()).with_status_code(response.status);
+        let mut builder = hyper::Response::builder().status(response.status);
         if let Some(content_type) = content_type {
-            let header = tiny_http::Header::from_bytes("Content-Type", content_type)
-                .expect("the content type is a valid header");
-            http_response = http_response.with_header(header);
+            builder = builder.header(hyper::header::CONTENT_TYPE, content_type);
         }
-        http_response
+        Ok(builder
+            .body(Full::new(Bytes::from(data)))
+            .wrap_error(format_args!("invalid response status {}", response.status))?)
     }
 }
