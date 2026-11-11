@@ -8,6 +8,12 @@
       "status": 200,
       "body": {
         "json": {
+          "artifacts": [
+            "testsuite_report",
+            "junit.xml",
+            "testsuite_stdout",
+            "testsuite_stderr"
+          ],
           "input": {
             "board": {
               "model": "stm32f4_discovery",
@@ -19,12 +25,6 @@
           "job_id": "run_test_suite_069688381cc52df8b000000000",
           "project_id": "project_00000000000000000000000001",
           "result": {
-            "artifacts": [
-              "testsuite_report",
-              "junit.xml",
-              "testsuite_stdout",
-              "testsuite_stderr"
-            ],
             "summary": {
               "failed": 1,
               "passed": 1,

@@ -13,6 +13,9 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct FailedJob {
+    /// Names of the artifacts stored for the job, which may be empty.
+    #[serde(rename = "artifacts", skip_serializing_if = "Option::is_none")]
+    pub artifacts: Option<Vec<String>>,
     #[serde(rename = "error")]
     pub error: String,
     /// What the job was started with, its shape depends on the kind of job.
@@ -33,6 +36,7 @@ impl FailedJob {
         project_id: String,
     ) -> FailedJob {
         FailedJob {
+            artifacts: None,
             error,
             input,
             job_id,
