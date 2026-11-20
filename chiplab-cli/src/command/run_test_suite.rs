@@ -265,8 +265,8 @@ impl Args {
             (Ok(()), Err(error)) => Err(error),
             // Report the outcome before the download error, but exit with the outcome's status.
             (Err(outcome), Err(error)) => {
-                error::report(&outcome);
-                error::report(&error);
+                let _ = error::report(&outcome);
+                let _ = error::report(&error);
                 Err(Silent(report.exit_code()).into())
             }
         }
