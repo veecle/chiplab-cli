@@ -17,8 +17,7 @@ pub struct Summary {
 impl Summary {
     /// The number of planned tests that neither passed nor failed.
     ///
-    /// Saturates rather than panicking if the server reports more passed and failed tests than
-    /// were planned, since the counts are only used for display.
+    /// Saturates rather than panicking if the server reports more passed and failed tests than were planned, since the counts are only used for display.
     pub fn skipped(&self) -> u64 {
         self.planned
             .saturating_sub(self.passed)

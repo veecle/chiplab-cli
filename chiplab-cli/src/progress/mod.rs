@@ -1,8 +1,8 @@
 //! Progress reporting on stderr, in the style of cargo.
 //!
-//! Each line is an action, right-aligned so that all actions line up, followed by a message. Each
-//! completed action leaves a line. When stderr is a terminal, the action in progress is shown below
-//! them, with a spinner and optionally a bar.
+//! Each line is an action, right-aligned so that all actions line up, followed by a message.
+//! Each completed action leaves a line.
+//! When stderr is a terminal, the action in progress is shown below them, with a spinner and optionally a bar.
 
 mod test_terminal;
 mod transfer;
@@ -23,8 +23,8 @@ use crate::error::Result;
 /// How often the spinner animates on a real terminal.
 const TICK_INTERVAL: Duration = Duration::from_millis(100);
 
-/// The spinner's characters, each different so that every tick is visible. The last is shown once
-/// finished.
+/// The spinner's characters, each different so that every tick is visible.
+/// The last is shown once finished.
 const TICK_CHARS: &str =
     "\u{280b}\u{2819}\u{2839}\u{2838}\u{283c}\u{2834}\u{2826}\u{2827}\u{2807}\u{280f} ";
 
@@ -84,8 +84,7 @@ impl Action {
 pub struct Progress {
     bar: ProgressBar,
 
-    /// The line for the last completed action, not yet printed so that it's drawn together with
-    /// whatever comes next.
+    /// The line for the last completed action, not yet printed so that it's drawn together with whatever comes next.
     completed: RefCell<Option<String>>,
 }
 
@@ -170,8 +169,7 @@ impl Progress {
 
     /// Advances the spinner to show that the action in progress is still progressing.
     ///
-    /// Also draws any change to the action in progress, along with the last completed action if
-    /// not yet drawn.
+    /// Also draws any change to the action in progress, along with the last completed action if not yet drawn.
     pub fn tick(&self) {
         match self.completed.take() {
             Some(completed) => self.bar.println(completed),

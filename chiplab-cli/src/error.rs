@@ -1,7 +1,7 @@
 //! Error handling.
 //!
-//! Errors are boxed trait objects, wrapped with ad-hoc messages and tagged with an exit status via
-//! [`ResultExt`]. [`report`] prints the error chain and picks the status.
+//! Errors are boxed trait objects, wrapped with ad-hoc messages and tagged with an exit status via [`ResultExt`].
+//! [`report`] prints the error chain and picks the status.
 
 use std::error::Error;
 use std::fmt::{self, Display, Formatter, Write};
@@ -16,11 +16,9 @@ const DEFAULT_EXIT_CODE: u8 = 1;
 
 /// Extensions for adding context to the error of a [`Result`].
 pub trait ResultExt<T> {
-    /// Wraps the error in a [`WrappedError`] carrying `message`, keeping the original as its
-    /// source.
+    /// Wraps the error in a [`WrappedError`] carrying `message`, keeping the original as its source.
     ///
-    /// `message` is only formatted if there is an error to wrap, so passing [`format_args!`] is
-    /// cheap on the success path.
+    /// `message` is only formatted if there is an error to wrap, so passing [`format_args!`] is cheap on the success path.
     fn wrap_error(self, message: impl Display) -> Result<T, WrappedError>;
 
     /// Tags the error with the exit status to use if it ends the process, see [`ExitCodeError`].
@@ -62,11 +60,10 @@ where
 
 /// An error tagged with an exit status.
 ///
-/// Transparent: displays as the wrapped error and forwards its source, so it adds no line to the
-/// reported chain. If the chain holds several, [`report`] uses the outermost.
+/// Transparent: displays as the wrapped error and forwards its source, so it adds no line to the reported chain.
+/// If the chain holds several, [`report`] uses the outermost.
 ///
-/// Display and source are implemented by hand, as `#[error(transparent)]` only supports a single
-/// field.
+/// Display and source are implemented by hand, as `#[error(transparent)]` only supports a single field.
 #[derive(Debug)]
 pub struct ExitCodeError {
     code: u8,
@@ -101,8 +98,7 @@ pub struct Silent(pub u8);
 
 /// Prints `error` with its chain to stderr, unless it is [`Silent`], and returns its exit status.
 ///
-/// Returning this [`ExitCode`] instead of the error lets errors print with the same `error:` prefix
-/// as `clap` and exit with a status other than 1.
+/// Returning this [`ExitCode`] instead of the error lets errors print with the same `error:` prefix as `clap` and exit with a status other than 1.
 pub fn report(error: &BoxError) -> ExitCode {
     let error: &(dyn Error + 'static) = &**error;
 
@@ -151,7 +147,7 @@ impl Display for Chain<'_> {
     }
 }
 
-/// Indents every line after the first to align under a `  - ` bullet.
+/// Indents every line after the first, so that multi-line causes stay aligned under their bullet.
 struct Indented<'a, 'b> {
     f: &'a mut Formatter<'b>,
     at_line_start: bool,

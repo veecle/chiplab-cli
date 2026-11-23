@@ -4,8 +4,7 @@ use crate::push_trimmed;
 
 /// The size of the terminal.
 ///
-/// Wide enough that lines don't wrap, as wrapped lines make diffs of the SVGs harder to read, and
-/// tall enough that nothing scrolls off, as the parser keeps no scrollback.
+/// Wide enough that lines don't wrap, as wrapped lines make diffs of the SVGs harder to read, and tall enough that nothing scrolls off, as the parser keeps no scrollback.
 const COLUMNS: u16 = 240;
 const ROWS: u16 = 200;
 
@@ -20,8 +19,7 @@ pub fn env_value() -> String {
     format!("{COLUMNS}\u{00D7}{ROWS}")
 }
 
-/// The screens of a terminal that `output` is written to: one after each frame drawn, skipping
-/// repeats, and the final one.
+/// The screens of a terminal that `output` is written to: one after each frame drawn, skipping repeats, and the final one.
 pub fn screens(output: &[u8]) -> (Vec<String>, String) {
     let rows = std::num::NonZeroU16::new(ROWS).expect("the terminal has rows");
     let columns = std::num::NonZeroU16::new(COLUMNS).expect("the terminal has columns");
@@ -57,8 +55,7 @@ pub fn screens(output: &[u8]) -> (Vec<String>, String) {
     }
 }
 
-/// Renders `row` of `screen` with its colors and attributes as SGR escape sequences, without
-/// trailing blank cells.
+/// Renders `row` of `screen` with its colors and attributes as SGR escape sequences, without trailing blank cells.
 fn render_row(screen: &vt100::Screen, row: u16) -> String {
     let cells = (0..COLUMNS)
         .filter_map(|column| screen.cell(row, column))

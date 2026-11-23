@@ -5,6 +5,8 @@ Each section is published as the release notes on GitHub, which renders every ne
 Unlike other Markdown files, write each paragraph and list item on a single line, not one sentence per line.
 -->
 
+<!-- mdslw-ignore-start -->
+
 ## Next
 
 ## v0.1.1

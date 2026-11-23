@@ -65,7 +65,8 @@ pub async fn upload(
 
 /// Downloads the artifact `artifact_name` produced by the job into `dir`.
 ///
-/// Fails if `artifact_name` resolves outside `dir`. Overwrites any existing file with the same name.
+/// Fails if `artifact_name` resolves outside `dir`.
+/// Overwrites any existing file with the same name.
 pub async fn download(
     configuration: &Configuration,
     job_id: &str,
@@ -100,12 +101,10 @@ pub async fn download(
     Ok(())
 }
 
-/// Prepares `dir` and returns a stream that downloads all the artifacts the job produced into it
-/// concurrently.
+/// Prepares `dir` and returns a stream that downloads all the artifacts the job produced into it concurrently.
 ///
-/// The stream performs the downloads as it is polled, yielding the path of each file
-/// along with whether it was downloaded, in the same order as `artifact_names`. Because multiple
-/// downloads run at once, later files may finish downloading before earlier ones are yielded.
+/// The stream performs the downloads as it is polled, yielding the path of each file along with whether it was downloaded, in the same order as `artifact_names`.
+/// Because multiple downloads run at once, later files may finish downloading before earlier ones are yielded.
 pub async fn download_all(
     configuration: &Configuration,
     job_id: &str,

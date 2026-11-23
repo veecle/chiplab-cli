@@ -20,6 +20,14 @@ Editor support for the test suite fixtures needs `deno` on the editor's `PATH`, 
 
 If you use [`jj`](https://jj-vcs.github.io/jj/), `nix run .#setup-jj-fix` configures `jj fix` in the repository with the same formatters the checks enforce.
 
+## Style
+
+Code and docs follow the [Veecle style-guide](https://github.com/veecle/style-guide).
+
+Markdown files and Rust doc comments are written one sentence per line, which the `mdslw` and `mdslw-rust` checks enforce.
+Both tools are available in the devshell and included in the `jj fix` setup, so they can reflow existing text into that style.
+The changelog is the exception, see [Changelog](#changelog).
+
 ## Testing
 
 PRs that change behaviour should include tests covering that change.

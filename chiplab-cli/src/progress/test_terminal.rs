@@ -14,8 +14,7 @@ const FRAME_END: &str = "\x1b]chiplab-frame-end\x07";
 
 /// A fixed-size terminal on stderr, for tests.
 ///
-/// Every update is drawn immediately and followed by [`FRAME_END`], so that each frame can be
-/// snapshotted deterministically.
+/// Every update is drawn immediately and followed by [`FRAME_END`], so that each frame can be snapshotted deterministically.
 #[derive(Debug)]
 pub(super) struct TestTerminal {
     columns: u16,
