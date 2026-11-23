@@ -18,6 +18,13 @@
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    veecle-utilities = {
+      url = "github:veecle/utilities";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-parts.follows = "flake-parts";
+      inputs.make-shell.follows = "make-shell";
+    };
   };
 
   outputs = inputs @ {
@@ -25,15 +32,16 @@
     flake-parts,
     make-shell,
     rust-overlay,
+    veecle-utilities,
     ...
   }:
     flake-parts.lib.mkFlake {inherit inputs;} {
       imports = [
         make-shell.flakeModules.default
+        veecle-utilities.flakeModules.default
         ./nix/alejandra.nix
         ./nix/chiplab-api.nix
         ./nix/deno.nix
-        ./nix/jj-fix.nix
         ./nix/release.nix
         ./nix/rust.nix
         ./nix/test-harness.nix

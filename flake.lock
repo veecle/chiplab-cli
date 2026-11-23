@@ -59,7 +59,8 @@
         "flake-parts": "flake-parts",
         "make-shell": "make-shell",
         "nixpkgs": "nixpkgs",
-        "rust-overlay": "rust-overlay"
+        "rust-overlay": "rust-overlay",
+        "veecle-utilities": "veecle-utilities"
       }
     },
     "rust-overlay": {
@@ -79,6 +80,32 @@
       "original": {
         "owner": "oxalica",
         "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "veecle-utilities": {
+      "inputs": {
+        "flake-parts": [
+          "flake-parts"
+        ],
+        "make-shell": [
+          "make-shell"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795442914,
+        "narHash": "sha256-VXl1pJMcOD9ZQfAuoL38t7PMOffLxowh3/eNK2X+ams=",
+        "owner": "veecle",
+        "repo": "utilities",
+        "rev": "d0630d7836562426088deef63bb3e6b8c4b55e0e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "veecle",
+        "repo": "utilities",
         "type": "github"
       }
     }
