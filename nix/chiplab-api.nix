@@ -1,5 +1,6 @@
 {root, ...}: {
   perSystem = {
+    inputs',
     pkgs,
     rustToolchain,
     cargoToml,
@@ -9,6 +10,7 @@
     generated-chiplab-api =
       pkgs.runCommand "generated-chiplab-api" {
         nativeBuildInputs = [
+          inputs'.veecle-utilities.packages.mdslw-rust
           pkgs.jq
           pkgs.openapi-generator-cli
           pkgs.tombi
@@ -53,6 +55,7 @@
 
         # Match the formatting applied to committed files.
         find $out -name '*.rs' -exec rustfmt --edition ${cargoToml.workspace.package.edition} {} +
+        mdslw-rust $out
         (cd $out && tombi format --offline --quiet)
       '';
 

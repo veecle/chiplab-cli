@@ -1,7 +1,6 @@
 //! A record/replay proxy standing in for the Chiplab API during fixture tests.
 //!
-//! The modes and what is recorded are documented in the "Recording API exchanges" section of
-//! `CONTRIBUTING.md`; keep it up to date when changing them.
+//! The modes and what is recorded are documented in the "Recording API exchanges" section of `CONTRIBUTING.md`; keep it up to date when changing them.
 
 use std::borrow::Borrow;
 use std::collections::HashMap;
@@ -48,8 +47,7 @@ struct Request {
 }
 
 impl Request {
-    /// A representation of the request that is stable between runs, so that what is derived from
-    /// it doesn't depend on the order concurrent requests are made in.
+    /// A representation of the request that is stable between runs, so that what is derived from it doesn't depend on the order concurrent requests are made in.
     fn stable_key(&self) -> (String, String, Option<String>) {
         (
             self.path.clone(),
@@ -77,8 +75,7 @@ impl std::fmt::Display for RequestHash {
     }
 }
 
-/// Identifies an external URL by the request whose response contained it, and its index among the
-/// external URLs in the responses to that request.
+/// Identifies an external URL by the request whose response contained it, and its index among the external URLs in the responses to that request.
 ///
 /// The proxy serves the URL at [`EXTERNAL_PREFIX`] followed by the key.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -148,8 +145,7 @@ fn save(path: &Path, exchanges: &[Exchange]) -> Result<()> {
     Ok(())
 }
 
-/// Orders `exchanges` by request independently of the order the requests came in, as the CLI
-/// makes some concurrently, keeping identical requests in their recorded order.
+/// Orders `exchanges` by request independently of the order the requests came in, as the CLI makes some concurrently, keeping identical requests in their recorded order.
 fn sort(exchanges: &mut [Exchange]) {
     exchanges.sort_by_cached_key(|exchange| exchange.request.stable_key());
 }
@@ -280,9 +276,7 @@ impl Upstream {
         })
     }
 
-    /// Forwards `request` with fake ids replaced by the real ones, and returns the response with
-    /// real ids replaced by fake ones and absolute URLs to other hosts rewritten to point back at
-    /// the proxy.
+    /// Forwards `request` with fake ids replaced by the real ones, and returns the response with real ids replaced by fake ones and absolute URLs to other hosts rewritten to point back at the proxy.
     async fn forward(
         &mut self,
         request: &Request,
@@ -374,11 +368,9 @@ static TYPE_ID: LazyLock<Regex> = LazyLock::new(|| {
         .expect("the TypeID pattern is valid")
 });
 
-/// Maps the real TypeIDs seen while recording to fake ones, so recordings don't depend on the ids a
-/// recording session happened to create.
+/// Maps the real TypeIDs seen while recording to fake ones, so recordings don't depend on the ids a recording session happened to create.
 ///
-/// A fake id is made of a hash of the request whose response it first appeared in, and a count of
-/// the ids first appearing in responses to that request.
+/// A fake id is made of a hash of the request whose response it first appeared in, and a count of the ids first appearing in responses to that request.
 ///
 /// The CLI only sees the fake ids, which are swapped back for the real ones in requests.
 #[derive(Default)]
@@ -416,8 +408,7 @@ impl Ids {
         self.to_real.insert(fake, real);
     }
 
-    /// Replaces the real TypeIDs in `text` from the response to `request` with fake ones,
-    /// assigning new fake ids as needed.
+    /// Replaces the real TypeIDs in `text` from the response to `request` with fake ones, assigning new fake ids as needed.
     fn normalize(&mut self, text: &str, request: RequestHash) -> String {
         TYPE_ID
             .replace_all(text, |captures: &regex::Captures<'_>| {
@@ -439,9 +430,8 @@ impl Ids {
 
     /// Replaces the fake TypeIDs in `text` with the real ones they stand in for.
     ///
-    /// Unknown ids, such as ones a case passes in its arguments, are passed through unchanged and
-    /// mapped to themselves, so they stay the same if the server echoes them back. Such ids must
-    /// not collide with the generated fakes or [`PROJECT_ID`], so don't copy them from recordings.
+    /// Unknown ids, such as ones a case passes in its arguments, are passed through unchanged and mapped to themselves, so they stay the same if the server echoes them back.
+    /// Such ids must not collide with the generated fakes or [`PROJECT_ID`], so don't copy them from recordings.
     fn denormalize(&mut self, text: &str) -> String {
         TYPE_ID
             .replace_all(text, |captures: &regex::Captures<'_>| {
@@ -594,8 +584,7 @@ impl Proxy {
 
 /// Accepts connections on `listener` and serves the requests on them until `shutdown` resolves.
 ///
-/// Each connection is served concurrently, so connections a client keeps open can't hold up
-/// others.
+/// Each connection is served concurrently, so connections a client keeps open can't hold up others.
 async fn serve(
     listener: std::net::TcpListener,
     state: Arc<Mutex<State>>,

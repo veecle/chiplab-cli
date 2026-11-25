@@ -96,11 +96,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795442914,
-        "narHash": "sha256-VXl1pJMcOD9ZQfAuoL38t7PMOffLxowh3/eNK2X+ams=",
+        "lastModified": 1795600400,
+        "narHash": "sha256-dVlWSXBJ5NSR9Kf43uldLzhnWt1Ee7gRFP6DTYfQ5iM=",
         "owner": "veecle",
         "repo": "utilities",
-        "rev": "d0630d7836562426088deef63bb3e6b8c4b55e0e",
+        "rev": "2630e6d1434fc9a9a9a4939878b39675c45451f2",
         "type": "github"
       },
       "original": {

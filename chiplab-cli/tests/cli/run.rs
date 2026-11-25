@@ -49,12 +49,10 @@ pub struct Run {
     /// What the binary wrote to stdout, as whole lines each ending in a newline.
     pub stdout: String,
 
-    /// The screens drawn on stderr before the final one, for a terminal, each as whole lines
-    /// ending in a newline.
+    /// The screens drawn on stderr before the final one, for a terminal, each as whole lines ending in a newline.
     pub frames: Vec<String>,
 
-    /// What stderr finally showed: its output as is for a pipe, or the final screen for a terminal,
-    /// as whole lines each ending in a newline.
+    /// What stderr finally showed: its output as is for a pipe, or the final screen for a terminal, as whole lines each ending in a newline.
     pub stderr: String,
 
     /// The directories and files left in the temporary directory, sorted by path.
@@ -67,8 +65,7 @@ pub enum Entry {
     /// A directory, at `path` relative to the temporary directory.
     Directory { path: String },
 
-    /// A file, at `path` relative to the temporary directory, with `contents` as whole lines each
-    /// ending in a newline.
+    /// A file, at `path` relative to the temporary directory, with `contents` as whole lines each ending in a newline.
     File { path: String, contents: String },
 }
 
@@ -241,8 +238,7 @@ pub fn run(
 
 /// Copies every directory and file under `from` into `to`.
 ///
-/// The copies are created with default permissions rather than the source's, so they stay
-/// writable when `from` is read-only (e.g. in the Nix store).
+/// The copies are created with default permissions rather than the source's, so they stay writable when `from` is read-only (e.g. in the Nix store).
 fn copy_files(from: &Path, to: &Path) -> Result<()> {
     for entry in std::fs::read_dir(from)? {
         let entry = entry?;

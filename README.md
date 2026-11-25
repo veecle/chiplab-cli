@@ -7,14 +7,12 @@ Chiplab by Veecle is an MCP platform that lets AI agents compile, simulate, and 
 
 ## What it does
 
-- **Runs test suites in CI.**
-  It runs your TypeScript test suite against a firmware build on a simulated board and reports whether the tests passed.
-- **Fits into pipelines.**
-  Each outcome (passed, test failures, or a run that didn't complete) has its own exit code.
-  There's optional JSON output for other tools, and the run's artifacts can be downloaded for your CI to keep.
-- **Runs almost anywhere.**
-  It's a single prebuilt binary for Linux (x86_64 and aarch64) and macOS (Apple Silicon).
-  You can also build it with `cargo` or run it with Nix.
+`chiplab-cli` runs your TypeScript test suite against a firmware build on a simulated board and reports whether the tests passed.
+Each outcome (passed, test failures, or a run that didn't complete) has its own exit code.
+There's optional JSON output for other tools, and the run's artifacts can be downloaded for your CI to keep.
+
+It's a single prebuilt binary for Linux (x86_64 and aarch64) and macOS (Apple Silicon).
+You can also build it with `cargo` or run it with Nix.
 
 ## Getting started
 

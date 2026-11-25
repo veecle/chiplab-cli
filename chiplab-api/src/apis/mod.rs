@@ -92,8 +92,7 @@ pub fn parse_deep_object(prefix: &str, value: &serde_json::Value) -> Vec<(String
     unimplemented!("Only objects are supported with style=deepObject")
 }
 
-/// Internal use only
-/// A content type supported by this client.
+/// Internal use only A content type supported by this client.
 #[allow(dead_code)]
 enum ContentType {
     Json,

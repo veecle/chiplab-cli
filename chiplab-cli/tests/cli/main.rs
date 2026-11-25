@@ -1,10 +1,8 @@
 //! Fixture tests running the `chiplab-cli` binary.
 //!
-//! Each directory in `cases/` within [`TESTS_DIRECTORY`] containing an `args` file is one case,
-//! named by its path relative to `cases/`.
+//! Each directory in `cases/` within [`TESTS_DIRECTORY`] containing an `args` file is one case, named by its path relative to `cases/`.
 //!
-//! The case layout and the workflows are documented in the "Testing" section of `CONTRIBUTING.md`;
-//! keep it up to date when changing them.
+//! The case layout and the workflows are documented in the "Testing" section of `CONTRIBUTING.md`; keep it up to date when changing them.
 
 use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
@@ -29,8 +27,7 @@ const TEMP: &str = "[TEMP]";
 /// The expected output when stderr is a terminal, checked for the cases that have this file.
 const TERMINAL_EXPECTED: &str = "expected.term.svg";
 
-/// The directory holding the cases and fixtures, from `TEST_CHIPLAB_TESTS` if set, otherwise
-/// `tests` in the working directory.
+/// The directory holding the cases and fixtures, from `TEST_CHIPLAB_TESTS` if set, otherwise `tests` in the working directory.
 static TESTS_DIRECTORY: LazyLock<PathBuf> = LazyLock::new(|| {
     std::env::var_os("TEST_CHIPLAB_TESTS").map_or_else(|| PathBuf::from("tests"), PathBuf::from)
 });
@@ -139,8 +136,7 @@ fn test(args_path: &Path) -> Result<String> {
 
 /// Appends `output` with trailing whitespace stripped from each line.
 ///
-/// `clap` indents the blank lines between paragraphs of multi-paragraph help, leaving trailing
-/// whitespace that editors and formatters would otherwise strip from the expected files.
+/// `clap` indents the blank lines between paragraphs of multi-paragraph help, leaving trailing whitespace that editors and formatters would otherwise strip from the expected files.
 fn push_trimmed(rendered: &mut String, output: &[u8]) {
     for line in String::from_utf8_lossy(output).lines() {
         rendered.push_str(line.trim_end());

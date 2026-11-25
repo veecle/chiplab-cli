@@ -1,5 +1,4 @@
-//! Unit tests for the temporary directory redaction used by the fixture tests, which can't contain
-//! them as they don't use the standard test harness.
+//! Unit tests for the temporary directory redaction used by the fixture tests, which can't contain them as they don't use the standard test harness.
 
 #[path = "cli/temp_dir.rs"]
 mod temp_dir;
