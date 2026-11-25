@@ -39,7 +39,6 @@
       imports = [
         make-shell.flakeModules.default
         veecle-utilities.flakeModules.default
-        ./nix/alejandra.nix
         ./nix/chiplab-api.nix
         ./nix/deno.nix
         ./nix/release.nix
